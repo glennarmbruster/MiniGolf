@@ -1030,54 +1030,112 @@
  }
  buildCourtyardSandMesh();
 
- // LOWERED, SERENE MISTY JADE MOUNTAIN RANGE (Fixed: ~45% lower so they frame the vista gracefully!)
- function buildSereneMountainRange() {
- const segs = 128, size = 340;
- const geo = new THREE.PlaneGeometry(size, size, segs, segs);
- geo.rotateX(-Math.PI / 2);
- const pos = geo.attributes.position;
- const colors = new Float32Array(pos.count * 3);
+  // DETAILED, MULTI-STRATA MISTY JADE MOUNTAIN RANGE WITH VALLEY RIDGES & SNOW/MIST PEAKS
+  function buildSereneMountainRange() {
+    const segs = 192, size = 360;
+    const geo = new THREE.PlaneGeometry(size, size, segs, segs);
+    geo.rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position;
+    const colors = new Float32Array(pos.count * 3);
 
- const colBase = new THREE.Color(0x4f7a46);
- const colMid = new THREE.Color(0x3a664b);
- const colRidge = new THREE.Color(0x385261);
- const colMist = new THREE.Color(0x6c8c9e);
- const tmpCol = new THREE.Color();
+    const colPineBase = new THREE.Color(0x284b2c);
+    const colForest   = new THREE.Color(0x235247);
+    const colSlate    = new THREE.Color(0x2b3e52);
+    const colGranite  = new THREE.Color(0x4a5d70);
+    const colMistCap  = new THREE.Color(0x9bb2c4);
+    const tmpCol = new THREE.Color();
 
- for (let i = 0; i < pos.count; i++) {
- const x = pos.getX(i), z = pos.getZ(i);
- const dist = Math.hypot(x, z);
- const valleyMask = Math.max(0, Math.min(1, (dist - 44) / 42));
- const smoothMask = valleyMask * valleyMask * (3 - 2 * valleyMask);
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i);
+      const dist = Math.hypot(x, z);
 
- let h = -0.5;
- if (smoothMask > 0.001) {
- const rolling = fbm(x * 0.017 + 3.8, z * 0.017 - 1.5, 4) * 7.5;
- const ridges = ridgedFbm(x * 0.013 - 2.4, z * 0.013 + 3.2, 5) * 22.0; // Gracefully lowered!
- const outerLift = Math.max(0, (dist - 90) * 0.08);
- h = -0.35 + smoothMask * (rolling + ridges + outerLift);
- }
- pos.setY(i, h);
+      // Keep courtyard & mid-ground landmarks clear, then rise into sculpted alpine/jade peaks
+      const mtnMask = Math.max(0, Math.min(1, (dist - 40) / 36));
+      const sm = mtnMask * mtnMask * (3 - 2 * mtnMask);
 
- const eh = h + (noise2(x * 0.06, z * 0.06) - 0.5) * 3.0;
- if (eh < 7) tmpCol.copy(colBase).lerp(colMid, Math.max(0, eh / 7));
- else if (eh < 15) tmpCol.copy(colMid).lerp(colRidge, (eh - 7) / 8);
- else tmpCol.copy(colRidge).lerp(colMist, Math.min(1, (eh - 15) / 14));
+      let h = -0.6;
+      if (sm > 0.0005) {
+        const macro = fbm(x * 0.014 + 2.4, z * 0.014 - 1.7, 5) * 9.5;
+        const ridgeA = ridgedFbm(x * 0.018 - 3.1, z * 0.018 + 2.6, 5) * 21.0;
+        const ridgeB = ridgedFbm(x * 0.036 + 7.2, z * 0.036 - 4.8, 4) * 5.2;
+        const valleyDip = 0.72 + 0.28 * Math.sin(x * 0.025 + 0.8) * Math.cos(z * 0.022 - 0.5);
+        const outerRise = Math.max(0, (dist - 88) * 0.075);
+        h = -0.35 + sm * ((macro + ridgeA + ridgeB) * valleyDip + outerRise);
+      }
+      pos.setY(i, h);
 
- colors[i * 3] = tmpCol.r; colors[i * 3 + 1] = tmpCol.g; colors[i * 3 + 2] = tmpCol.b;
- }
+      // Elevation + craggy noise color strata so every slope & ridge has crisp definition
+      const cragJitter = (noise2(x * 0.09, z * 0.09) - 0.5) * 2.6 + (noise2(x * 0.24, z * 0.24) - 0.5) * 1.1;
+      const eh = Math.max(0, h + cragJitter);
+      if (eh < 5.5) {
+        tmpCol.copy(colPineBase).lerp(colForest, eh / 5.5);
+      } else if (eh < 12.5) {
+        tmpCol.copy(colForest).lerp(colSlate, (eh - 5.5) / 7.0);
+      } else if (eh < 19.5) {
+        tmpCol.copy(colSlate).lerp(colGranite, (eh - 12.5) / 7.0);
+      } else {
+        tmpCol.copy(colGranite).lerp(colMistCap, Math.min(1, (eh - 19.5) / 7.5));
+      }
 
- geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
- geo.computeVertexNormals();
- const mtnNormal = cliffPBR.normalMap.clone(); mtnNormal.needsUpdate = true; mtnNormal.repeat.set(18, 18);
- const terrain = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
- vertexColors: true, normalMap: mtnNormal, normalScale: new THREE.Vector2(0.8, 0.8),
- roughness: 0.95, metalness: 0.01, envMapIntensity: 0.4
- }));
- terrain.receiveShadow = true;
- envGroup.add(terrain);
- }
- buildSereneMountainRange();
+      colors[i * 3] = tmpCol.r;
+      colors[i * 3 + 1] = tmpCol.g;
+      colors[i * 3 + 2] = tmpCol.b;
+    }
+
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    // Convert to non-indexed flat-faceted normals so every mountain ridge catches directional sun & shadow!
+    const facetedGeo = geo.toNonIndexed();
+    facetedGeo.computeVertexNormals();
+
+    const mtnNormal = cliffPBR.normalMap.clone();
+    mtnNormal.needsUpdate = true;
+    mtnNormal.repeat.set(28, 28);
+
+    const terrain = new THREE.Mesh(facetedGeo, new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      normalMap: mtnNormal,
+      normalScale: new THREE.Vector2(1.35, 1.35),
+      roughness: 0.90,
+      metalness: 0.03,
+      envMapIntensity: 0.28
+    }));
+    terrain.receiveShadow = true;
+    envGroup.add(terrain);
+
+    // Distant misty foothill ridges along the horizon for atmospheric depth
+    const hillMat = new THREE.MeshStandardMaterial({
+      color: 0x3b6356,
+      roughness: 0.94,
+      metalness: 0.01,
+      envMapIntensity: 0.2
+    });
+    const foothillSpecs = [
+      [-68, -62, 16, 11, 14, 0.4],
+      [-34, -74, 19, 13, 15, -0.3],
+      [ 28, -76, 18, 12, 15, 0.5],
+      [ 66, -64, 17, 11, 14, -0.4],
+      [-82, -18, 15, 10, 16, 0.2],
+      [ 82, -22, 16, 10, 16, -0.2]
+    ];
+    foothillSpecs.forEach(([hx, hz, sx, sy, sz, ry], idx) => {
+      const hGeo = new THREE.ConeGeometry(1.0, 1.0, 9, 3);
+      const hp = hGeo.attributes.position;
+      for (let k = 0; k < hp.count; k++) {
+        const vx = hp.getX(k), vy = hp.getY(k), vz = hp.getZ(k);
+        const n = 0.80 + 0.34 * ridgedFbm(vx * 1.4 + idx * 3.1, vz * 1.4 + vy * 1.1, 3);
+        hp.setXYZ(k, vx * n, vy, vz * n);
+      }
+      const flatH = hGeo.toNonIndexed();
+      flatH.computeVertexNormals();
+      const ridge = new THREE.Mesh(flatH, hillMat);
+      ridge.position.set(hx, sy * 0.45 - 0.3, hz);
+      ridge.scale.set(sx, sy, sz);
+      ridge.rotation.y = ry;
+      ridge.receiveShadow = true;
+      envGroup.add(ridge);
+    });
+  }
+  buildSereneMountainRange();
 
  // =========================================================================
  // 5. HERO ARCHITECTURE: SWEPT-EAVE JADE PAGODA ON STEPPED TERRACE + OCHRE CRAGS
@@ -2281,13 +2339,13 @@ function buildRampMesh(rp) {
  // 9. ATMOSPHERE (SERENE JADE DAYLIGHT / DAWN / DUSK / NIGHT + CLEAR / RAINY)
  // =========================================================================
  const ATMOS = {
- daylight: {
- top: 0x2280cc, horizon: 0xc4e8fa, fog: 0xd2ecfa, sunColor: 0xfff8e6, sunInt: 1.90,
- sunPos: [22, 36, 18], hemiSky: 0xe6f5ff, hemiGround: 0x6f8554, hemiInt: 1.15,
- ambCol: 0xf5faff, ambInt: 0.52, grassEm: 0.0, wallEm: 0.0,
- lanternInt: 0.0, haloOp: 0.0, paperEm: 0.12, ballLight: 0.0, stars: 0.0, firefly: 0.0,
- waterDeep: 0x0b636e, waterShal: 0x28c4b4, exposure: 1.15
- },
+    daylight: {
+      top: 0x1c6ba8, horizon: 0x9ecbe3, fog: 0xb5d6e6, sunColor: 0xfff2d1, sunInt: 1.48,
+      sunPos: [26, 26, 16], hemiSky: 0xd4ebf7, hemiGround: 0x4b5c38, hemiInt: 0.62,
+      ambCol: 0xeef6fa, ambInt: 0.34, grassEm: 0.0, wallEm: 0.0,
+      lanternInt: 0.0, haloOp: 0.0, paperEm: 0.08, ballLight: 0.0, stars: 0.0, firefly: 0.0,
+      waterDeep: 0x0b5d66, waterShal: 0x24b8a8, exposure: 0.94
+    },
  dawn: {
  top: 0x4a72a8, horizon: 0xffb87a, fog: 0xf0c59c, sunColor: 0xffcf94, sunInt: 1.35,
  sunPos: [30, 22, -10], hemiSky: 0xffe4c4, hemiGround: 0x7a6550, hemiInt: 0.90,

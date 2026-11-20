@@ -120,7 +120,7 @@
     border: 1px solid var(--border); border-radius: 15px; padding: 9px 15px;
     box-shadow: 0 14px 36px rgba(0,0,0,0.6);
   }
-  .slider-grp { display: flex; flex-direction: column; gap: 4px; width: 142px; }
+  .slider-grp { display: flex; flex-direction: column; gap: 4px; width: 146px; }
   .slider-head { display: flex; justify-content: space-between; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #cbd5e1; font-weight: 700; }
   .slider-head span.val { color: #fde047; font-variant-numeric: tabular-nums; }
   input[type=range] {
@@ -138,7 +138,8 @@
     box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45); transition: 0.15s;
   }
   .putt-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
-  .dock-hint { font-size: 10px; color: #94a3b8; }
+  .putt-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+  .dock-hint { font-size: 10px; color: #94a3b8; text-align: center; }
 
   #banner {
     position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%) scale(0.85);
@@ -168,10 +169,10 @@
   .over { color: #facc15; font-weight: 700; }
   #loader {
     position: fixed; inset: 0; background: #040611; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; z-index: 100; gap: 10px; transition: opacity 0.4s;
+    align-items: center; justify-content: center; z-index: 100; gap: 10px; transition: opacity 0.35s;
   }
   @media (max-width: 720px) {
-    .slider-grp { width: 106px; }
+    .slider-grp { width: 108px; }
     .cam-rail { display: none; }
   }
 </style>
@@ -231,7 +232,7 @@
   </div>
   <div class="putt-console">
     <div class="slider-grp">
-      <div class="slider-head"><span>AIM</span><span class="val" id="lblAim">0°</span></div>
+      <div class="slider-head"><span>AIM (0° = CUP)</span><span class="val" id="lblAim">0°</span></div>
       <input type="range" id="rngAim" min="-180" max="180" value="0" step="1">
     </div>
     <div class="slider-grp">
@@ -240,7 +241,7 @@
     </div>
     <button class="putt-btn" id="btnPutt">Launch</button>
   </div>
-  <div class="dock-hint">Use sliders + Launch, or drag directly back from the ball • Drag sky to orbit</div>
+  <div class="dock-hint">Sliders + Launch, drag back from ball, or tap green to aim • Drag sky to orbit</div>
 </div>
 
 <div id="banner">
@@ -326,7 +327,6 @@
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const ctx = c.getContext('2d');
 
-    // Deep obsidian-navy cosmos backdrop
     const bg = ctx.createLinearGradient(0, 0, 0, h);
     bg.addColorStop(0.0, '#040614');
     bg.addColorStop(0.5, '#0b0f2b');
@@ -334,19 +334,15 @@
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
-    // Rich, saturated multi-color nebula ribbons (fiery orange-gold, violet-magenta, electric blue)
     ctx.globalCompositeOperation = 'screen';
     const bands = [
-      // Fiery Orange & Amber Core Ribbon
       { x: 0.24, y: 0.34, rx: 240, ry: 130, rot: -0.35, col: 'rgba(249, 115, 22, 0.52)' },
       { x: 0.29, y: 0.38, rx: 170, ry: 95,  rot: -0.30, col: 'rgba(251, 191, 36, 0.45)' },
       { x: 0.78, y: 0.32, rx: 220, ry: 120, rot: -0.32, col: 'rgba(234, 88, 12, 0.46)' },
-      // Deep Violet & Magenta Nebula Clouds
       { x: 0.42, y: 0.30, rx: 290, ry: 165, rot: -0.25, col: 'rgba(168, 85, 247, 0.52)' },
       { x: 0.52, y: 0.42, rx: 260, ry: 150, rot: -0.20, col: 'rgba(217, 70, 239, 0.44)' },
       { x: 0.14, y: 0.48, rx: 250, ry: 145, rot: -0.28, col: 'rgba(147, 51, 234, 0.46)' },
       { x: 0.88, y: 0.46, rx: 260, ry: 150, rot: -0.28, col: 'rgba(168, 85, 247, 0.48)' },
-      // Electric Cosmic Cyan & Sapphire Wisps
       { x: 0.66, y: 0.36, rx: 270, ry: 155, rot: -0.22, col: 'rgba(14, 165, 233, 0.50)' },
       { x: 0.72, y: 0.48, rx: 220, ry: 130, rot: -0.18, col: 'rgba(56, 189, 248, 0.42)' },
       { x: 0.36, y: 0.55, rx: 240, ry: 130, rot: -0.24, col: 'rgba(37, 99, 235, 0.44)' },
@@ -372,7 +368,6 @@
       }
     });
 
-    // Bright Starburst Core
     const coreG = ctx.createRadialGradient(w * 0.48, h * 0.32, 3, w * 0.48, h * 0.32, 130);
     coreG.addColorStop(0.0, 'rgba(255, 255, 255, 0.96)');
     coreG.addColorStop(0.22, 'rgba(253, 224, 71, 0.50)');
@@ -381,7 +376,6 @@
     ctx.fillStyle = coreG;
     ctx.beginPath(); ctx.arc(w * 0.48, h * 0.32, 130, 0, Math.PI * 2); ctx.fill();
 
-    // Crisp Starfield + 4-Point Sparkling Stars
     ctx.globalCompositeOperation = 'source-over';
     for (let i = 0; i < 3400; i++) {
       const sx = hash2(i * 1.3, 4.7) * w;
@@ -406,7 +400,6 @@
     return new THREE.CanvasTexture(c);
   }
 
-  // Lush, Natural Golf-Course Emerald Turf with Crisp Mowing Stripes
   function createEmeraldTurfPBR() {
     const size = 512;
     const c = document.createElement('canvas'); c.width = c.height = size;
@@ -417,12 +410,10 @@
     ctx.fillStyle = '#16803c'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
 
-    // Classic PGA-style emerald fairway mowing stripes
     for (let x = 0; x < size; x += 64) {
       ctx.fillStyle = (x / 64) % 2 === 0 ? '#1ea34a' : '#136c33';
       ctx.fillRect(x, 0, 64, size);
     }
-    // Fine organic turf blades & micro-texture
     for (let i = 0; i < 26000; i++) {
       const x = Math.random() * size, y = Math.random() * size, t = Math.random();
       ctx.fillStyle = t > 0.65 ? 'rgba(134, 239, 172, 0.22)' : 'rgba(5, 46, 22, 0.26)';
@@ -436,7 +427,6 @@
     return { map, normalMap };
   }
 
-  // Sleek Dark-Titanium Rail with Gold/Black Hazard Chevrons + Glowing Cyan Accent Strip
   function createTitaniumRailPBR() {
     const size = 512;
     const c = document.createElement('canvas'); c.width = c.height = size;
@@ -452,7 +442,6 @@
       ctx.fillStyle = Math.random() > 0.5 ? 'rgba(203,213,225,0.10)' : 'rgba(15,23,42,0.20)';
       ctx.fillRect(0, y, size, 1.5);
     }
-    // Gold-and-black diagonal hazard chevron band along top bevel (v = 0.44..0.68)
     ctx.save();
     ctx.beginPath(); ctx.rect(0, size * 0.44, size, size * 0.24); ctx.clip();
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0, size * 0.44, size, size * 0.24);
@@ -467,7 +456,6 @@
     }
     ctx.restore();
 
-    // Crisp Cyan LED strip along lower inner edge (v = 0.26..0.35)
     const ledGrad = ctx.createLinearGradient(0, size * 0.26, 0, size * 0.35);
     ledGrad.addColorStop(0.0, '#0284c7');
     ledGrad.addColorStop(0.5, '#38bdf8');
@@ -533,6 +521,8 @@
       hctx.beginPath(); hctx.arc(x, y, r * 0.8, 0, Math.PI * 2); hctx.fill();
     }
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 3.0);
+    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+    map.repeat.set(0.15, 0.15); normalMap.repeat.set(0.15, 0.15);
     return { map, normalMap };
   }
 
@@ -650,12 +640,10 @@
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 460);
 
-  // Full-sky high-resolution cosmic nebula skydome
   const skyDomeMat = new THREE.MeshBasicMaterial({ map: createCosmicNebulaSkyTexture(), side: THREE.BackSide, depthWrite: false });
   const skyDome = new THREE.Mesh(new THREE.SphereGeometry(290, 48, 32), skyDomeMat);
   scene.add(skyDome);
 
-  // Clean neutral lighting so emerald green stays rich emerald green and details never blow out!
   const ambLight = new THREE.AmbientLight(0xf8fafc, 0.42);
   scene.add(ambLight);
   const hemiLight = new THREE.HemisphereLight(0xf1f5f9, 0x1e293b, 0.52);
@@ -714,28 +702,11 @@
   });
 
   // =========================================================================
-  // 4. FLOATING ASTEROID BASE, RINGED GAS GIANT, STATION & SATELLITE ISLANDS
+  // 4. DEEP SPACE BACKDROP OBJECTS (GAS GIANT, MOON, STATION, SATELLITE ROCKS)
   // =========================================================================
   const envGroup = new THREE.Group();
   scene.add(envGroup);
 
-  // Craggy floating asteroid rock under the fairway
-  const islandBaseGeo = new THREE.ConeGeometry(7.2, 7.5, 18, 4);
-  islandBaseGeo.rotateX(Math.PI);
-  const ibPos = islandBaseGeo.attributes.position;
-  for (let i = 0; i < ibPos.count; i++) {
-    const vx = ibPos.getX(i), vy = ibPos.getY(i), vz = ibPos.getZ(i);
-    const n = 0.84 + 0.28 * fbm(vx * 0.35 + 1.4, vz * 0.35 + vy * 0.25, 3);
-    ibPos.setXYZ(i, vx * n, vy, vz * n);
-  }
-  islandBaseGeo.computeVertexNormals();
-  const islandBaseMesh = new THREE.Mesh(islandBaseGeo, matAsteroid);
-  islandBaseMesh.scale.set(0.95, 1.0, 2.05);
-  islandBaseMesh.position.y = -3.8;
-  islandBaseMesh.receiveShadow = true;
-  envGroup.add(islandBaseMesh);
-
-  // Ringed Gas Giant Planet in the upper nebula sky
   const planetGroup = new THREE.Group();
   const planetMesh = new THREE.Mesh(
     new THREE.SphereGeometry(30, 48, 36),
@@ -758,12 +729,10 @@
   planetGroup.rotation.set(0.32, 0.2, -0.26);
   envGroup.add(planetGroup);
 
-  // Cratered Moon
   const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(7.2, 28, 28), matAsteroid);
   moonMesh.position.set(-46, 30, -98);
   envGroup.add(moonMesh);
 
-  // Rotating Orbital Space Station Ring
   const stationRing = new THREE.Group();
   stationRing.add(new THREE.Mesh(new THREE.TorusGeometry(14, 1.1, 14, 48), matDarkAlloy));
   const sGlow = new THREE.Mesh(new THREE.TorusGeometry(14, 0.24, 8, 48), matCyanGlow);
@@ -776,11 +745,10 @@
   stationRing.rotation.set(0.35, 0.45, 0);
   envGroup.add(stationRing);
 
-  // Floating Satellite Asteroid Islands around the course (with green turf caps!)
   const asteroids = [];
   for (let i = 0; i < 18; i++) {
     const ang = (i / 18) * Math.PI * 2;
-    const dist = 20 + (i % 4) * 8;
+    const dist = 22 + (i % 4) * 8;
     const geo = new THREE.IcosahedronGeometry(1.2 + (i % 3) * 0.8, 2);
     const pos = geo.attributes.position;
     for (let v = 0; v < pos.count; v++) {
@@ -795,7 +763,6 @@
     asteroids.push({ mesh: ast, rx: 0.12 + (i % 3) * 0.06, ry: 0.16 + (i % 4) * 0.06 });
   }
 
-  // Drifting Cosmic Stardust
   const dustCount = 220;
   const dustGeo = new THREE.BufferGeometry();
   const dustPos = new Float32Array(dustCount * 3);
@@ -808,7 +775,7 @@
   envGroup.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.22, transparent: true, opacity: 0.75 })));
 
   // =========================================================================
-  // 5. CURVED FAIRWAY & TITANIUM RAIL GEOMETRY GENERATORS
+  // 5. CURVED FAIRWAY, TITANIUM RAIL & CUSTOM-FITTED FLOATING ASTEROID HULL
   // =========================================================================
   function createRoundedPolygon(verts, arcSteps = 8) {
     const pts = [], n = verts.length;
@@ -910,6 +877,58 @@
     mesh.castShadow = true; mesh.receiveShadow = true; return mesh;
   }
 
+  // Custom-fitted craggy asteroid base extruded directly under each hole's exact footprint
+  function buildCustomAsteroidHull(loopPts) {
+    const n = loopPts.length;
+    let cx = 0, cz = 0;
+    loopPts.forEach(p => { cx += p.x; cz += p.z; });
+    cx /= n; cz /= n;
+
+    const normals = [];
+    for (let i = 0; i < n; i++) {
+      const pPrev = loopPts[(i - 1 + n) % n], pCurr = loopPts[i], pNext = loopPts[(i + 1) % n];
+      const e1x = pCurr.x - pPrev.x, e1z = pCurr.z - pPrev.z, e2x = pNext.x - pCurr.x, e2z = pNext.z - pCurr.z;
+      const l1 = Math.hypot(e1x, e1z) || 1, l2 = Math.hypot(e2x, e2z) || 1;
+      const n1x = e1z / l1, n1z = -e1x / l1, n2x = e2z / l2, n2z = -e2x / l2;
+      let mx = n1x + n2x, mz = n1z + n2z; const ml = Math.hypot(mx, mz) || 1; mx /= ml; mz /= ml;
+      normals.push({ x: mx, z: mz });
+    }
+
+    const tiers = [
+      { out: 0.52, y:  0.00, shrink: 1.00 },
+      { out: 0.95, y: -0.45, shrink: 0.96 },
+      { out: 0.45, y: -1.85, shrink: 0.72 },
+      { out: 0.00, y: -3.65, shrink: 0.35 },
+      { out: 0.00, y: -5.40, shrink: 0.02 }
+    ];
+    const tLen = tiers.length, positions = [], uvs = [], indices = [];
+    for (let i = 0; i <= n; i++) {
+      const idx = i % n, pt = loopPts[idx], nm = normals[idx];
+      for (let t = 0; t < tLen; t++) {
+        const tr = tiers[t];
+        const rx = pt.x + nm.x * tr.out, rz = pt.z + nm.z * tr.out;
+        const bx = cx + (rx - cx) * tr.shrink, bz = cz + (rz - cz) * tr.shrink;
+        const jag = t === 0 ? 1.0 : (0.88 + 0.24 * fbm(bx * 0.45 + 2.1, bz * 0.45 + tr.y * 0.35, 3));
+        positions.push(cx + (bx - cx) * jag, tr.y, cz + (bz - cz) * jag);
+        uvs.push((i / n) * 6.0, t / (tLen - 1));
+      }
+    }
+    for (let i = 0; i < n; i++) {
+      const rowA = i * tLen, rowB = (i + 1) * tLen;
+      for (let t = 0; t < tLen - 1; t++) {
+        const a = rowA + t, b = rowB + t, c = rowB + t + 1, d = rowA + t + 1;
+        indices.push(a, b, c, a, c, d);
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices); geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, matAsteroid);
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
   function buildFairwayTurfMesh(outerPts, islandPts = null) {
     const shape = new THREE.Shape();
     outerPts.forEach((p, i) => { if (i === 0) shape.moveTo(p.x, -p.z); else shape.lineTo(p.x, -p.z); });
@@ -925,7 +944,7 @@
   }
 
   // =========================================================================
-  // 6. 18-HOLE ORBITAL CHAMPIONSHIP COURSE
+  // 6. 18-HOLE ORBITAL CHAMPIONSHIP COURSE (Tuned & Play-Tested Geometry)
   // =========================================================================
   const HOLES = [
     {
@@ -971,9 +990,9 @@
       ], 10)),
       island: null, bumpers: [{ x: -1.7, z: -7.2, r: 0.5 }, { x: 1.7, z: -7.2, r: 0.5 }],
       slopes: [],
-      ramps: [{ x: 0, z: 3.4, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.7, boost: 4.6 }],
+      ramps: [{ x: 0, z: 3.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.4, boost: 2.2 }],
       windmills: [], movers: [], boosts: [], bunkers: [],
-      voids: [{ x: 0, z: -1.2, w: 6.2, d: 4.4 }],
+      voids: [{ x: 0, z: -1.0, w: 6.2, d: 4.0 }],
       portals: []
     },
     {
@@ -1015,17 +1034,21 @@
       portals: [{ inX: -4.5, inZ: 5.2, outX: 4.3, outZ: -6.2, outAngle: Math.PI }]
     },
     {
-      name: "Gravity Well Ascent", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -10.8 },
+      name: "Gravity Well Thruster", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -10.8 },
       outer: ensureOutwardWinding(createRoundedPolygon([
         { x: -3.5, z: 14.6, r: 2.5 }, { x: 3.5, z: 14.6, r: 2.5 },
         { x: 3.5, z: -13.6, r: 3.1 }, { x: -3.5, z: -13.6, r: 3.1 }
       ], 10)),
       island: null,
-      slopes: [{ x1: -3.2, z1: -4.2, x2: 3.2, z2: 3.8, fx: 0, fz: 6.0 }],
+      slopes: [],
       bumpers: [{ x: -1.65, z: -7.0, r: 0.52 }, { x: 1.65, z: -7.0, r: 0.52 }],
       ramps: [], windmills: [], movers: [],
-      boosts: [{ x: 0, z: 6.6, w: 2.2, d: 2.8, fx: 0, fz: -25.0 }],
-      bunkers: [], voids: [], portals: []
+      boosts: [
+        { x: -1.3, z: 4.0, w: 1.8, d: 3.4, fx: 0, fz: -18.0 },
+        { x:  1.3, z: -1.5, w: 1.8, d: 3.4, fx: 0, fz: -18.0 }
+      ],
+      bunkers: [{ x: 0, z: 1.2, rx: 1.1, rz: 1.4 }],
+      voids: [], portals: []
     },
     {
       name: "Orbital Hairpin", par: 4, tee: { x: -5.4, z: 8.8 }, cup: { x: 3.4, z: 7.4 },
@@ -1046,7 +1069,7 @@
       ], 10)),
       island: null, bumpers: [{ x: -2.4, z: -6.8, r: 0.58 }, { x: 2.4, z: 5.5, r: 0.58 }],
       slopes: [],
-      ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 8.4, boost: 4.4 }],
+      ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 7.4, boost: 2.2 }],
       windmills: [], movers: [], boosts: [],
       bunkers: [{ x: 0.5, z: -1.6, rx: 3.6, rz: 2.1 }],
       voids: [], portals: []
@@ -1091,13 +1114,13 @@
       island: null, bumpers: [],
       slopes: [],
       ramps: [
-        { x: 0, z: 7.4, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.7, boost: 4.8 },
-        { x: 0, z: -1.8, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.7, boost: 4.8 }
+        { x: 0, z: 7.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.2, boost: 2.0 },
+        { x: 0, z: -1.8, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.2, boost: 2.0 }
       ],
       windmills: [], movers: [], boosts: [], bunkers: [],
       voids: [
-        { x: 0, z: 3.4, w: 6.2, d: 3.6 },
-        { x: 0, z: -5.8, w: 6.2, d: 3.6 }
+        { x: 0, z: 3.4, w: 6.2, d: 3.4 },
+        { x: 0, z: -5.8, w: 6.2, d: 3.4 }
       ],
       portals: []
     },
@@ -1154,12 +1177,13 @@
         { x: 3.6, z: -14.6, r: 3.0 }, { x: -3.6, z: -14.6, r: 3.0 }
       ], 10)),
       island: null, bumpers: [{ x: -1.8, z: -8.2, r: 0.5 }, { x: 1.8, z: -8.2, r: 0.5 }],
-      slopes: [{ x1: -3.3, z1: -4.5, x2: 3.3, z2: 4.0, fx: 0, fz: 6.2 }],
+      slopes: [],
       ramps: [],
-      windmills: [{ x: 0, z: -5.2, speed: 1.7, bladeLen: 2.15 }],
+      windmills: [{ x: 0, z: -4.5, speed: 1.7, bladeLen: 2.15 }],
       movers: [],
-      boosts: [{ x: 0, z: 6.8, w: 2.2, d: 2.8, fx: 0, fz: -25.0 }],
-      bunkers: [], voids: [], portals: []
+      boosts: [{ x: 0, z: 6.2, w: 2.2, d: 3.2, fx: 0, fz: -22.0 }],
+      bunkers: [{ x: -1.9, z: 0.5, rx: 0.9, rz: 1.4 }, { x: 1.9, z: 0.5, rx: 0.9, rz: 1.4 }],
+      voids: [], portals: []
     },
     {
       name: "Supernova Command Finale", par: 4, tee: { x: 0, z: 13.2 }, cup: { x: 0, z: -12.4 },
@@ -1170,10 +1194,10 @@
       island: null,
       bumpers: [{ x: -1.65, z: -8.4, r: 0.52 }, { x: 1.65, z: -8.4, r: 0.52 }],
       slopes: [],
-      ramps: [{ x: 0, z: 7.2, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.8, boost: 5.0 }],
+      ramps: [{ x: 0, z: 7.2, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.4, boost: 2.2 }],
       windmills: [{ x: 0, z: -3.2, speed: 1.7, bladeLen: 2.2 }],
       movers: [], boosts: [], bunkers: [],
-      voids: [{ x: 0, z: 3.0, w: 6.8, d: 3.8 }],
+      voids: [{ x: 0, z: 3.0, w: 6.8, d: 3.6 }],
       portals: []
     }
   ];
@@ -1203,19 +1227,19 @@
   );
   readyRing.rotation.x = -Math.PI / 2; scene.add(readyRing);
 
-  // Sleek Sci-Fi Plasma Putter (Clean, unobstructed view of ball and aim line!)
+  // Low-profile putter blade beside/behind the ball (never blocks sightline!)
   const putterGroup = new THREE.Group();
   const putterHead = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.16, 0.20), matDarkAlloy);
   putterHead.position.set(0, 0.11, 0); putterHead.castShadow = true;
   const putterLed = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.04, 0.22), matCyanGlow);
   putterLed.position.set(0, 0.14, 0);
   const putterShaft = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.022, 0.026, 2.1, 10),
+    new THREE.CylinderGeometry(0.018, 0.022, 1.55, 10),
     new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 })
   );
-  putterShaft.position.set(0.2, 1.15, 0); putterShaft.rotation.z = -0.1;
-  const putterGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.038, 0.6, 10), matDarkAlloy);
-  putterGrip.position.set(0.3, 2.05, 0); putterGrip.rotation.z = -0.1;
+  putterShaft.position.set(0.28, 0.85, 0); putterShaft.rotation.z = -0.22;
+  const putterGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.032, 0.45, 10), matDarkAlloy);
+  putterGrip.position.set(0.42, 1.52, 0); putterGrip.rotation.z = -0.22;
   putterGroup.add(putterHead, putterLed, putterShaft, putterGrip);
   scene.add(putterGroup);
 
@@ -1234,19 +1258,32 @@
 
   const aimGroup = new THREE.Group(); scene.add(aimGroup);
   const aimDots = [];
-  for (let i = 0; i < 16; i++) {
-    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.095 - i * 0.003, 12, 12), new THREE.MeshBasicMaterial({ color: 0x7dd3fc }));
+  for (let i = 0; i < 18; i++) {
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.095 - i * 0.0028, 12, 12), new THREE.MeshBasicMaterial({ color: 0x7dd3fc }));
     aimGroup.add(dot); aimDots.push(dot);
   }
 
+  // Relative Aim System: baseAimAngle points straight toward the cup; aimOffsetDeg is -180..+180 around that!
   const state = {
     holeIdx: 0, strokes: 0, scores: Array(HOLES.length).fill(null),
     camMode: 'follow', guideOn: true,
-    camYaw: 0, camPitch: 0.42, camDist: 9.8,
+    camYaw: 0, camPitch: 0.44, camDist: 9.8,
     ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vy: 0, vz: 0, lastSafeX: 0, lastSafeZ: 10.2, portalCD: 0, inHole: false, sinkT: 0 },
-    aiming: false, aimPower: 0.45, aimAngle: Math.PI,
+    aiming: false, aimPower: 0.45, baseAimAngle: Math.PI, aimOffsetDeg: 0,
     putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null, dynWindmills: [], dynMovers: [], dynPortals: []
   };
+
+  function getWorldAimAngle() {
+    return state.baseAimAngle - (state.aimOffsetDeg * Math.PI) / 180;
+  }
+
+  function pointAimAtCup() {
+    const h = HOLES[state.holeIdx];
+    const dx = h.cup.x - state.ball.x, dz = h.cup.z - state.ball.z;
+    state.baseAimAngle = Math.atan2(dx, dz);
+    state.aimOffsetDeg = 0;
+    syncSlidersFromState();
+  }
 
   function clearGroup(grp) { while (grp.children.length > 0) grp.remove(grp.children[0]); }
   function pointInPoly(x, z, pts) {
@@ -1380,6 +1417,7 @@
     state.aiming = false;
     state.wallSegs = []; state.dynWindmills = []; state.dynMovers = []; state.dynPortals = [];
 
+    courseGroup.add(buildCustomAsteroidHull(h.outer));
     courseGroup.add(buildFairwayTurfMesh(h.outer, h.island));
     courseGroup.add(buildCurvedRailMesh(h.outer, 0.84, 0.50, false));
     for (let i = 0; i < h.outer.length; i++) {
@@ -1411,7 +1449,6 @@
     h.voids.forEach(buildVoidHazardMesh);
     h.portals.forEach(buildPortalMesh);
 
-    // Glowing Cyan Flagstick & Cup
     const cupHole = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 24), new THREE.MeshBasicMaterial({ color: 0x020617 }));
     cupHole.position.set(h.cup.x, 0.23, h.cup.z); courseGroup.add(cupHole);
     const cupRim = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.45, 24), matCyanGlow);
@@ -1422,7 +1459,6 @@
     flagMesh.position.set(h.cup.x + 0.5, 2.66, h.cup.z); courseGroup.add(flagMesh);
     state.flagMesh = flagMesh;
 
-    // Sleek Sci-Fi Tee Pad + Flanking Low-Profile Emitter Pods (matches reference tee box!)
     const teePad = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.48, 0.03, 20), matCyanGlow);
     teePad.position.set(h.tee.x, 0.242, h.tee.z); courseGroup.add(teePad);
     [-1.1, 1.1].forEach(ox => {
@@ -1432,13 +1468,11 @@
       podLed.position.set(h.tee.x + ox, 0.38, h.tee.z); courseGroup.add(podLed);
     });
 
-    const dx = h.cup.x - h.tee.x, dz = h.cup.z - h.tee.z;
-    state.aimAngle = Math.atan2(dx, dz);
     state.aimPower = 0.45;
-    syncSlidersFromState();
+    pointAimAtCup();
 
-    state.camYaw = state.aimAngle + Math.PI;
-    state.camPitch = 0.42; state.camDist = 9.8;
+    state.camYaw = getWorldAimAngle() + Math.PI;
+    state.camPitch = 0.44; state.camDist = 9.8;
 
     document.getElementById('holeNumBadge').textContent = String(idx + 1).padStart(2, '0');
     document.getElementById('holeSelect').value = String(idx);
@@ -1447,18 +1481,22 @@
   }
 
   // =========================================================================
-  // 8. DUAL INPUT (SLIDERS + LAUNCH OR DIRECT DRAG-BACK) & PHYSICS
+  // 8. DUAL INPUT (CENTERED 0° AIM SLIDER, DRAG-BACK, TAP-TO-AIM & KEYBOARD)
   // =========================================================================
   const rngAim = document.getElementById('rngAim'), rngPower = document.getElementById('rngPower');
   const lblAim = document.getElementById('lblAim'), lblPower = document.getElementById('lblPower');
+  const btnPutt = document.getElementById('btnPutt');
 
   function syncSlidersFromState() {
-    let deg = Math.round((state.aimAngle * 180) / Math.PI);
+    let deg = Math.round(state.aimOffsetDeg);
     while (deg > 180) deg -= 360;
     while (deg < -180) deg += 360;
-    rngAim.value = deg; lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
+    state.aimOffsetDeg = deg;
+    rngAim.value = deg;
+    lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
     const pPct = Math.round(state.aimPower * 100);
-    rngPower.value = pPct; lblPower.textContent = `${pPct}%`;
+    rngPower.value = pPct;
+    lblPower.textContent = `${pPct}%`;
   }
 
   function ballStopped() {
@@ -1468,28 +1506,38 @@
   function executePutt() {
     if (!ballStopped() || state.aimPower < 0.04) return;
     initAudio();
+    const worldAng = getWorldAimAngle();
     const spd = state.aimPower * 21.0;
     state.ball.lastSafeX = state.ball.x; state.ball.lastSafeZ = state.ball.z;
-    state.ball.vx = Math.sin(state.aimAngle) * spd;
-    state.ball.vz = Math.cos(state.aimAngle) * spd;
+    state.ball.vx = Math.sin(worldAng) * spd;
+    state.ball.vz = Math.cos(worldAng) * spd;
     state.strokes++; updateHUD(); sfxPutt(state.aimPower);
     spawnFX(state.ball.x, 0.3, state.ball.z, 0x38bdf8, 8, 2.6);
     state.putterSwingT = 0.22;
   }
 
   rngAim.addEventListener('input', () => {
-    const deg = parseFloat(rngAim.value); state.aimAngle = (deg * Math.PI) / 180;
-    lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
+    state.aimOffsetDeg = parseFloat(rngAim.value);
+    lblAim.textContent = `${state.aimOffsetDeg > 0 ? '+' : ''}${Math.round(state.aimOffsetDeg)}°`;
   });
   rngPower.addEventListener('input', () => {
     const pct = parseFloat(rngPower.value); state.aimPower = pct / 100;
     lblPower.textContent = `${pct}%`;
   });
-  document.getElementById('btnPutt').addEventListener('click', executePutt);
+  btnPutt.addEventListener('click', executePutt);
+
+  window.addEventListener('keydown', e => {
+    if (document.getElementById('scoreModal').classList.contains('open')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); state.aimOffsetDeg = Math.max(-180, state.aimOffsetDeg - (e.shiftKey ? 1 : 3)); syncSlidersFromState(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); state.aimOffsetDeg = Math.min(180, state.aimOffsetDeg + (e.shiftKey ? 1 : 3)); syncSlidersFromState(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); state.aimPower = Math.min(1, state.aimPower + 0.03); syncSlidersFromState(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); state.aimPower = Math.max(0.05, state.aimPower - 0.03); syncSlidersFromState(); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); executePutt(); }
+  });
 
   const raycaster = new THREE.Raycaster(), pointerNDC = new THREE.Vector2();
   const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.24);
-  let dragMode = null, lastPointer = { x: 0, y: 0 };
+  let dragMode = null, downPointer = { x: 0, y: 0 }, lastPointer = { x: 0, y: 0 };
 
   function getGroundHit(cx, cy) {
     pointerNDC.x = (cx / window.innerWidth) * 2 - 1;
@@ -1498,8 +1546,18 @@
     const hit = new THREE.Vector3(); raycaster.ray.intersectPlane(groundPlane, hit); return hit;
   }
 
+  function setAimTowardWorldAngle(worldAng) {
+    let diffDeg = ((state.baseAimAngle - worldAng) * 180) / Math.PI;
+    while (diffDeg > 180) diffDeg -= 360;
+    while (diffDeg < -180) diffDeg += 360;
+    state.aimOffsetDeg = Math.round(diffDeg);
+    syncSlidersFromState();
+  }
+
   canvas.addEventListener('pointerdown', e => {
-    initAudio(); lastPointer = { x: e.clientX, y: e.clientY };
+    initAudio();
+    downPointer = { x: e.clientX, y: e.clientY };
+    lastPointer = { x: e.clientX, y: e.clientY };
     const hit = getGroundHit(e.clientX, e.clientY);
     if (ballStopped() && hit && Math.hypot(hit.x - state.ball.x, hit.z - state.ball.z) < 2.1) {
       dragMode = 'aim'; state.aiming = true; canvas.setPointerCapture(e.pointerId); return;
@@ -1518,13 +1576,23 @@
       if (hit) {
         const dx = state.ball.x - hit.x, dz = state.ball.z - hit.z;
         state.aimPower = Math.max(0.05, Math.min(1, Math.hypot(dx, dz) / 4.2));
-        state.aimAngle = Math.atan2(dx, dz);
-        syncSlidersFromState();
+        setAimTowardWorldAngle(Math.atan2(dx, dz));
       }
     }
   });
-  canvas.addEventListener('pointerup', () => {
-    if (dragMode === 'aim' && state.aiming) { state.aiming = false; executePutt(); }
+  canvas.addEventListener('pointerup', e => {
+    if (dragMode === 'aim' && state.aiming) {
+      state.aiming = false;
+      executePutt();
+    } else if (dragMode === 'orbit' && ballStopped() && Math.hypot(e.clientX - downPointer.x, e.clientY - downPointer.y) < 6) {
+      // Quick tap on the fairway aims straight toward that point!
+      const hit = getGroundHit(e.clientX, e.clientY);
+      const hole = HOLES[state.holeIdx];
+      if (hit && pointInPoly(hit.x, hit.z, hole.outer)) {
+        const dx = hit.x - state.ball.x, dz = hit.z - state.ball.z;
+        if (Math.hypot(dx, dz) > 0.3) setAimTowardWorldAngle(Math.atan2(dx, dz));
+      }
+    }
     dragMode = null;
   });
   canvas.addEventListener('wheel', e => {
@@ -1564,12 +1632,15 @@
 
   function updateAimAndPutter() {
     const stopped = ballStopped();
+    btnPutt.disabled = !stopped;
     aimGroup.visible = stopped && state.guideOn;
+    const worldAng = getWorldAimAngle();
+
     if (stopped && state.putterSwingT <= 0) {
       putterGroup.visible = true;
       const pullBack = 0.36 + (state.aiming ? state.aimPower * 1.1 : state.aimPower * 0.45);
-      putterGroup.position.set(state.ball.x - Math.sin(state.aimAngle) * pullBack, 0.24, state.ball.z - Math.cos(state.aimAngle) * pullBack);
-      putterGroup.rotation.y = state.aimAngle;
+      putterGroup.position.set(state.ball.x - Math.sin(worldAng) * pullBack, 0.24, state.ball.z - Math.cos(worldAng) * pullBack);
+      putterGroup.rotation.y = worldAng;
     } else if (state.putterSwingT <= 0) {
       putterGroup.visible = false;
     }
@@ -1577,30 +1648,59 @@
     if (!aimGroup.visible) return;
     const hole = HOLES[state.holeIdx];
     const col = state.aimPower < 0.45 ? 0x7dd3fc : (state.aimPower < 0.8 ? 0xfde047 : 0xf43f5e);
+    const groundY = 0.24 + ballRadius;
     const sim = {
-      x: state.ball.x, z: state.ball.z,
-      vx: Math.sin(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0),
-      vz: Math.cos(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0)
+      x: state.ball.x, y: groundY, z: state.ball.z,
+      vx: Math.sin(worldAng) * (state.aimPower * 21.0),
+      vy: 0,
+      vz: Math.cos(worldAng) * (state.aimPower * 21.0)
     };
-    const stepDt = 0.022;
+    const stepDt = 0.028;
     for (let i = 0; i < aimDots.length; i++) {
-      for (let s = 0; s < 3; s++) {
-        sim.x += sim.vx * (stepDt / 3); sim.z += sim.vz * (stepDt / 3);
+      for (let s = 0; s < 4; s++) {
+        const sdt = stepDt / 4;
+        const airborne = sim.y > groundY + 0.05;
+        if (airborne || sim.vy > 0) {
+          sim.vy -= 21.0 * sdt; sim.y += sim.vy * sdt;
+          if (sim.y <= groundY) { sim.y = groundY; sim.vy = 0; }
+        }
+        if (!airborne) {
+          hole.ramps.forEach(rp => {
+            if (Math.abs(sim.x - rp.x) <= rp.w * 0.5 && Math.abs(sim.z - rp.z) <= rp.d * 0.5) {
+              const fSpd = sim.vx * rp.dirX + sim.vz * rp.dirZ;
+              if (fSpd > 2.4 && sim.vy <= 0.1) {
+                sim.vy = rp.vy * Math.min(1.15, Math.max(0.65, fSpd / 11.0));
+                sim.vx += rp.dirX * rp.boost; sim.vz += rp.dirZ * rp.boost; sim.y = groundY + 0.08;
+              }
+            }
+          });
+          hole.boosts.forEach(bp => {
+            if (Math.abs(sim.x - bp.x) <= bp.w * 0.5 && Math.abs(sim.z - bp.z) <= bp.d * 0.5) {
+              sim.vx += bp.fx * sdt; sim.vz += bp.fz * sdt;
+            }
+          });
+        }
+        sim.x += sim.vx * sdt; sim.z += sim.vz * sdt;
+        const fric = Math.pow(airborne ? 0.9985 : 0.988, sdt * 60);
+        sim.vx *= fric; sim.vz *= fric;
         for (const seg of state.wallSegs) collideWall2D(sim, seg[0], seg[1], seg[2], seg[3], 0.85, true);
         for (const bmp of hole.bumpers) collideCircle2D(sim, bmp.x, bmp.z, bmp.r, 1.12, 3.0, true);
       }
-      aimDots[i].position.set(sim.x, 0.34, sim.z); aimDots[i].material.color.setHex(col);
+      aimDots[i].position.set(sim.x, sim.y + 0.04, sim.z);
+      aimDots[i].material.color.setHex(col);
     }
   }
 
+  let wasMoving = false;
   function stepPhysics(dt) {
     const hole = HOLES[state.holeIdx], b = state.ball;
     if (state.bannerT > 0) { state.bannerT -= dt; if (state.bannerT <= 0) document.getElementById('banner').classList.remove('show'); }
 
     if (state.putterSwingT > 0) {
+      const worldAng = getWorldAimAngle();
       state.putterSwingT -= dt;
-      putterGroup.position.x += Math.sin(state.aimAngle) * dt * 6.5;
-      putterGroup.position.z += Math.cos(state.aimAngle) * dt * 6.5;
+      putterGroup.position.x += Math.sin(worldAng) * dt * 6.5;
+      putterGroup.position.z += Math.cos(worldAng) * dt * 6.5;
       if (state.putterSwingT <= 0) putterGroup.visible = false;
     }
 
@@ -1720,13 +1820,15 @@
             document.getElementById('bannerTitle').textContent = 'VOID CHASM!';
             document.getElementById('bannerSub').textContent = '+1 Penalty Stroke';
             ban.classList.add('show'); state.bannerT = 1.3;
-            b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0; return;
+            b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0;
+            pointAimAtCup(); return;
           }
         }
       }
 
       if (!pointInPoly(b.x, b.z, hole.outer) && minDistToPoly(b.x, b.z, hole.outer) > 0.35) {
-        b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0; return;
+        b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0;
+        pointAimAtCup(); return;
       }
 
       const cDist = Math.hypot(b.x - hole.cup.x, b.z - hole.cup.z);
@@ -1750,8 +1852,13 @@
     }
 
     const spd = Math.hypot(b.vx, b.vz);
-    if (spd < 0.08) { b.vx = 0; b.vz = 0; }
-    else ballMesh.rotateOnWorldAxis(new THREE.Vector3(b.vz, 0, -b.vx).normalize(), (spd * dt) / ballRadius);
+    if (spd < 0.08) {
+      b.vx = 0; b.vz = 0;
+      if (wasMoving) { pointAimAtCup(); wasMoving = false; }
+    } else {
+      wasMoving = true;
+      ballMesh.rotateOnWorldAxis(new THREE.Vector3(b.vz, 0, -b.vx).normalize(), (spd * dt) / ballRadius);
+    }
   }
 
   // =========================================================================
@@ -1897,8 +2004,8 @@
   buildHole(0);
   setTimeout(() => {
     const ld = document.getElementById('loader');
-    if (ld) { ld.style.opacity = '0'; setTimeout(() => ld.remove(), 400); }
-  }, 220);
+    if (ld) { ld.style.opacity = '0'; setTimeout(() => ld.remove(), 350); }
+  }, 200);
   requestAnimationFrame(animate);
 })();
 </script>
