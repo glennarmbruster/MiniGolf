@@ -397,7 +397,7 @@
       ctx.beginPath(); ctx.arc(sx, sy, 2.0, 0, Math.PI * 2); ctx.fill();
     }
 
-    return new THREE.CanvasTexture(c);
+    const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; return tex;
   }
 
   function createEmeraldTurfPBR() {
@@ -423,7 +423,7 @@
     }
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.4);
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(0.22, 0.22); normalMap.repeat.set(0.22, 0.22); map.anisotropy = 8;
+    map.encoding = THREE.sRGBEncoding; map.repeat.set(0.22, 0.22); normalMap.repeat.set(0.22, 0.22); map.anisotropy = 8;
     return { map, normalMap };
   }
 
@@ -464,7 +464,7 @@
     ctx.fillRect(0, size * 0.26, size, size * 0.09);
 
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 2.0);
-    map.wrapS = map.wrapT = THREE.RepeatWrapping; map.anisotropy = 8;
+    map.encoding = THREE.sRGBEncoding; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.anisotropy = 8;
     return { map, normalMap };
   }
 
@@ -472,7 +472,7 @@
     const w = 1024, h = 512;
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const ctx = c.getContext('2d');
-    const bands = ['#1e3a8a', '#2563eb', '#0284c7', '#7e22ce', '#4338ca', '#0369a1', '#6d28d9', '#1d4ed8'];
+    const bands = ['#0f2557', '#1e3a8a', '#2b5ea7', '#3882b8', '#6b4e9b', '#3a4b8c', '#1c4d7a', '#523c82', '#172e66'];
     for (let y = 0; y < h; y++) {
       const t = (y / h) * (bands.length - 1);
       const idx = Math.floor(t);
@@ -480,13 +480,48 @@
       ctx.fillStyle = '#' + col.getHexString();
       ctx.fillRect(0, y, w, 1.5);
     }
-    for (let i = 0; i < 42; i++) {
-      const x = Math.random() * w, y = 40 + Math.random() * (h - 80);
-      const rx = 24 + Math.random() * 68, ry = 5 + Math.random() * 14;
-      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(186, 230, 253, 0.22)' : 'rgba(233, 213, 255, 0.20)';
+    // Fine zonal jet streams
+    for (let i = 0; i < 95; i++) {
+      const y = 20 + Math.random() * (h - 40), th = 1.5 + Math.random() * 5;
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(206, 236, 255, 0.14)' : 'rgba(15, 23, 62, 0.20)';
+      ctx.fillRect(0, y, w, th);
+    }
+    // Swirling cloud eddies
+    for (let i = 0; i < 65; i++) {
+      const x = Math.random() * w, y = 45 + Math.random() * (h - 90);
+      const rx = 20 + Math.random() * 64, ry = 4 + Math.random() * 12;
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(186, 230, 253, 0.22)' : 'rgba(233, 213, 255, 0.18)';
       ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
     }
-    return new THREE.CanvasTexture(c);
+    // Great Amber-Coral Anticyclone Storm
+    const sg = ctx.createRadialGradient(w * 0.42, h * 0.58, 4, w * 0.42, h * 0.58, 42);
+    sg.addColorStop(0.0, 'rgba(251, 146, 60, 0.85)');
+    sg.addColorStop(0.45, 'rgba(217, 119, 6, 0.45)');
+    sg.addColorStop(1.0, 'rgba(0,0,0,0)');
+    ctx.save(); ctx.translate(w * 0.42, h * 0.58); ctx.scale(1.8, 0.9);
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, 0, 42, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
+
+  function createSolarCellTexture() {
+    const size = 256;
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0c234d'; ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = 'rgba(125, 211, 252, 0.55)'; ctx.lineWidth = 2;
+    for (let i = 0; i <= size; i += 32) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(size, i); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)'; ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, size - 4, size - 4);
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
   }
 
   function createPlanetRingTexture() {
@@ -502,7 +537,7 @@
       ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
       ctx.fillRect(x, 0, 1.5, 32);
     }
-    return new THREE.CanvasTexture(c);
+    const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; return tex;
   }
 
   function createAsteroidPBR() {
@@ -522,7 +557,7 @@
     }
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 3.0);
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(0.15, 0.15); normalMap.repeat.set(0.15, 0.15);
+    map.encoding = THREE.sRGBEncoding; map.repeat.set(0.15, 0.15); normalMap.repeat.set(0.15, 0.15);
     return { map, normalMap };
   }
 
@@ -542,7 +577,7 @@
     }
     ctx.fillStyle = '#0284c7'; ctx.fillRect(0, size * 0.455, size, size * 0.09);
     ctx.fillStyle = '#facc15'; ctx.fillRect(0, size * 0.485, size, size * 0.03);
-    const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8; return tex;
+    const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8; return tex;
   }
 
   function createChevronTexture() {
@@ -635,7 +670,8 @@
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.02;
+  renderer.outputEncoding = THREE.sRGBEncoding;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 460);
@@ -707,21 +743,30 @@
   const envGroup = new THREE.Group();
   scene.add(envGroup);
 
+  const solarTex = createSolarCellTexture();
+  const matSolarWing = new THREE.MeshStandardMaterial({ map: solarTex, metalness: 0.45, roughness: 0.25, emissive: 0x07264d, emissiveIntensity: 0.35 });
+
+  // Ringed Gas Giant with Soft Atmospheric Rim Glow
   const planetGroup = new THREE.Group();
   const planetMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(30, 48, 36),
-    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), roughness: 0.75 })
+    new THREE.SphereGeometry(31, 48, 36),
+    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), roughness: 0.72, metalness: 0.05 })
   );
   planetGroup.add(planetMesh);
-  const ringGeo = new THREE.RingGeometry(38, 62, 72);
+  const atmoHalo = new THREE.Mesh(
+    new THREE.SphereGeometry(32.8, 36, 28),
+    new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.12, side: THREE.BackSide })
+  );
+  planetGroup.add(atmoHalo);
+  const ringGeo = new THREE.RingGeometry(39, 64, 72);
   const rPos = ringGeo.attributes.position, rUv = ringGeo.attributes.uv;
   for (let i = 0; i < rPos.count; i++) {
     const rad = Math.hypot(rPos.getX(i), rPos.getY(i));
-    rUv.setXY(i, (rad - 38) / (62 - 38), 0.5);
+    rUv.setXY(i, (rad - 39) / (64 - 39), 0.5);
   }
   const ringMesh = new THREE.Mesh(
     ringGeo,
-    new THREE.MeshBasicMaterial({ map: createPlanetRingTexture(), side: THREE.DoubleSide, transparent: true, opacity: 0.86 })
+    new THREE.MeshBasicMaterial({ map: createPlanetRingTexture(), side: THREE.DoubleSide, transparent: true, opacity: 0.88 })
   );
   ringMesh.rotation.x = Math.PI / 2;
   planetGroup.add(ringMesh);
@@ -729,26 +774,66 @@
   planetGroup.rotation.set(0.32, 0.2, -0.26);
   envGroup.add(planetGroup);
 
-  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(7.2, 28, 28), matAsteroid);
+  // Cratered Orbital Moon
+  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(7.6, 32, 32), matAsteroid);
   moonMesh.position.set(-46, 30, -98);
   envGroup.add(moonMesh);
 
+  // Detailed Rotating Coriolis Space Station with Central Hub, Lit Windows & Solar Wings
   const stationRing = new THREE.Group();
-  stationRing.add(new THREE.Mesh(new THREE.TorusGeometry(14, 1.1, 14, 48), matDarkAlloy));
-  const sGlow = new THREE.Mesh(new THREE.TorusGeometry(14, 0.24, 8, 48), matCyanGlow);
-  sGlow.position.z = 0.95; stationRing.add(sGlow);
+  const habitatRing = new THREE.Mesh(new THREE.TorusGeometry(14, 1.25, 16, 56), matDarkAlloy);
+  stationRing.add(habitatRing);
+  const sGlow = new THREE.Mesh(new THREE.TorusGeometry(14, 0.22, 8, 56), matCyanGlow);
+  sGlow.position.z = 1.05; stationRing.add(sGlow);
+  // Central docking spindle & antenna
+  const hubCore = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.8, 7.5, 16), matDarkAlloy);
+  hubCore.rotation.x = Math.PI / 2; stationRing.add(hubCore);
+  const hubRing = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.18, 8, 24), matGoldAlloy);
+  hubRing.position.z = 2.6; stationRing.add(hubRing);
+  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.22, 9.0, 8), matDarkAlloy);
+  antenna.rotation.x = Math.PI / 2; antenna.position.z = 6.5; stationRing.add(antenna);
+  const beaconTip = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 10), matCyanGlow);
+  beaconTip.position.z = 11.0; stationRing.add(beaconTip);
+  // Spokes + Habitat Window Strips
   for (let sp = 0; sp < 4; sp++) {
-    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 28, 8), matDarkAlloy);
+    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 28, 8), matDarkAlloy);
     spoke.rotation.z = (sp * Math.PI) / 4; stationRing.add(spoke);
   }
-  stationRing.position.set(-28, 18, -60);
+  for (let w = 0; w < 16; w++) {
+    const wa = (w / 16) * Math.PI * 2;
+    const win = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.35, 0.2), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+    win.position.set(Math.cos(wa) * 14, Math.sin(wa) * 14, 1.18);
+    win.rotation.z = wa + Math.PI / 2;
+    stationRing.add(win);
+  }
+  // Twin Solar Wing Arrays mounted on station flanks
+  [-1, 1].forEach(side => {
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(12.5, 3.2, 0.14), matSolarWing);
+    wing.position.set(side * 22.5, 0, 0);
+    stationRing.add(wing);
+    const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 6.0, 8), matDarkAlloy);
+    strut.rotation.z = Math.PI / 2; strut.position.set(side * 16.5, 0, 0);
+    stationRing.add(strut);
+  });
+  stationRing.position.set(-29, 19, -62);
   stationRing.rotation.set(0.35, 0.45, 0);
   envGroup.add(stationRing);
+
+  // Subtle Distant Orbital Shuttle cruising across the background
+  const shuttleGroup = new THREE.Group();
+  const sBody = new THREE.Mesh(new THREE.ConeGeometry(0.42, 2.2, 6), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.3 }));
+  sBody.rotation.x = Math.PI / 2; shuttleGroup.add(sBody);
+  const sWings = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 0.9), matDarkAlloy);
+  sWings.position.z = -0.35; shuttleGroup.add(sWings);
+  const sEngine = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), matCyanGlow);
+  sEngine.position.z = -1.15; shuttleGroup.add(sEngine);
+  shuttleGroup.position.set(-40, 14, -45);
+  envGroup.add(shuttleGroup);
 
   const asteroids = [];
   for (let i = 0; i < 18; i++) {
     const ang = (i / 18) * Math.PI * 2;
-    const dist = 22 + (i % 4) * 8;
+    const dist = 24 + (i % 4) * 8;
     const geo = new THREE.IcosahedronGeometry(1.2 + (i % 3) * 0.8, 2);
     const pos = geo.attributes.position;
     for (let v = 0; v < pos.count; v++) {
@@ -977,7 +1062,7 @@
       ], 10)),
       island: null, bumpers: [],
       slopes: [], ramps: [],
-      windmills: [{ x: 0, z: 0.0, speed: 1.5, bladeLen: 2.2 }],
+      windmills: [{ x: 0, z: 0.0, speed: 1.05, bladeLen: 1.65 }],
       movers: [], boosts: [],
       bunkers: [{ x: -2.0, z: -5.8, rx: 0.95, rz: 1.3 }, { x: 2.0, z: -5.8, rx: 0.95, rz: 1.3 }],
       voids: [], portals: []
@@ -990,9 +1075,9 @@
       ], 10)),
       island: null, bumpers: [{ x: -1.7, z: -7.2, r: 0.5 }, { x: 1.7, z: -7.2, r: 0.5 }],
       slopes: [],
-      ramps: [{ x: 0, z: 3.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.4, boost: 2.2 }],
+      ramps: [{ x: 0, z: 3.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.9, boost: 2.0 }],
       windmills: [], movers: [], boosts: [], bunkers: [],
-      voids: [{ x: 0, z: -1.0, w: 6.2, d: 4.0 }],
+      voids: [{ x: 0, z: -1.0, w: 6.2, d: 3.5 }],
       portals: []
     },
     {
@@ -1004,8 +1089,8 @@
       island: null, bumpers: [],
       slopes: [], ramps: [], windmills: [],
       movers: [
-        { cx: 0, cz: 3.5, w: 2.2, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.65, phase: 0 },
-        { cx: 0, cz: -3.5, w: 2.2, d: 0.65, ampX: 1.9, ampZ: 0, speed: 2.0, phase: 2.2 }
+        { cx: 0, cz: 3.5, w: 2.2, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.15, phase: 0 },
+        { cx: 0, cz: -3.5, w: 2.2, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.30, phase: 2.2 }
       ],
       boosts: [], bunkers: [], voids: [], portals: []
     },
@@ -1069,7 +1154,7 @@
       ], 10)),
       island: null, bumpers: [{ x: -2.4, z: -6.8, r: 0.58 }, { x: 2.4, z: 5.5, r: 0.58 }],
       slopes: [],
-      ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 7.4, boost: 2.2 }],
+      ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 6.9, boost: 2.0 }],
       windmills: [], movers: [], boosts: [],
       bunkers: [{ x: 0.5, z: -1.6, rx: 3.6, rz: 2.1 }],
       voids: [], portals: []
@@ -1083,8 +1168,8 @@
       island: null, bumpers: [{ x: 0, z: 0, r: 0.55 }],
       slopes: [], ramps: [],
       windmills: [
-        { x: 0, z: 4.8, speed: 1.55, bladeLen: 2.15 },
-        { x: 0, z: -4.8, speed: -1.8, bladeLen: 2.15 }
+        { x: 0, z: 4.8, speed: 1.05, bladeLen: 1.65 },
+        { x: 0, z: -4.8, speed: -1.15, bladeLen: 1.65 }
       ],
       movers: [], boosts: [], bunkers: [], voids: [], portals: []
     },
@@ -1114,8 +1199,8 @@
       island: null, bumpers: [],
       slopes: [],
       ramps: [
-        { x: 0, z: 7.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.2, boost: 2.0 },
-        { x: 0, z: -1.8, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.2, boost: 2.0 }
+        { x: 0, z: 7.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.8, boost: 1.9 },
+        { x: 0, z: -1.8, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.8, boost: 1.9 }
       ],
       windmills: [], movers: [], boosts: [], bunkers: [],
       voids: [
@@ -1146,9 +1231,9 @@
       island: null, bumpers: [{ x: -2.2, z: 0, r: 0.48 }, { x: 2.2, z: 0, r: 0.48 }],
       slopes: [], ramps: [], windmills: [],
       movers: [
-        { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.55, phase: 0 },
-        { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 2.1, phase: 2.0 },
-        { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.75, phase: 4.0 }
+        { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.10, phase: 0 },
+        { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 1.35, phase: 2.0 },
+        { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.20, phase: 4.0 }
       ],
       boosts: [],
       bunkers: [{ x: -2.5, z: -8.8, rx: 0.9, rz: 1.2 }, { x: 2.5, z: -8.8, rx: 0.9, rz: 1.2 }],
@@ -1166,7 +1251,7 @@
       ], 10), false),
       bumpers: [{ x: 2.8, z: 0, r: 0.55 }],
       slopes: [], ramps: [], windmills: [],
-      movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.85, phase: 0 }],
+      movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.25, phase: 0 }],
       boosts: [], bunkers: [], voids: [],
       portals: [{ inX: -2.8, inZ: 0.0, outX: 0.0, outZ: -7.8, outAngle: Math.PI }]
     },
@@ -1179,7 +1264,7 @@
       island: null, bumpers: [{ x: -1.8, z: -8.2, r: 0.5 }, { x: 1.8, z: -8.2, r: 0.5 }],
       slopes: [],
       ramps: [],
-      windmills: [{ x: 0, z: -4.5, speed: 1.7, bladeLen: 2.15 }],
+      windmills: [{ x: 0, z: -4.5, speed: 1.15, bladeLen: 1.65 }],
       movers: [],
       boosts: [{ x: 0, z: 6.2, w: 2.2, d: 3.2, fx: 0, fz: -22.0 }],
       bunkers: [{ x: -1.9, z: 0.5, rx: 0.9, rz: 1.4 }, { x: 1.9, z: 0.5, rx: 0.9, rz: 1.4 }],
@@ -1194,8 +1279,8 @@
       island: null,
       bumpers: [{ x: -1.65, z: -8.4, r: 0.52 }, { x: 1.65, z: -8.4, r: 0.52 }],
       slopes: [],
-      ramps: [{ x: 0, z: 7.2, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.4, boost: 2.2 }],
-      windmills: [{ x: 0, z: -3.2, speed: 1.7, bladeLen: 2.2 }],
+      ramps: [{ x: 0, z: 7.2, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.9, boost: 2.0 }],
+      windmills: [{ x: 0, z: -3.2, speed: 1.15, bladeLen: 1.65 }],
       movers: [], boosts: [], bunkers: [],
       voids: [{ x: 0, z: 3.0, w: 6.8, d: 3.6 }],
       portals: []
@@ -1333,23 +1418,28 @@
 
   function buildWindmillMesh(wm) {
     const g = new THREE.Group();
-    const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.82, 2.35, 8), matDarkAlloy);
-    tower.position.y = 1.18; tower.castShadow = true; g.add(tower);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.08, 8, 20), matCyanGlow);
-    ring.rotation.x = Math.PI / 2; ring.position.y = 2.3; g.add(ring);
-    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.65, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), matCyanGlow);
-    dome.position.y = 2.35; g.add(dome);
+    // Pass-through Titanium Energy Archway so players can time and putt cleanly through the center!
+    [-0.82, 0.82].forEach(px => {
+      const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.46, 1.55, 0.90), matDarkAlloy);
+      pylon.position.set(px, 0.77, 0); pylon.castShadow = true; pylon.receiveShadow = true; g.add(pylon);
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.12, 0.94), matCyanGlow);
+      led.position.set(px, 1.38, 0); g.add(led);
+    });
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.75, 0.96), matDarkAlloy);
+    bridge.position.set(0, 1.90, 0); bridge.castShadow = true; g.add(bridge);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), matCyanGlow);
+    dome.position.y = 2.28; g.add(dome);
+
     const rotor = new THREE.Group();
-    rotor.position.set(0, 1.48, 0.78);
-    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.28, 12), matGoldAlloy);
+    rotor.position.set(0, 1.52, 0.58);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.26, 12), matGoldAlloy);
     hub.rotation.x = Math.PI / 2; rotor.add(hub);
-    const matSolar = new THREE.MeshStandardMaterial({ color: 0x0284c7, emissive: 0x0369a1, emissiveIntensity: 0.6, metalness: 0.5, roughness: 0.25 });
     for (let b = 0; b < 4; b++) {
       const armG = new THREE.Group(); armG.rotation.z = (b * Math.PI) / 2;
-      const spar = new THREE.Mesh(new THREE.BoxGeometry(0.10, wm.bladeLen, 0.08), matDarkAlloy);
+      const spar = new THREE.Mesh(new THREE.BoxGeometry(0.09, wm.bladeLen, 0.08), matDarkAlloy);
       spar.position.y = wm.bladeLen / 2; armG.add(spar);
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(0.42, wm.bladeLen * 0.72, 0.04), matSolar);
-      panel.position.set(0.16, wm.bladeLen * 0.58, 0.02); panel.castShadow = true; armG.add(panel);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(0.36, wm.bladeLen * 0.68, 0.04), matSolarWing);
+      panel.position.set(0.14, wm.bladeLen * 0.58, 0.02); panel.castShadow = true; armG.add(panel);
       rotor.add(armG);
     }
     g.add(rotor); g.position.set(wm.x, 0.24, wm.z); courseGroup.add(g);
@@ -1418,6 +1508,24 @@
     state.wallSegs = []; state.dynWindmills = []; state.dynMovers = []; state.dynPortals = [];
 
     courseGroup.add(buildCustomAsteroidHull(h.outer));
+    // Glowing Anti-Gravity Thruster Ring & Structural Trusses beneath the asteroid hull
+    const thrusterRing = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.24, 12, 32), matCyanGlow);
+    thrusterRing.rotation.x = Math.PI / 2; thrusterRing.position.set(0, -4.6, 0);
+    courseGroup.add(thrusterRing);
+    const thrusterCore = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 1.4, 0.7, 16), matDarkAlloy);
+    thrusterCore.position.set(0, -4.3, 0); courseGroup.add(thrusterCore);
+    // Orbital Perimeter Navigation Beacons around the outer rail
+    const beaconPts = h.outer.length;
+    for (let k = 0; k < 6; k++) {
+      const idxP = Math.floor(((k + 0.5) / 6) * beaconPts) % beaconPts;
+      const p = h.outer[idxP], pN = h.outer[(idxP + 1) % beaconPts];
+      const dx = pN.x - p.x, dz = pN.z - p.z, l = Math.hypot(dx, dz) || 1;
+      const bx = p.x + (dz / l) * 0.72, bz = p.z + (-dx / l) * 0.72;
+      const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 1.35, 8), matDarkAlloy);
+      pylon.position.set(bx, 0.68, bz); courseGroup.add(pylon);
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), k % 2 === 0 ? matCyanGlow : matVioletGlow);
+      lamp.position.set(bx, 1.42, bz); courseGroup.add(lamp);
+    }
     courseGroup.add(buildFairwayTurfMesh(h.outer, h.island));
     courseGroup.add(buildCurvedRailMesh(h.outer, 0.84, 0.50, false));
     for (let i = 0; i < h.outer.length; i++) {
@@ -1780,7 +1888,7 @@
       }
 
       b.x += b.vx * sdt; b.z += b.vz * sdt;
-      const baseFric = airborne ? 0.9985 : (inSand ? 0.935 : 0.988);
+      const baseFric = airborne ? 0.9985 : (inSand ? 0.955 : 0.988);
       const fric = Math.pow(baseFric, sdt * 60);
       b.vx *= fric; b.vz *= fric;
 
@@ -1788,16 +1896,21 @@
       for (const bmp of hole.bumpers) collideCircle2D(b, bmp.x, bmp.z, bmp.r, 1.12, 3.0);
 
       for (const wm of state.dynWindmills) {
-        collideCircle2D(b, wm.def.x, wm.def.z, 0.85, 0.82, 0);
-        const frontZ = wm.def.z + 0.78;
-        if (Math.abs(b.z - frontZ) < 0.34 && b.y < 0.85) {
+        [-0.82, 0.82].forEach(px => {
+          const cx = wm.def.x + px, cz = wm.def.z;
+          const xL = cx - 0.23, xR = cx + 0.23, zF = cz + 0.45, zB = cz - 0.45;
+          collideWall2D(b, xL, zF, xR, zF, 0.84); collideWall2D(b, xR, zF, xR, zB, 0.84);
+          collideWall2D(b, xR, zB, xL, zB, 0.84); collideWall2D(b, xL, zB, xL, zF, 0.84);
+        });
+        const frontZ = wm.def.z + 0.58;
+        if (Math.abs(b.z - frontZ) < 0.28 && b.y < 0.72) {
           for (let bi = 0; bi < 4; bi++) {
             const a = wm.angle + (bi * Math.PI) / 2;
-            if (1.48 + Math.sin(a) * wm.def.bladeLen < 0.45) {
-              const bxAtGround = wm.def.x + Math.cos(a) * 1.2;
-              if (Math.abs(b.x - bxAtGround) < 0.55) {
-                b.vz = Math.abs(b.vz) * 0.85 + 3.2; b.z = frontZ + 0.36;
-                sfxBounce(10, true); spawnFX(b.x, 0.4, b.z, 0x38bdf8, 8, 3.5);
+            if (1.52 + Math.sin(a) * wm.def.bladeLen < 0.42) {
+              const bxAtGround = wm.def.x + Math.cos(a) * 0.95;
+              if (Math.abs(b.x - bxAtGround) < 0.34) {
+                b.vz = Math.abs(b.vz) * 0.75 + 2.2; b.z = frontZ + 0.32;
+                sfxBounce(8, true); spawnFX(b.x, 0.4, b.z, 0x38bdf8, 8, 3.0);
               }
             }
           }
@@ -1832,7 +1945,12 @@
       }
 
       const cDist = Math.hypot(b.x - hole.cup.x, b.z - hole.cup.z);
-      if (!airborne && cDist < 0.37 && Math.hypot(b.vx, b.vz) < 13.5) {
+      const bSpd = Math.hypot(b.vx, b.vz);
+      if (!airborne && cDist < 0.56 && cDist > 0.05 && bSpd < 6.5) {
+        b.vx += ((hole.cup.x - b.x) / cDist) * 4.5 * sdt;
+        b.vz += ((hole.cup.z - b.z) / cDist) * 4.5 * sdt;
+      }
+      if (!airborne && cDist < 0.39 && bSpd < 13.5) {
         b.inHole = true; b.x = hole.cup.x; b.z = hole.cup.z; b.vx = 0; b.vz = 0;
         state.scores[state.holeIdx] = state.strokes; updateHUD(); sfxCup();
         spawnFX(hole.cup.x, 0.4, hole.cup.z, 0x38bdf8, 24, 6.2);
@@ -1944,6 +2062,9 @@
     skyDome.rotation.y += dt * 0.006;
     planetMesh.rotation.y += dt * 0.025;
     stationRing.rotation.z += dt * 0.14;
+    const shT = now * 0.00018;
+    shuttleGroup.position.set(Math.cos(shT) * 52, 13 + Math.sin(shT * 2) * 3, Math.sin(shT) * 52 - 18);
+    shuttleGroup.rotation.y = -shT;
     asteroids.forEach(a => { a.mesh.rotation.x += a.rx * dt; a.mesh.rotation.y += a.ry * dt; });
 
     ballMesh.position.set(state.ball.x, state.ball.y, state.ball.z);

@@ -266,7 +266,7 @@
  </div>
  <div class="putt-console">
  <div class="slider-grp">
- <div class="slider-head"><span>AIM</span><span class="val" id="lblAim">0°</span></div>
+ <div class="slider-head"><span>AIM (0° = CUP)</span><span class="val" id="lblAim">0°</span></div>
  <input type="range" id="rngAim" min="-180" max="180" value="0" step="1">
  </div>
  <div class="slider-grp">
@@ -275,7 +275,7 @@
  </div>
  <button class="putt-btn" id="btnPutt">Putt</button>
  </div>
- <div class="dock-hint">Use sliders + Putt, or drag directly back from the ball • Drag sky/sand to orbit</div>
+ <div class="dock-hint">Sliders + Putt, drag back from ball, or tap green to aim • Drag sky/sand to orbit</div>
 </div>
 
 <div id="banner">
@@ -369,42 +369,108 @@
  // 1. PAINTERLY PHOTOREALISTIC PBR TEXTURE SUITE
  // =========================================================================
  function createGrassPBR() {
- const size = 512;
- const c = document.createElement('canvas'); c.width = c.height = size;
- const ctx = c.getContext('2d');
- const hC = document.createElement('canvas'); hC.width = hC.height = size;
- const hctx = hC.getContext('2d');
+    const size = 512;
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const hC = document.createElement('canvas'); hC.width = hC.height = size;
+    const hctx = hC.getContext('2d');
 
- // Warm sunlit manicured emerald-jade green (matches serene Zen garden aesthetic)
- ctx.fillStyle = '#206b1a'; ctx.fillRect(0, 0, size, size);
- hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#1b5e20'; ctx.fillRect(0, 0, size, size);
+    hctx.fillStyle = '#787878'; hctx.fillRect(0, 0, size, size);
 
- for (let x = 0; x < size; x += 64) {
- ctx.fillStyle = (x / 64) % 2 === 0 ? 'rgba(255,255,240,0.032)' : 'rgba(0,25,0,0.036)';
- ctx.fillRect(x, 0, 64, size);
- }
- for (let i = 0; i < 240; i++) {
- const x = Math.random() * size, y = Math.random() * size, r = 18 + Math.random() * 44;
- const g = ctx.createRadialGradient(x, y, 2, x, y, r);
- g.addColorStop(0, Math.random() > 0.5 ? 'rgba(116, 184, 56, 0.16)' : 'rgba(34, 88, 22, 0.18)');
- g.addColorStop(1, 'rgba(0,0,0,0)');
- ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
- }
- for (let i = 0; i < 34000; i++) {
- const x = Math.random() * size, y = Math.random() * size;
- const len = 3 + Math.random() * 6, ang = (Math.random() - 0.5) * 1.1, t = Math.random();
- ctx.strokeStyle = t > 0.72 ? '#42a826' : (t > 0.34 ? '#277d1c' : '#144d0f');
- ctx.lineWidth = 1.05;
- ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); ctx.stroke();
- const bv = Math.floor(88 + t * 155);
- hctx.strokeStyle = `rgb(${bv},${bv},${bv})`;
- hctx.beginPath(); hctx.moveTo(x, y); hctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); hctx.stroke();
- }
- const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.4); map.encoding = THREE.sRGBEncoding;
- map.wrapS = map.wrapT = THREE.RepeatWrapping;
- map.repeat.set(0.18, 0.18); normalMap.repeat.set(0.18, 0.18); map.anisotropy = 8;
- return { map, normalMap };
- }
+    for (let x = 0; x < size; x += 64) {
+      ctx.fillStyle = (x / 64) % 2 === 0 ? '#237327' : '#1a5c1f';
+      ctx.fillRect(x, 0, 64, size);
+    }
+    for (let i = 0; i < 220; i++) {
+      const x = Math.random() * size, y = Math.random() * size, r = 18 + Math.random() * 48;
+      const g = ctx.createRadialGradient(x, y, 2, x, y, r);
+      g.addColorStop(0, Math.random() > 0.5 ? 'rgba(92, 168, 56, 0.14)' : 'rgba(18, 62, 18, 0.16)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    for (let i = 0; i < 36000; i++) {
+      const x = Math.random() * size, y = Math.random() * size;
+      const len = 3 + Math.random() * 5.5, ang = (Math.random() - 0.5) * 1.0, t = Math.random();
+      ctx.strokeStyle = t > 0.72 ? '#3d9429' : (t > 0.34 ? '#246e1c' : '#134210');
+      ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); ctx.stroke();
+      const bv = Math.floor(82 + t * 160);
+      hctx.strokeStyle = `rgb(${bv},${bv},${bv})`;
+      hctx.beginPath(); hctx.moveTo(x, y); hctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); hctx.stroke();
+    }
+    const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.6);
+    map.encoding = THREE.sRGBEncoding;
+    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+    map.repeat.set(0.20, 0.20); normalMap.repeat.set(0.20, 0.20); map.anisotropy = 8;
+    return { map, normalMap };
+  }
+
+  function createShojiWindowTexture() {
+    const size = 256;
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#efe5cf'; ctx.fillRect(0, 0, size, size);
+    const g = ctx.createRadialGradient(size/2, size/2, 10, size/2, size/2, size*0.7);
+    g.addColorStop(0, 'rgba(255, 246, 218, 0.6)');
+    g.addColorStop(1, 'rgba(190, 166, 128, 0.45)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = '#3b2012'; ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, size - 10, size - 10);
+    ctx.lineWidth = 5;
+    for (let i = 1; i < 4; i++) {
+      const p = (i / 4) * size;
+      ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  function createMountainRockTexture() {
+    const size = 512;
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#b8c4be'; ctx.fillRect(0, 0, size, size);
+    for (let i = 0; i < 1600; i++) {
+      const x = Math.random() * size, y = Math.random() * size;
+      const rw = 8 + Math.random() * 36, rh = 4 + Math.random() * 14;
+      const t = Math.random();
+      ctx.save(); ctx.translate(x, y); ctx.rotate(-0.28 + (Math.random() - 0.5) * 0.35);
+      ctx.fillStyle = t > 0.65 ? 'rgba(235, 240, 238, 0.22)' : (t > 0.3 ? 'rgba(85, 100, 95, 0.22)' : 'rgba(42, 54, 48, 0.28)');
+      ctx.beginPath(); ctx.ellipse(0, 0, rw, rh, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(22, 22); tex.anisotropy = 8;
+    return tex;
+  }
+
+  function createCloudTexture() {
+    const w = 512, h = 256;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    const puffs = [
+      [256, 138, 125], [175, 148, 95], [335, 146, 98],
+      [215, 118, 86], [295, 118, 84], [120, 160, 68], [392, 158, 70]
+    ];
+    puffs.forEach(([x, y, r]) => {
+      const g = ctx.createRadialGradient(x, y - r * 0.15, r * 0.1, x, y, r);
+      g.addColorStop(0.0, 'rgba(255, 253, 248, 0.85)');
+      g.addColorStop(0.55, 'rgba(235, 243, 248, 0.42)');
+      g.addColorStop(1.0, 'rgba(220, 234, 244, 0.0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    });
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
 
  // TWO-TONE SCULPTED TRAVERTINE + FIELDSTONE BASE WALL PBR (Matches high-end Zen masonry!)
  function createTravertineWallPBR() {
@@ -537,9 +603,9 @@
  const g01 = groove * 0.5 + 0.5;
 
  // Warm champagne-cream Zen sand palette (bright, serene, sunlit!)
- const sr = (202 + g01 * 34) * (0.94 + grain);
- const sg = (180 + g01 * 30) * (0.94 + grain);
- const sb = (136 + g01 * 24) * (0.94 + grain);
+ const sr = (176 + g01 * 30) * (0.94 + grain);
+ const sg = (156 + g01 * 26) * (0.94 + grain);
+ const sb = (118 + g01 * 20) * (0.94 + grain);
 
  const idx = (py * size + px) * 4;
  dA[idx] = Math.min(255, sr);
@@ -912,8 +978,12 @@
  emissive: 0x4a3826, emissiveIntensity: 0.0,
  roughness: 0.88, metalness: 0.03, envMapIntensity: 0.55
  });
- const matPagodaRoof = new THREE.MeshStandardMaterial({ color: 0x265452, roughness: 0.45, metalness: 0.15, envMapIntensity: 0.95 });
- const matPagodaRed = new THREE.MeshStandardMaterial({ color: 0x8f2424, roughness: 0.52, metalness: 0.05 });
+ const shojiTex = createShojiWindowTexture();
+ const mtnRockTex = createMountainRockTexture();
+ const cloudTex = createCloudTexture();
+ const matPagodaRoof = new THREE.MeshStandardMaterial({ color: 0x1c4544, roughness: 0.48, metalness: 0.18, envMapIntensity: 0.75 });
+ const matPagodaRed = new THREE.MeshStandardMaterial({ color: 0x7d1a1a, roughness: 0.50, metalness: 0.06 });
+ const matShoji = new THREE.MeshStandardMaterial({ map: shojiTex, emissive: 0xffd28a, emissiveIntensity: 0.08, roughness: 0.65 });
  const matGoldTrim = new THREE.MeshStandardMaterial({ color: 0xd9b36c, metalness: 0.78, roughness: 0.25, envMapIntensity: 1.2 });
  const matBark = new THREE.MeshStandardMaterial({ map: barkTex, roughness: 0.92, envMapIntensity: 0.35 });
  const matWoodDark = new THREE.MeshStandardMaterial({ color: 0x3b2416, roughness: 0.8 });
@@ -1092,12 +1162,13 @@
     mtnNormal.repeat.set(28, 28);
 
     const terrain = new THREE.Mesh(facetedGeo, new THREE.MeshStandardMaterial({
+      map: mtnRockTex,
       vertexColors: true,
       normalMap: mtnNormal,
-      normalScale: new THREE.Vector2(1.35, 1.35),
-      roughness: 0.90,
-      metalness: 0.03,
-      envMapIntensity: 0.28
+      normalScale: new THREE.Vector2(1.45, 1.45),
+      roughness: 0.92,
+      metalness: 0.02,
+      envMapIntensity: 0.22
     }));
     terrain.receiveShadow = true;
     envGroup.add(terrain);
@@ -1137,76 +1208,142 @@
   }
   buildSereneMountainRange();
 
+  // Soft Drifting Sky Clouds
+  const skyClouds = [];
+  for (let i = 0; i < 10; i++) {
+    const ang = (i / 10) * Math.PI * 2 + 0.25;
+    const dist = 125 + (i % 3) * 28;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTex, transparent: true, opacity: 0.62, depthWrite: false }));
+    sp.position.set(Math.cos(ang) * dist, 38 + (i % 4) * 7, Math.sin(ang) * dist);
+    sp.scale.set(42 + (i % 3) * 14, 18 + (i % 2) * 5, 1);
+    envGroup.add(sp);
+    skyClouds.push({ sp, ang, dist, spd: 0.004 + (i % 3) * 0.0015 });
+  }
+
  // =========================================================================
  // 5. HERO ARCHITECTURE: SWEPT-EAVE JADE PAGODA ON STEPPED TERRACE + OCHRE CRAGS
  // =========================================================================
- function createHeroJadePagoda(x, z) {
- const g = new THREE.Group();
+  function createHeroJadePagoda(x, z) {
+    const g = new THREE.Group();
 
- // Multi-tiered carved travertine stone terrace platform
- const step1 = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.75, 9.2), matWall);
- step1.position.y = 0.37; step1.castShadow = true; step1.receiveShadow = true; g.add(step1);
- const step2 = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.75, 7.6), matWall);
- step2.position.y = 1.12; step2.castShadow = true; step2.receiveShadow = true; g.add(step2);
- const step3 = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.65, 6.2), matWall);
- step3.position.y = 1.82; step3.castShadow = true; step3.receiveShadow = true; g.add(step3);
+    const step1 = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.72, 9.6), matWall);
+    step1.position.y = 0.36; step1.castShadow = true; step1.receiveShadow = true; g.add(step1);
+    const step2 = new THREE.Mesh(new THREE.BoxGeometry(7.9, 0.72, 7.9), matWall);
+    step2.position.y = 1.08; step2.castShadow = true; step2.receiveShadow = true; g.add(step2);
+    const step3 = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.64, 6.4), matWall);
+    step3.position.y = 1.76; step3.castShadow = true; step3.receiveShadow = true; g.add(step3);
+    for (let s = 0; s < 5; s++) {
+      const stair = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.38, 0.65), matWall);
+      stair.position.set(0, 0.20 + s * 0.38, 4.95 - s * 0.42);
+      stair.castShadow = true; stair.receiveShadow = true; g.add(stair);
+    }
 
- // Helper: Swept Curved Pagoda Roof with upturned corners & gold ridge trim
- function createCurvedRoof(w, y) {
- const rg = new THREE.Group();
- const segs = 12;
- const geo = new THREE.ConeGeometry(w * 0.86, 1.35, 4, segs);
- geo.rotateY(Math.PI / 4);
- const pos = geo.attributes.position;
- for (let i = 0; i < pos.count; i++) {
- const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
- // Concave sweeping eave flare toward outer edge!
- const rad = Math.hypot(vx, vz) / (w * 0.86);
- const flare = Math.pow(rad, 2.2) * 0.55;
- pos.setXYZ(i, vx * (1 + rad * 0.14), vy + flare, vz * (1 + rad * 0.14));
- }
- geo.computeVertexNormals();
- const roofMesh = new THREE.Mesh(geo, matPagodaRoof);
- roofMesh.castShadow = true; roofMesh.receiveShadow = true; rg.add(roofMesh);
+    function createCurvedRoof(w, y) {
+      const rg = new THREE.Group();
+      const segs = 12;
+      const geo = new THREE.ConeGeometry(w * 0.88, 1.38, 4, segs);
+      geo.rotateY(Math.PI / 4);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+        const rad = Math.hypot(vx, vz) / (w * 0.88);
+        const flare = Math.pow(rad, 2.2) * 0.56;
+        pos.setXYZ(i, vx * (1 + rad * 0.14), vy + flare, vz * (1 + rad * 0.14));
+      }
+      geo.computeVertexNormals();
+      const roofMesh = new THREE.Mesh(geo, matPagodaRoof);
+      roofMesh.castShadow = true; roofMesh.receiveShadow = true; rg.add(roofMesh);
 
- // Gold trim band along eave rim
- const trim = new THREE.Mesh(new THREE.BoxGeometry(w * 1.12, 0.08, w * 1.12), matGoldTrim);
- trim.position.y = -0.18; rg.add(trim);
+      const soffit = new THREE.Mesh(new THREE.BoxGeometry(w * 1.04, 0.14, w * 1.04), matWoodDark);
+      soffit.position.y = -0.32; rg.add(soffit);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(w * 1.14, 0.08, w * 1.14), matGoldTrim);
+      trim.position.y = -0.22; rg.add(trim);
 
- rg.position.y = y;
- return rg;
- }
+      rg.position.y = y;
+      return rg;
+    }
 
- // 3 Elegant Open-Column Tiers with Crimson Core & Swept Jade Roofs
- for (let t = 0; t < 3; t++) {
- const w = 4.5 - t * 0.75;
- const yBase = 2.15 + t * 2.55;
+    for (let t = 0; t < 3; t++) {
+      const w = 4.6 - t * 0.78;
+      const yBase = 2.08 + t * 2.55;
 
- // Recessed crimson sanctuary walls
- const core = new THREE.Mesh(new THREE.BoxGeometry(w * 0.74, 2.0, w * 0.74), matPagodaRed);
- core.position.y = yBase + 1.0; core.castShadow = true; g.add(core);
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(w * 1.14, 0.16, w * 1.14), matWoodDark);
+      deck.position.y = yBase + 0.08; deck.castShadow = true; g.add(deck);
+      const rOff = w * 0.54;
+      [[0, rOff, w * 1.1, 0.08], [0, -rOff, w * 1.1, 0.08], [rOff, 0, 0.08, w * 1.1], [-rOff, 0, 0.08, w * 1.1]].forEach(([rx, rz, rw, rd]) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(rw, 0.42, rd), matPagodaRed);
+        rail.position.set(rx, yBase + 0.34, rz); g.add(rail);
+      });
 
- // 4 Exterior crimson lacquer corner pillars
- const off = w * 0.46;
- [[-off, -off], [off, -off], [off, off], [-off, off]].forEach(pt => {
- const col = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.1, 10), matPagodaRed);
- col.position.set(pt[0], yBase + 1.05, pt[1]); col.castShadow = true; g.add(col);
- });
+      const core = new THREE.Mesh(new THREE.BoxGeometry(w * 0.78, 2.05, w * 0.78), matPagodaRed);
+      core.position.y = yBase + 1.08; core.castShadow = true; g.add(core);
+      const winW = w * 0.52, winH = 1.15, winOff = w * 0.396;
+      [[0, winOff, 0], [0, -winOff, Math.PI], [winOff, 0, Math.PI / 2], [-winOff, 0, -Math.PI / 2]].forEach(([wx, wz, ry]) => {
+        const shoji = new THREE.Mesh(new THREE.PlaneGeometry(winW, winH), matShoji);
+        shoji.position.set(wx, yBase + 1.15, wz); shoji.rotation.y = ry; g.add(shoji);
+      });
 
- g.add(createCurvedRoof(w * 1.25, yBase + 2.3));
- }
+      const off = w * 0.47;
+      [[-off, -off], [off, -off], [off, off], [-off, off]].forEach(pt => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.15, 10), matPagodaRed);
+        col.position.set(pt[0], yBase + 1.12, pt[1]); col.castShadow = true; g.add(col);
+      });
 
- // Ornate golden temple spire (Sōrin)
- const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.18, 2.8, 10), matGoldTrim);
- spire.position.y = 11.4; g.add(spire);
- const orb = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), matGoldTrim);
- orb.position.y = 10.6; g.add(orb);
+      g.add(createCurvedRoof(w * 1.26, yBase + 2.34));
+    }
 
- g.position.set(x, 0, z);
- envGroup.add(g);
- }
- // Place Hero Jade Pagoda prominently in the mid-ground scenic vista!
- createHeroJadePagoda(3.5, -24.5);
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.18, 2.9, 10), matGoldTrim);
+    spire.position.y = 11.45; g.add(spire);
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), matGoldTrim);
+    orb.position.y = 10.65; g.add(orb);
+
+    g.position.set(x, 0, z);
+    envGroup.add(g);
+  }
+  createHeroJadePagoda(3.5, -24.5);
+
+  function createBambooGrove(cx, cz, count = 14) {
+    const g = new THREE.Group();
+    const matBamboo = new THREE.MeshStandardMaterial({ color: 0x4d7c2b, roughness: 0.48 });
+    const matNode = new THREE.MeshStandardMaterial({ color: 0x76994b, roughness: 0.65 });
+    const matLeaf = new THREE.MeshStandardMaterial({ color: 0x3b6e22, roughness: 0.7, side: THREE.DoubleSide });
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + (i % 3) * 0.4;
+      const rad = 0.5 + (i % 4) * 0.55;
+      const h = 4.2 + (i % 5) * 1.1;
+      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, h, 7), matBamboo);
+      const sx = Math.cos(a) * rad, sz = Math.sin(a) * rad;
+      stalk.position.set(sx, h / 2, sz);
+      stalk.rotation.set((Math.sin(i * 2.1)) * 0.06, 0, (Math.cos(i * 1.7)) * 0.06);
+      stalk.castShadow = true; g.add(stalk);
+      for (let ny = 1.2; ny < h - 0.6; ny += 1.25) {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.014, 5, 8), matNode);
+        ring.rotation.x = Math.PI / 2; ring.position.set(sx, ny, sz); g.add(ring);
+      }
+      for (let lf = 0; lf < 4; lf++) {
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.9, 3), matLeaf);
+        leaf.scale.set(1, 1, 0.15);
+        leaf.position.set(sx + Math.cos(lf * 1.6) * 0.25, h - 0.5 - lf * 0.35, sz + Math.sin(lf * 1.6) * 0.25);
+        leaf.rotation.set(0.7, lf * 1.6, 0.4); g.add(leaf);
+      }
+    }
+    g.position.set(cx, 0, cz);
+    envGroup.add(g);
+  }
+  createBambooGrove(-17.5, -16.5, 14);
+  createBambooGrove( 17.5, -16.0, 14);
+  createBambooGrove( 20.5,  11.5, 12);
+  createBambooGrove(-19.5,  13.5, 12);
+
+  const matFlagstone = new THREE.MeshStandardMaterial({ color: 0x6b7268, roughness: 0.85, normalMap: cliffPBR.normalMap });
+  [
+    [1.8, -16.2], [2.4, -17.6], [3.0, -19.0], [3.5, -20.4],
+    [-9.2, -5.2], [-10.8, -5.0], [-12.4, -4.8]
+  ].forEach(([sx, sz], idx) => {
+    const slab = new THREE.Mesh(new THREE.CylinderGeometry(0.58 + (idx % 2) * 0.12, 0.64, 0.09, 7), matFlagstone);
+    slab.scale.set(1.15, 1.0, 0.82); slab.rotation.y = idx * 0.7;
+    slab.position.set(sx, 0.03, sz); slab.receiveShadow = true; envGroup.add(slab);
+  });
 
  // =========================================================================
  // 5B. COASTAL ZEN LIGHTHOUSE WITH ROTATING VOLUMETRIC BEAM + TORII GATES
@@ -1232,36 +1369,27 @@
  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 2.05, 1.4, 12), matWall);
  base.position.y = 3.6; base.castShadow = true; base.receiveShadow = true; g.add(base);
 
- // Red & White striped tapered lighthouse tower (5 bands)
- const matLHWhite = new THREE.MeshStandardMaterial({ color: 0xf8f5ee, roughness: 0.55 });
- const matLHRed = new THREE.MeshStandardMaterial({ color: 0xc22b2b, roughness: 0.48 });
- const bands = [
- { y: 5.2, rT: 1.46, rB: 1.62, h: 1.9, m: matLHWhite },
- { y: 7.1, rT: 1.30, rB: 1.46, h: 1.9, m: matLHRed },
- { y: 9.0, rT: 1.15, rB: 1.30, h: 1.9, m: matLHWhite },
- { y: 10.9, rT: 1.02, rB: 1.15, h: 1.9, m: matLHRed },
- { y: 12.6, rT: 0.92, rB: 1.02, h: 1.5, m: matLHWhite }
- ];
- bands.forEach(b => {
- const seg = new THREE.Mesh(new THREE.CylinderGeometry(b.rT, b.rB, b.h, 20), b.m);
- seg.position.y = b.y; seg.castShadow = true; seg.receiveShadow = true; g.add(seg);
- });
-
- // Wrap-around gallery deck & dark iron railing
- const gallery = new THREE.Mesh(new THREE.CylinderGeometry(1.38, 1.12, 0.35, 20), matWoodDark);
- gallery.position.y = 13.45; gallery.castShadow = true; g.add(gallery);
- const rail = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.045, 8, 24), matWoodDark);
- rail.rotation.x = Math.PI / 2; rail.position.y = 14.05; g.add(rail);
-
- // Glass lantern room + glowing Fresnel core
- const glass = new THREE.Mesh(
- new THREE.CylinderGeometry(0.86, 0.86, 1.35, 16),
- new THREE.MeshStandardMaterial({ color: 0xfff8dc, emissive: 0xffd166, emissiveIntensity: 0.85, transparent: true, opacity: 0.72, roughness: 0.1 })
- );
- glass.position.y = 14.3; g.add(glass);
-
- // Pagoda-inspired crimson dome cap + golden finial
- const dome = new THREE.Mesh(new THREE.ConeGeometry(1.18, 1.05, 16), matLHRed);
+    const matTodaiStone = new THREE.MeshStandardMaterial({ map: wallPBR.map, normalMap: wallPBR.normalMap, color: 0xc2b299, roughness: 0.78 });
+    const bands = [
+      { y: 5.5, rT: 1.44, rB: 1.66, h: 2.5, m: matTodaiStone },
+      { y: 8.0, rT: 1.24, rB: 1.44, h: 2.5, m: matTodaiStone },
+      { y: 10.5, rT: 1.06, rB: 1.24, h: 2.5, m: matWoodDark },
+      { y: 12.5, rT: 0.96, rB: 1.06, h: 1.6, m: matPagodaRed }
+    ];
+    bands.forEach(b => {
+      const seg = new THREE.Mesh(new THREE.CylinderGeometry(b.rT, b.rB, b.h, 8), b.m);
+      seg.position.y = b.y; seg.castShadow = true; seg.receiveShadow = true; g.add(seg);
+    });
+    const gallery = new THREE.Mesh(new THREE.CylinderGeometry(1.48, 1.18, 0.34, 8), matWoodDark);
+    gallery.position.y = 13.45; gallery.castShadow = true; g.add(gallery);
+    const rail = new THREE.Mesh(new THREE.TorusGeometry(1.36, 0.045, 8, 24), matPagodaRed);
+    rail.rotation.x = Math.PI / 2; rail.position.y = 14.05; g.add(rail);
+    const glass = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.86, 0.86, 1.35, 8),
+      new THREE.MeshStandardMaterial({ color: 0xfff8dc, emissive: 0xffd166, emissiveIntensity: 0.85, transparent: true, opacity: 0.78, roughness: 0.15 })
+    );
+    glass.position.y = 14.3; g.add(glass);
+    const dome = new THREE.Mesh(new THREE.ConeGeometry(1.52, 1.12, 8), matPagodaRoof);
  dome.position.y = 15.48; dome.castShadow = true; g.add(dome);
  const fin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), matGoldTrim);
  fin.position.y = 16.08; g.add(fin);
@@ -1673,7 +1801,7 @@
  ], 10)),
  island: null, bumpers: [],
  gates: [], slopes: [], ramps: [],
- windmills: [{ x: 0, z: 0.0, speed: 1.45, bladeLen: 2.15 }],
+ windmills: [{ x: 0, z: 0.0, speed: 1.05, bladeLen: 1.65 }],
  movers: [], boosts: [],
  bunkers: [{ x: -2.0, z: -5.5, rx: 0.95, rz: 1.35 }, { x: 2.0, z: -5.5, rx: 0.95, rz: 1.35 }],
  waters: [], portals: [], shrineBackZ: null
@@ -1686,9 +1814,9 @@
  ], 10)),
  island: null, bumpers: [{ x: -1.6, z: -7.2, r: 0.48 }, { x: 1.6, z: -7.2, r: 0.48 }],
  gates: [], slopes: [],
- ramps: [{ x: 0, z: 3.2, w: 3.0, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.5 }],
+ ramps: [{ x: 0, z: 3.2, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.0, boost: 2.0 }],
  windmills: [], movers: [], boosts: [], bunkers: [],
- waters: [{ x: 0, z: -1.2, w: 5.8, d: 4.2 }],
+ waters: [{ x: 0, z: -1.0, w: 5.8, d: 3.6 }],
  portals: [], shrineBackZ: -13.4
  },
  {
@@ -1724,8 +1852,8 @@
  island: null, bumpers: [],
  gates: [], slopes: [], ramps: [], windmills: [],
  movers: [
- { cx: 0, cz: 3.2, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.6, phase: 0 },
- { cx: 0, cz: -3.8, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.9, phase: 2.4 }
+ { cx: 0, cz: 3.2, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.15, phase: 0 },
+ { cx: 0, cz: -3.8, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.30, phase: 2.4 }
  ],
  boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: null
  },
@@ -1763,7 +1891,7 @@
  ], 10)),
  island: null, bumpers: [{ x: -2.4, z: -6.8, r: 0.58 }, { x: 2.4, z: 5.5, r: 0.58 }],
  gates: [], slopes: [],
- ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 8.2, boost: 4.2 }],
+ ramps: [{ x: 0, z: 2.5, w: 3.8, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 6.8, boost: 2.0 }],
  windmills: [], movers: [], boosts: [],
  bunkers: [{ x: 0.5, z: -1.6, rx: 3.6, rz: 2.1 }],
  waters: [], portals: [], shrineBackZ: null
@@ -1777,8 +1905,8 @@
  island: null, bumpers: [{ x: 0, z: 0.0, r: 0.55 }],
  gates: [], slopes: [], ramps: [],
  windmills: [
- { x: 0, z: 4.8, speed: 1.5, bladeLen: 2.1 },
- { x: 0, z: -4.8, speed: -1.75, bladeLen: 2.1 }
+ { x: 0, z: 4.8, speed: 1.05, bladeLen: 1.65 },
+ { x: 0, z: -4.8, speed: -1.15, bladeLen: 1.65 }
  ],
  movers: [], boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: -14.6
  },
@@ -1821,13 +1949,13 @@
  island: null, bumpers: [],
  gates: [], slopes: [],
  ramps: [
- { x: 0, z: 7.4, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 },
- { x: 0, z: -1.8, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 }
+ { x: 0, z: 7.4, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.8, boost: 1.9 },
+ { x: 0, z: -1.8, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 6.8, boost: 1.9 }
  ],
  windmills: [], movers: [], boosts: [], bunkers: [],
  waters: [
- { x: 0, z: 3.4, w: 6.2, d: 3.6 },
- { x: 0, z: -5.8, w: 6.2, d: 3.6 }
+ { x: 0, z: 3.4, w: 6.2, d: 3.2 },
+ { x: 0, z: -5.8, w: 6.2, d: 3.2 }
  ],
  portals: [], shrineBackZ: -15.0
  },
@@ -1840,9 +1968,9 @@
  island: null, bumpers: [{ x: -2.2, z: 0.0, r: 0.48 }, { x: 2.2, z: 0.0, r: 0.48 }],
  gates: [], slopes: [], ramps: [], windmills: [],
  movers: [
- { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.5, phase: 0 },
- { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 2.0, phase: 2.0 },
- { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.7, phase: 4.0 }
+ { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.10, phase: 0 },
+ { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 1.35, phase: 2.0 },
+ { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.20, phase: 4.0 }
  ],
  boosts: [],
  bunkers: [{ x: -2.5, z: -8.8, rx: 0.9, rz: 1.2 }, { x: 2.5, z: -8.8, rx: 0.9, rz: 1.2 }],
@@ -1860,7 +1988,7 @@
  ], 10), false),
  bumpers: [{ x: 2.8, z: 0.0, r: 0.55 }],
  gates: [], slopes: [], ramps: [], windmills: [],
- movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.8, phase: 0 }],
+ movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.25, phase: 0 }],
  boosts: [], bunkers: [], waters: [],
  portals: [{ inX: -2.8, inZ: 0.0, outX: 0.0, outZ: -7.8, outAngle: Math.PI }],
  shrineBackZ: -14.5
@@ -1875,7 +2003,7 @@
  gates: [],
  slopes: [{ x1: -3.3, z1: -4.5, x2: 3.3, z2: 4.0, fx: 0, fz: 6.2 }],
  ramps: [],
- windmills: [{ x: 0, z: -5.2, speed: 1.65, bladeLen: 2.1 }],
+ windmills: [{ x: 0, z: -5.2, speed: 1.15, bladeLen: 1.65 }],
  movers: [],
  boosts: [{ x: 0, z: 6.8, w: 2.2, d: 2.8, fx: 0, fz: -25.0 }],
  bunkers: [], waters: [], portals: [], shrineBackZ: -14.8
@@ -1889,8 +2017,8 @@
  island: null,
  bumpers: [{ x: -1.65, z: -8.4, r: 0.52 }, { x: 1.65, z: -8.4, r: 0.52 }],
  gates: [], slopes: [],
- ramps: [{ x: 0, z: 7.2, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.8, boost: 5.0 }],
- windmills: [{ x: 0, z: -3.2, speed: 1.65, bladeLen: 2.2 }],
+ ramps: [{ x: 0, z: 7.2, w: 3.4, d: 2.2, dirX: 0, dirZ: -1, vy: 7.0, boost: 2.0 }],
+ windmills: [{ x: 0, z: -3.2, speed: 1.15, bladeLen: 1.65 }],
  movers: [], boosts: [], bunkers: [],
  waters: [{ x: 0, z: 3.0, w: 6.8, d: 3.8 }],
  portals: [], shrineBackZ: -15.0
@@ -1979,7 +2107,7 @@
  time: 'daylight', weather: 'clear', camMode: 'follow', guideOn: true,
  camYaw: 0, camPitch: 0.44, camDist: 9.6,
  ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vy: 0, vz: 0, lastSafeX: 0, lastSafeZ: 10.2, portalCD: 0, inHole: false, sinkT: 0 },
- aiming: false, aimPower: 0.45, aimAngle: Math.PI,
+ aiming: false, aimPower: 0.45, baseAimAngle: Math.PI, aimOffsetDeg: 0,
  putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null, dynWindmills: [], dynMovers: [], dynPortals: []
  };
 
@@ -2035,38 +2163,40 @@ function buildRampMesh(rp) {
  courseGroup.add(g);
  }
 
- function buildWindmillMesh(wm) {
- const g = new THREE.Group();
- // Traditional Japanese stone & timber mill house straddling the center
- const house = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.82, 2.35, 8), matWall);
- house.position.y = 1.18; house.castShadow = true; house.receiveShadow = true; g.add(house);
- const roof = new THREE.Mesh(new THREE.ConeGeometry(1.18, 0.95, 8), matPagodaRoof);
- roof.position.y = 2.75; roof.castShadow = true; g.add(roof);
- const finial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), matGoldTrim);
- finial.position.y = 3.28; g.add(finial);
+  function buildWindmillMesh(wm) {
+    const g = new THREE.Group();
+    [-0.82, 0.82].forEach(px => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.46, 1.55, 0.92), matWall);
+      pillar.position.set(px, 0.77, 0); pillar.castShadow = true; pillar.receiveShadow = true; g.add(pillar);
+    });
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.85, 0.96), matWall);
+    lintel.position.set(0, 1.92, 0); lintel.castShadow = true; g.add(lintel);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(1.55, 0.95, 4), matPagodaRoof);
+    roof.rotation.y = Math.PI / 4; roof.position.y = 2.82; roof.castShadow = true; g.add(roof);
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), matGoldTrim);
+    finial.position.y = 3.35; g.add(finial);
 
- // Rotating 4-blade timber & crimson sail hub (mounted on front face)
- const rotor = new THREE.Group();
- rotor.position.set(0, 1.48, 0.78);
- const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.26, 12), matGoldTrim);
- hub.rotation.x = Math.PI / 2; rotor.add(hub);
- const matSail = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
- for (let b = 0; b < 4; b++) {
- const armG = new THREE.Group();
- armG.rotation.z = (b * Math.PI) / 2;
- const spar = new THREE.Mesh(new THREE.BoxGeometry(0.11, wm.bladeLen, 0.08), matWoodDark);
- spar.position.y = wm.bladeLen / 2; spar.castShadow = true; armG.add(spar);
- const sail = new THREE.Mesh(new THREE.BoxGeometry(0.42, wm.bladeLen * 0.72, 0.04), matSail);
- sail.position.set(0.16, wm.bladeLen * 0.58, 0.02); sail.castShadow = true; armG.add(sail);
- const trim = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.10, 0.06), matPagodaRed);
- trim.position.set(0.16, wm.bladeLen * 0.92, 0.02); armG.add(trim);
- rotor.add(armG);
- }
- g.add(rotor);
- g.position.set(wm.x, 0.24, wm.z);
- courseGroup.add(g);
- state.dynWindmills.push({ def: wm, rotor, angle: 0 });
- }
+    const rotor = new THREE.Group();
+    rotor.position.set(0, 1.52, 0.58);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.24, 12), matGoldTrim);
+    hub.rotation.x = Math.PI / 2; rotor.add(hub);
+    const matSail = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+    for (let b = 0; b < 4; b++) {
+      const armG = new THREE.Group();
+      armG.rotation.z = (b * Math.PI) / 2;
+      const spar = new THREE.Mesh(new THREE.BoxGeometry(0.10, wm.bladeLen, 0.08), matWoodDark);
+      spar.position.y = wm.bladeLen / 2; spar.castShadow = true; armG.add(spar);
+      const sail = new THREE.Mesh(new THREE.BoxGeometry(0.36, wm.bladeLen * 0.68, 0.04), matSail);
+      sail.position.set(0.14, wm.bladeLen * 0.58, 0.02); sail.castShadow = true; armG.add(sail);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.09, 0.06), matPagodaRed);
+      trim.position.set(0.14, wm.bladeLen * 0.90, 0.02); armG.add(trim);
+      rotor.add(armG);
+    }
+    g.add(rotor);
+    g.position.set(wm.x, 0.24, wm.z);
+    courseGroup.add(g);
+    state.dynWindmills.push({ def: wm, rotor, angle: 0 });
+  }
 
  function buildMoverMesh(mv) {
  const g = new THREE.Group();
@@ -2319,13 +2449,9 @@ function buildRampMesh(rp) {
  }
  for (let i = lIdx; i < lanternLights.length; i++) lanternLights[i].intensity = 0;
 
- // Initial aim toward cup
- const dx = h.cup.x - h.tee.x, dz = h.cup.z - h.tee.z;
- state.aimAngle = Math.atan2(dx, dz);
  state.aimPower = 0.45;
- syncSlidersFromState();
-
- state.camYaw = state.aimAngle + Math.PI;
+ pointAimAtCup();
+ state.camYaw = getWorldAimAngle() + Math.PI;
  state.camPitch = 0.45; state.camDist = 9.8;
 
  document.getElementById('holeNumBadge').textContent = String(idx + 1).padStart(2, '0');
@@ -2374,7 +2500,7 @@ function buildRampMesh(rp) {
  const topCol = rainy ? new THREE.Color(a.top).lerp(new THREE.Color(0x2c3846), 0.65) : new THREE.Color(a.top);
  const horCol = rainy ? new THREE.Color(a.horizon).lerp(new THREE.Color(0x526170), 0.68) : new THREE.Color(a.horizon);
  const fogCol = rainy ? new THREE.Color(a.fog).lerp(new THREE.Color(0x475563), 0.7) : new THREE.Color(a.fog);
- const fogDensity = rainy ? 0.0125 : 0.0046;
+ const fogDensity = rainy ? 0.0115 : 0.0017;
 
  skyUniforms.topColor.value.copy(topCol);
  skyUniforms.horizonColor.value.copy(horCol);
@@ -2422,108 +2548,143 @@ function buildRampMesh(rp) {
  syncRainAudio();
  }
 
- // =========================================================================
- // 10. DUAL INPUT (SLIDERS + PUTT BUTTON OR DIRECT DRAG-BACK FROM BALL)
- // =========================================================================
- const rngAim = document.getElementById('rngAim');
- const rngPower = document.getElementById('rngPower');
- const lblAim = document.getElementById('lblAim');
- const lblPower = document.getElementById('lblPower');
+  // =========================================================================
+  // 10. DUAL INPUT (CENTERED 0° AIM SLIDER, DRAG-BACK, TAP-TO-AIM & KEYBOARD)
+  // =========================================================================
+  const rngAim = document.getElementById('rngAim');
+  const rngPower = document.getElementById('rngPower');
+  const lblAim = document.getElementById('lblAim');
+  const lblPower = document.getElementById('lblPower');
+  const btnPutt = document.getElementById('btnPutt');
 
- function syncSlidersFromState() {
- let deg = Math.round((state.aimAngle * 180) / Math.PI);
- while (deg > 180) deg -= 360;
- while (deg < -180) deg += 360;
- rngAim.value = deg;
- lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
- const pPct = Math.round(state.aimPower * 100);
- rngPower.value = pPct;
- lblPower.textContent = `${pPct}%`;
- }
+  function getWorldAimAngle() {
+    return state.baseAimAngle - (state.aimOffsetDeg * Math.PI) / 180;
+  }
+  function pointAimAtCup() {
+    const h = HOLES[state.holeIdx];
+    const dx = h.cup.x - state.ball.x, dz = h.cup.z - state.ball.z;
+    state.baseAimAngle = Math.atan2(dx, dz);
+    state.aimOffsetDeg = 0;
+    syncSlidersFromState();
+  }
+  function setAimTowardWorldAngle(worldAng) {
+    let diffDeg = ((state.baseAimAngle - worldAng) * 180) / Math.PI;
+    while (diffDeg > 180) diffDeg -= 360;
+    while (diffDeg < -180) diffDeg += 360;
+    state.aimOffsetDeg = Math.round(diffDeg);
+    syncSlidersFromState();
+  }
 
- function executePutt() {
- if (!ballStopped() || state.aimPower < 0.04) return;
- initAudio();
- const spd = state.aimPower * 21.0;
- state.ball.lastSafeX = state.ball.x; state.ball.lastSafeZ = state.ball.z;
- state.ball.vx = Math.sin(state.aimAngle) * spd;
- state.ball.vz = Math.cos(state.aimAngle) * spd;
- state.strokes++; updateHUD(); sfxPutt(state.aimPower);
- spawnFX(state.ball.x, 0.3, state.ball.z, 0xf5d89a, 8, 2.5);
- state.putterSwingT = 0.22;
- }
+  function syncSlidersFromState() {
+    let deg = Math.round(state.aimOffsetDeg);
+    while (deg > 180) deg -= 360;
+    while (deg < -180) deg += 360;
+    state.aimOffsetDeg = deg;
+    rngAim.value = deg;
+    lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
+    const pPct = Math.round(state.aimPower * 100);
+    rngPower.value = pPct;
+    lblPower.textContent = `${pPct}%`;
+  }
 
- rngAim.addEventListener('input', () => {
- const deg = parseFloat(rngAim.value);
- state.aimAngle = (deg * Math.PI) / 180;
- lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
- });
- rngPower.addEventListener('input', () => {
- const pct = parseFloat(rngPower.value);
- state.aimPower = pct / 100;
- lblPower.textContent = `${pct}%`;
- });
- document.getElementById('btnPutt').addEventListener('click', executePutt);
+  function executePutt() {
+    if (!ballStopped() || state.aimPower < 0.04) return;
+    initAudio();
+    const worldAng = getWorldAimAngle();
+    const spd = state.aimPower * 21.0;
+    state.ball.lastSafeX = state.ball.x; state.ball.lastSafeZ = state.ball.z;
+    state.ball.vx = Math.sin(worldAng) * spd;
+    state.ball.vz = Math.cos(worldAng) * spd;
+    state.strokes++; updateHUD(); sfxPutt(state.aimPower);
+    spawnFX(state.ball.x, 0.3, state.ball.z, 0xf5d89a, 8, 2.5);
+    state.putterSwingT = 0.22;
+  }
 
- const raycaster = new THREE.Raycaster();
- const pointerNDC = new THREE.Vector2();
- const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.24);
- let dragMode = null, lastPointer = { x: 0, y: 0 };
+  rngAim.addEventListener('input', () => {
+    state.aimOffsetDeg = parseFloat(rngAim.value);
+    lblAim.textContent = `${state.aimOffsetDeg > 0 ? '+' : ''}${Math.round(state.aimOffsetDeg)}°`;
+  });
+  rngPower.addEventListener('input', () => {
+    const pct = parseFloat(rngPower.value);
+    state.aimPower = pct / 100;
+    lblPower.textContent = `${pct}%`;
+  });
+  btnPutt.addEventListener('click', executePutt);
 
- function getGroundHit(clientX, clientY) {
- pointerNDC.x = (clientX / window.innerWidth) * 2 - 1;
- pointerNDC.y = -(clientY / window.innerHeight) * 2 + 1;
- raycaster.setFromCamera(pointerNDC, camera);
- const hit = new THREE.Vector3();
- raycaster.ray.intersectPlane(groundPlane, hit);
- return hit;
- }
+  window.addEventListener('keydown', e => {
+    if (document.getElementById('scoreModal').classList.contains('open')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); state.aimOffsetDeg = Math.max(-180, state.aimOffsetDeg - (e.shiftKey ? 1 : 3)); syncSlidersFromState(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); state.aimOffsetDeg = Math.min(180, state.aimOffsetDeg + (e.shiftKey ? 1 : 3)); syncSlidersFromState(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); state.aimPower = Math.min(1, state.aimPower + 0.03); syncSlidersFromState(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); state.aimPower = Math.max(0.05, state.aimPower - 0.03); syncSlidersFromState(); }
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); executePutt(); }
+  });
 
- function ballStopped() { return !state.ball.inHole && state.ball.y <= 0.24 + ballRadius + 0.04 && Math.abs(state.ball.vy) < 0.1 && Math.hypot(state.ball.vx, state.ball.vz) < 0.08; }
+  const raycaster = new THREE.Raycaster();
+  const pointerNDC = new THREE.Vector2();
+  const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.24);
+  let dragMode = null, downPointer = { x: 0, y: 0 }, lastPointer = { x: 0, y: 0 };
 
- canvas.addEventListener('pointerdown', e => {
- initAudio(); lastPointer = { x: e.clientX, y: e.clientY };
- const hit = getGroundHit(e.clientX, e.clientY);
- if (ballStopped() && hit && Math.hypot(hit.x - state.ball.x, hit.z - state.ball.z) < 2.1) {
- dragMode = 'aim'; state.aiming = true;
- canvas.setPointerCapture(e.pointerId); return;
- }
- dragMode = 'orbit'; canvas.setPointerCapture(e.pointerId);
- });
+  function getGroundHit(clientX, clientY) {
+    pointerNDC.x = (clientX / window.innerWidth) * 2 - 1;
+    pointerNDC.y = -(clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(pointerNDC, camera);
+    const hit = new THREE.Vector3();
+    raycaster.ray.intersectPlane(groundPlane, hit);
+    return hit;
+  }
 
- canvas.addEventListener('pointermove', e => {
- if (!dragMode) return;
- if (dragMode === 'orbit') {
- const dx = e.clientX - lastPointer.x, dy = e.clientY - lastPointer.y;
- lastPointer = { x: e.clientX, y: e.clientY };
- state.camYaw -= dx * 0.0065;
- state.camPitch = Math.max(0.16, Math.min(1.25, state.camPitch + dy * 0.0055));
- } else if (dragMode === 'aim') {
- const hit = getGroundHit(e.clientX, e.clientY);
- if (hit) {
- const dx = state.ball.x - hit.x, dz = state.ball.z - hit.z;
- state.aimPower = Math.max(0.05, Math.min(1, Math.hypot(dx, dz) / 4.2));
- state.aimAngle = Math.atan2(dx, dz);
- syncSlidersFromState();
- }
- }
- });
+  function ballStopped() { return !state.ball.inHole && state.ball.y <= 0.24 + ballRadius + 0.04 && Math.abs(state.ball.vy) < 0.1 && Math.hypot(state.ball.vx, state.ball.vz) < 0.08; }
 
- canvas.addEventListener('pointerup', () => {
- if (dragMode === 'aim' && state.aiming) {
- state.aiming = false;
- executePutt();
- }
- dragMode = null;
- });
+  canvas.addEventListener('pointerdown', e => {
+    initAudio(); downPointer = { x: e.clientX, y: e.clientY }; lastPointer = { x: e.clientX, y: e.clientY };
+    const hit = getGroundHit(e.clientX, e.clientY);
+    if (ballStopped() && hit && Math.hypot(hit.x - state.ball.x, hit.z - state.ball.z) < 2.1) {
+      dragMode = 'aim'; state.aiming = true;
+      canvas.setPointerCapture(e.pointerId); return;
+    }
+    dragMode = 'orbit'; canvas.setPointerCapture(e.pointerId);
+  });
 
- canvas.addEventListener('wheel', e => {
- state.camDist = Math.max(4.8, Math.min(23.0, state.camDist + e.deltaY * 0.008));
- }, { passive: true });
+  canvas.addEventListener('pointermove', e => {
+    if (!dragMode) return;
+    if (dragMode === 'orbit') {
+      const dx = e.clientX - lastPointer.x, dy = e.clientY - lastPointer.y;
+      lastPointer = { x: e.clientX, y: e.clientY };
+      state.camYaw -= dx * 0.0065;
+      state.camPitch = Math.max(0.16, Math.min(1.25, state.camPitch + dy * 0.0055));
+    } else if (dragMode === 'aim') {
+      const hit = getGroundHit(e.clientX, e.clientY);
+      if (hit) {
+        const dx = state.ball.x - hit.x, dz = state.ball.z - hit.z;
+        state.aimPower = Math.max(0.05, Math.min(1, Math.hypot(dx, dz) / 4.2));
+        setAimTowardWorldAngle(Math.atan2(dx, dz));
+      }
+    }
+  });
 
- // =========================================================================
- // 11. 16x SUB-STEPPED PHYSICS & LIVE BANK-BOUNCE PREVIEW
- // =========================================================================
+  canvas.addEventListener('pointerup', e => {
+    if (dragMode === 'aim' && state.aiming) {
+      state.aiming = false;
+      executePutt();
+    } else if (dragMode === 'orbit' && ballStopped() && Math.hypot(e.clientX - downPointer.x, e.clientY - downPointer.y) < 6) {
+      const hit = getGroundHit(e.clientX, e.clientY);
+      const hole = HOLES[state.holeIdx];
+      if (hit && pointInPoly(hit.x, hit.z, hole.outer)) {
+        const dx = hit.x - state.ball.x, dz = hit.z - state.ball.z;
+        if (Math.hypot(dx, dz) > 0.3) setAimTowardWorldAngle(Math.atan2(dx, dz));
+      }
+    }
+    dragMode = null;
+  });
+
+  canvas.addEventListener('wheel', e => {
+    state.camDist = Math.max(4.8, Math.min(23.0, state.camDist + e.deltaY * 0.008));
+  }, { passive: true });
+
+  // =========================================================================
+  // 11. 16x SUB-STEPPED PHYSICS & LIVE 3D BANK/JUMP PREVIEW
+  // =========================================================================
  function collideWall2D(ball, x1, z1, x2, z2, rest = 0.84, silent = false) {
  const vx = x2 - x1, vz = z2 - z1, lenSq = vx * vx + vz * vz;
  if (lenSq === 0) return;
@@ -2555,45 +2716,79 @@ function buildRampMesh(rp) {
  }
  }
 
- function updateAimAndPutter() {
- const stopped = ballStopped();
- aimGroup.visible = stopped && state.guideOn;
- if (stopped && state.putterSwingT <= 0) {
- putterGroup.visible = true;
- const pullBack = 0.36 + (state.aiming ? state.aimPower * 1.1 : state.aimPower * 0.45);
- putterGroup.position.set(state.ball.x - Math.sin(state.aimAngle) * pullBack, 0.24, state.ball.z - Math.cos(state.aimAngle) * pullBack);
- putterGroup.rotation.y = state.aimAngle;
- } else if (state.putterSwingT <= 0) {
- putterGroup.visible = false;
- }
+  function updateAimAndPutter() {
+    const stopped = ballStopped();
+    btnPutt.disabled = !stopped;
+    aimGroup.visible = stopped && state.guideOn;
+    const worldAng = getWorldAimAngle();
+    if (stopped && state.putterSwingT <= 0) {
+      putterGroup.visible = true;
+      const pullBack = 0.36 + (state.aiming ? state.aimPower * 1.1 : state.aimPower * 0.45);
+      putterGroup.position.set(state.ball.x - Math.sin(worldAng) * pullBack, 0.24, state.ball.z - Math.cos(worldAng) * pullBack);
+      putterGroup.rotation.y = worldAng;
+    } else if (state.putterSwingT <= 0) {
+      putterGroup.visible = false;
+    }
 
- if (!aimGroup.visible) return;
- const hole = HOLES[state.holeIdx];
- const col = state.aimPower < 0.45 ? 0x34d399 : (state.aimPower < 0.8 ? 0xf5d89a : 0xef4444);
- const sim = {
- x: state.ball.x, z: state.ball.z,
- vx: Math.sin(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0),
- vz: Math.cos(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0)
- };
- const stepDt = 0.022;
- for (let i = 0; i < aimDots.length; i++) {
- for (let s = 0; s < 3; s++) {
- sim.x += sim.vx * (stepDt / 3); sim.z += sim.vz * (stepDt / 3);
- for (const seg of state.wallSegs) collideWall2D(sim, seg[0], seg[1], seg[2], seg[3], 0.84, true);
- for (const bmp of hole.bumpers) collideCircle2D(sim, bmp.x, bmp.z, bmp.r, 1.1, 2.8, true);
- }
- aimDots[i].position.set(sim.x, 0.33, sim.z); aimDots[i].material.color.setHex(col);
- }
- }
+    if (!aimGroup.visible) return;
+    const hole = HOLES[state.holeIdx];
+    const col = state.aimPower < 0.45 ? 0x34d399 : (state.aimPower < 0.8 ? 0xf5d89a : 0xef4444);
+    const groundY = 0.24 + ballRadius;
+    const sim = {
+      x: state.ball.x, y: groundY, z: state.ball.z,
+      vx: Math.sin(worldAng) * (state.aimPower * 21.0),
+      vy: 0,
+      vz: Math.cos(worldAng) * (state.aimPower * 21.0)
+    };
+    const stepDt = 0.028;
+    for (let i = 0; i < aimDots.length; i++) {
+      for (let s = 0; s < 4; s++) {
+        const sdt = stepDt / 4;
+        const airborne = sim.y > groundY + 0.05;
+        if (airborne || sim.vy > 0) {
+          sim.vy -= 22.0 * sdt; sim.y += sim.vy * sdt;
+          if (sim.y <= groundY) { sim.y = groundY; sim.vy = 0; }
+        }
+        if (!airborne) {
+          (hole.slopes || []).forEach(sl => {
+            if (sim.x >= sl.x1 && sim.x <= sl.x2 && sim.z >= sl.z1 && sim.z <= sl.z2) { sim.vx += sl.fx * sdt; sim.vz += sl.fz * sdt; }
+          });
+          (hole.ramps || []).forEach(rp => {
+            if (Math.abs(sim.x - rp.x) <= rp.w * 0.5 && Math.abs(sim.z - rp.z) <= rp.d * 0.5) {
+              const fSpd = sim.vx * rp.dirX + sim.vz * rp.dirZ;
+              if (fSpd > 2.4 && sim.vy <= 0.1) {
+                sim.vy = rp.vy * Math.min(1.15, Math.max(0.65, fSpd / 11.0));
+                sim.vx += rp.dirX * rp.boost; sim.vz += rp.dirZ * rp.boost; sim.y = groundY + 0.08;
+              }
+            }
+          });
+          (hole.boosts || []).forEach(bp => {
+            if (Math.abs(sim.x - bp.x) <= bp.w * 0.5 && Math.abs(sim.z - bp.z) <= bp.d * 0.5) {
+              sim.vx += bp.fx * sdt; sim.vz += bp.fz * sdt;
+            }
+          });
+        }
+        sim.x += sim.vx * sdt; sim.z += sim.vz * sdt;
+        const fric = Math.pow(airborne ? 0.9985 : 0.987, sdt * 60);
+        sim.vx *= fric; sim.vz *= fric;
+        for (const seg of state.wallSegs) collideWall2D(sim, seg[0], seg[1], seg[2], seg[3], 0.84, true);
+        for (const bmp of hole.bumpers) collideCircle2D(sim, bmp.x, bmp.z, bmp.r, 1.1, 2.8, true);
+      }
+      aimDots[i].position.set(sim.x, sim.y + 0.04, sim.z);
+      aimDots[i].material.color.setHex(col);
+    }
+  }
 
- function stepPhysics(dt) {
+ let wasMoving = false;
+  function stepPhysics(dt) {
  const hole = HOLES[state.holeIdx], b = state.ball;
  if (state.bannerT > 0) { state.bannerT -= dt; if (state.bannerT <= 0) document.getElementById('banner').classList.remove('show'); }
 
  if (state.putterSwingT > 0) {
  state.putterSwingT -= dt;
- putterGroup.position.x += Math.sin(state.aimAngle) * dt * 6.5;
- putterGroup.position.z += Math.cos(state.aimAngle) * dt * 6.5;
+ const wAng = getWorldAimAngle();
+ putterGroup.position.x += Math.sin(wAng) * dt * 6.5;
+ putterGroup.position.z += Math.cos(wAng) * dt * 6.5;
  if (state.putterSwingT <= 0) putterGroup.visible = false;
  }
 
@@ -2694,35 +2889,38 @@ function buildRampMesh(rp) {
  }
 
  b.x += b.vx * sdt; b.z += b.vz * sdt;
- const baseFric = airborne ? 0.9985 : (inSand ? 0.935 : (state.weather === 'rainy' ? 0.991 : 0.987));
+ const baseFric = airborne ? 0.9985 : (inSand ? 0.955 : (state.weather === 'rainy' ? 0.991 : 0.987));
  const fric = Math.pow(baseFric, sdt * 60);
  b.vx *= fric; b.vz *= fric;
 
  for (const seg of state.wallSegs) collideWall2D(b, seg[0], seg[1], seg[2], seg[3], 0.84);
  for (const bmp of hole.bumpers) collideCircle2D(b, bmp.x, bmp.z, bmp.r, 1.1, 2.8);
 
- // Windmill house + rotating blades collision
- for (const wm of state.dynWindmills) {
- collideCircle2D(b, wm.def.x, wm.def.z, 0.85, 0.82, 0);
- // Check if any of the 4 blades is sweeping down near ground level (y < 0.65)
- const frontZ = wm.def.z + 0.78;
- if (Math.abs(b.z - frontZ) < 0.34 && b.y < 0.85) {
- for (let bi = 0; bi < 4; bi++) {
- const a = wm.angle + (bi * Math.PI) / 2;
- // Tip position in XY: tipY = 1.48 + sin(a)*len, tipX = wm.x + cos(a)*len
- const tipY = 1.48 + Math.sin(a) * wm.def.bladeLen;
- if (tipY < 0.45) {
- const bxAtGround = wm.def.x + Math.cos(a) * (1.2);
- if (Math.abs(b.x - bxAtGround) < 0.55) {
- b.vz = Math.abs(b.vz) * 0.85 + 3.2;
- b.z = frontZ + 0.36;
- sfxBounce(10, true);
- spawnFX(b.x, 0.4, b.z, 0xfef08a, 8, 3.5);
- }
- }
- }
- }
- }
+      // Windmill pass-through archway pillars + fair rotating blade collision
+      for (const wm of state.dynWindmills) {
+        [-0.82, 0.82].forEach(px => {
+          const cx = wm.def.x + px, cz = wm.def.z;
+          const xL = cx - 0.23, xR = cx + 0.23, zF = cz + 0.46, zB = cz - 0.46;
+          collideWall2D(b, xL, zF, xR, zF, 0.82); collideWall2D(b, xR, zF, xR, zB, 0.82);
+          collideWall2D(b, xR, zB, xL, zB, 0.82); collideWall2D(b, xL, zB, xL, zF, 0.82);
+        });
+        const frontZ = wm.def.z + 0.58;
+        if (Math.abs(b.z - frontZ) < 0.28 && b.y < 0.72) {
+          for (let bi = 0; bi < 4; bi++) {
+            const a = wm.angle + (bi * Math.PI) / 2;
+            const tipY = 1.52 + Math.sin(a) * wm.def.bladeLen;
+            if (tipY < 0.42) {
+              const bxAtGround = wm.def.x + Math.cos(a) * 0.95;
+              if (Math.abs(b.x - bxAtGround) < 0.34) {
+                b.vz = Math.abs(b.vz) * 0.75 + 2.2;
+                b.z = frontZ + 0.32;
+                sfxBounce(8, true);
+                spawnFX(b.x, 0.4, b.z, 0xfef08a, 8, 3.0);
+              }
+            }
+          }
+        }
+      }
 
  // Moving stone gates collision
  for (const mv of state.dynMovers) {
@@ -2745,7 +2943,7 @@ function buildRampMesh(rp) {
  document.getElementById('bannerTitle').textContent = 'WATER HAZARD!';
  document.getElementById('bannerSub').textContent = '+1 Penalty Stroke';
  ban.classList.add('show'); state.bannerT = 1.3;
- b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0;
+ b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0; pointAimAtCup();
  return;
  }
  }
@@ -2756,7 +2954,12 @@ function buildRampMesh(rp) {
  }
 
  const cDist = Math.hypot(b.x - hole.cup.x, b.z - hole.cup.z);
- if (!airborne && cDist < 0.37 && Math.hypot(b.vx, b.vz) < 13.5) {
+      const bSpd = Math.hypot(b.vx, b.vz);
+      if (!airborne && cDist < 0.56 && cDist > 0.05 && bSpd < 6.5) {
+        b.vx += ((hole.cup.x - b.x) / cDist) * 4.5 * sdt;
+        b.vz += ((hole.cup.z - b.z) / cDist) * 4.5 * sdt;
+      }
+      if (!airborne && cDist < 0.39 && bSpd < 13.5) {
  b.inHole = true; b.x = hole.cup.x; b.z = hole.cup.z; b.vx = 0; b.vz = 0;
  state.scores[state.holeIdx] = state.strokes; updateHUD(); sfxCup();
  spawnFX(hole.cup.x, 0.4, hole.cup.z, 0xf5d89a, 24, 6.2);
@@ -2776,8 +2979,13 @@ function buildRampMesh(rp) {
  }
 
  const spd = Math.hypot(b.vx, b.vz);
- if (spd < 0.08) { b.vx = 0; b.vz = 0; }
- else ballMesh.rotateOnWorldAxis(new THREE.Vector3(b.vz, 0, -b.vx).normalize(), (spd * dt) / ballRadius);
+    if (spd < 0.09) {
+      b.vx = 0; b.vz = 0;
+      if (wasMoving) { pointAimAtCup(); wasMoving = false; }
+    } else {
+      wasMoving = true;
+      ballMesh.rotateOnWorldAxis(new THREE.Vector3(b.vz, 0, -b.vx).normalize(), (spd * dt) / ballRadius);
+    }
  }
 
  // =========================================================================
@@ -2871,6 +3079,11 @@ function buildRampMesh(rp) {
  waterUniforms.uTime.value = now * 0.001;
  lavaUniforms.uTime.value = now * 0.001;
  lighthouseBeacon.rotation.y += dt * 0.65;
+    skyClouds.forEach(cl => {
+      cl.ang += cl.spd * dt;
+      cl.sp.position.x = Math.cos(cl.ang) * cl.dist;
+      cl.sp.position.z = Math.sin(cl.ang) * cl.dist;
+    });
  if (lighthouseBeamMat) lighthouseBeamMat.opacity = state.time === 'night' ? 0.24 : (state.time === 'dusk' ? 0.16 : 0.07);
 
  ballMesh.position.set(state.ball.x, state.ball.y, state.ball.z);
