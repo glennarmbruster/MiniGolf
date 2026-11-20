@@ -898,9 +898,9 @@
  void main() {
  vec3 dir = normalize(vWorldPos);
  float h = clamp(dir.y, 0.0, 1.0);
- vec3 col = mix(horizonColor, topColor, pow(h, 0.52));
+ vec3 col = mix(horizonColor, topColor, pow(max(h, 0.0001), 0.52));
  float sunAmt = max(dot(dir, normalize(sunDir)), 0.0);
- col += sunColor * pow(sunAmt, 14.0) * 0.35;
+ col += sunColor * pow(max(sunAmt, 0.0001), 14.0) * 0.35;
  col += sunColor * smoothstep(0.996, 0.9992, sunAmt) * 1.25;
  if (starAlpha > 0.01 && dir.y > 0.08) {
  vec2 grid = floor(dir.xz / (dir.y + 0.1) * 95.0);
@@ -937,7 +937,7 @@
  scene.add(sunLight); scene.add(sunLight.target);
 
  const shrineLight = new THREE.PointLight(0xff6a1a, 3.0, 22, 2);
- const ballGlowLight = new THREE.PointLight(0xfff3d6, 0, 24, 0.9);
+ const ballGlowLight = new THREE.PointLight(0xfff3d6, 0, 32, 2);
  scene.add(ballGlowLight);
  scene.add(shrineLight);
 
@@ -945,7 +945,7 @@
  const lanternHalos = [];
  const glowSpriteTex = createGlowSpriteTexture();
  for (let i = 0; i < 6; i++) {
- const pl = new THREE.PointLight(0xffc46b, 0, 38, 0.75);
+ const pl = new THREE.PointLight(0xffc46b, 0, 46, 2);
  scene.add(pl); lanternLights.push(pl);
  }
 
@@ -1060,13 +1060,13 @@
  vec3 N = normalize(vec3(waveHeight(p-vec2(eps,0), uTime) - waveHeight(p+vec2(eps,0), uTime), 1.8,
  waveHeight(p-vec2(0,eps), uTime) - waveHeight(p+vec2(0,eps), uTime)));
  vec3 V = normalize(cameraPosition - vWorldPos);
- float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.2);
- float caustics = pow(max(0.0, sin(p.x * 3.5 + uTime * 2.2) * cos(p.y * 3.5 - uTime * 1.8)), 3.0);
+ float fresnel = pow(max(1.0 - max(dot(N, V), 0.0), 0.0001), 3.2);
+ float caustics = pow(max(0.0001, sin(p.x * 3.5 + uTime * 2.2) * cos(p.y * 3.5 - uTime * 1.8)), 3.0);
  vec3 waterCol = mix(uDeepColor, uShallowColor, smoothstep(0.25, 0.92, distC))
  + vec3(0.16, 0.30, 0.30) * caustics * (1.0 - fresnel);
  vec3 col = mix(waterCol, uSkyColor, clamp(fresnel * 0.80 + 0.12, 0.0, 0.9));
  vec3 H = normalize(normalize(uSunDir) + V);
- col += uSunColor * pow(max(dot(N, H), 0.0), 96.0) * (1.1 - uRain * 0.6);
+ col += uSunColor * pow(max(dot(N, H), 0.0001), 96.0) * (1.1 - uRain * 0.6);
  float foam = smoothstep(0.86, 0.97, distC) * (0.5 + 0.5 * sin(uTime * 2.5 + p.x * 3.0));
  col = mix(col, vec3(0.94, 0.98, 0.97), foam * 0.45);
  gl_FragColor = vec4(col, mix(0.86, 0.96, fresnel) * smoothstep(1.0, 0.93, distC));
@@ -2480,18 +2480,18 @@ function buildRampMesh(rp) {
  waterDeep: 0x1d4e6b, waterShal: 0x3b9694, exposure: 1.04
  },
  dusk: {
- top: 0x314082, horizon: 0xf79268, fog: 0xbd7d6c, sunColor: 0xffc799, sunInt: 1.35,
- sunPos: [-22, 30, 16], hemiSky: 0xffdfd0, hemiGround: 0x7d6a72, hemiInt: 0.95,
- ambCol: 0xffdfd0, ambInt: 0.62, grassEm: 0.16, wallEm: 0.12, sandEm: 0.08,
- lanternInt: 2.4, haloOp: 0.72, paperEm: 1.65, ballLight: 0.95, stars: 0.35, firefly: 0.65,
- waterDeep: 0x1f3666, waterShal: 0x487a9e, exposure: 1.08
+ top: 0x2b3a78, horizon: 0xf28b66, fog: 0xb87a6e, sunColor: 0xffc48c, sunInt: 1.25,
+ sunPos: [-22, 26, 16], hemiSky: 0xffd9c4, hemiGround: 0x635562, hemiInt: 0.78,
+ ambCol: 0xffd8c2, ambInt: 0.48, grassEm: 0.10, wallEm: 0.08, sandEm: 0.05,
+ lanternInt: 2.2, haloOp: 0.65, paperEm: 1.55, ballLight: 0.85, stars: 0.35, firefly: 0.65,
+ waterDeep: 0x1b335e, waterShal: 0x427596, exposure: 1.00
  },
  night: {
- top: 0x0f224d, horizon: 0x2a4d8a, fog: 0x1f3d70, sunColor: 0xdbeafe, sunInt: 1.30,
- sunPos: [-16, 36, 20], hemiSky: 0xb0d2ff, hemiGround: 0x526f8f, hemiInt: 0.98,
- ambCol: 0xbfd9ff, ambInt: 0.68, grassEm: 0.22, wallEm: 0.16, sandEm: 0.10,
- lanternInt: 2.8, haloOp: 0.92, paperEm: 2.15, ballLight: 1.15, stars: 1.0, firefly: 0.95,
- waterDeep: 0x123059, waterShal: 0x266396, exposure: 1.12
+ top: 0x0d1d42, horizon: 0x24437a, fog: 0x1c3563, sunColor: 0xcbe3ff, sunInt: 1.15,
+ sunPos: [-16, 34, 20], hemiSky: 0x9ec5f5, hemiGround: 0x425b78, hemiInt: 0.74,
+ ambCol: 0xb3d1f7, ambInt: 0.46, grassEm: 0.14, wallEm: 0.10, sandEm: 0.06,
+ lanternInt: 2.6, haloOp: 0.88, paperEm: 2.05, ballLight: 1.00, stars: 1.0, firefly: 0.90,
+ waterDeep: 0x102a52, waterShal: 0x235c8c, exposure: 1.02
  }
  };
 
