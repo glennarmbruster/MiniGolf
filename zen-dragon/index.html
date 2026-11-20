@@ -854,7 +854,9 @@
  scene.environment = envRT.texture;
  }
 
- const hemiLight = new THREE.HemisphereLight(0xf6f3e8, 0x5c694b, 0.72);
+ const ambLight = new THREE.AmbientLight(0xffffff, 0.48);
+ scene.add(ambLight);
+ const hemiLight = new THREE.HemisphereLight(0xf6f3e8, 0x5c694b, 1.05);
  scene.add(hemiLight);
 
  const sunLight = new THREE.DirectionalLight(0xfff1d2, 1.38);
@@ -869,7 +871,7 @@
  scene.add(sunLight); scene.add(sunLight.target);
 
  const shrineLight = new THREE.PointLight(0xff6a1a, 3.0, 22, 2);
- const ballGlowLight = new THREE.PointLight(0xdbeafe, 0, 14, 1.2);
+ const ballGlowLight = new THREE.PointLight(0xfff3d6, 0, 24, 0.9);
  scene.add(ballGlowLight);
  scene.add(shrineLight);
 
@@ -877,7 +879,7 @@
  const lanternHalos = [];
  const glowSpriteTex = createGlowSpriteTexture();
  for (let i = 0; i < 6; i++) {
- const pl = new THREE.PointLight(0xffb84d, 0, 26, 1.05);
+ const pl = new THREE.PointLight(0xffc46b, 0, 38, 0.75);
  scene.add(pl); lanternLights.push(pl);
  }
 
@@ -892,10 +894,12 @@
 
  const matGrass = new THREE.MeshStandardMaterial({
  map: grassPBR.map, normalMap: grassPBR.normalMap, normalScale: new THREE.Vector2(0.75, 0.75),
- roughness: 0.88, metalness: 0.01, envMapIntensity: 0.18
+ emissive: 0x1b5e20, emissiveIntensity: 0.0,
+ roughness: 0.88, metalness: 0.01, envMapIntensity: 0.24
  });
  const matWall = new THREE.MeshStandardMaterial({
  map: wallPBR.map, normalMap: wallPBR.normalMap, normalScale: new THREE.Vector2(1.1, 1.1),
+ emissive: 0x5c4a36, emissiveIntensity: 0.0,
  roughness: 0.72, metalness: 0.03, envMapIntensity: 0.75
  });
  const matCourtyardSand = new THREE.MeshStandardMaterial({
@@ -930,7 +934,7 @@
  float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
  float noise(vec2 p){
  vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
- return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y);
+ return mix(mix(hash(i), hash(i+vec2(1.0,0.0)), f.x), mix(hash(i+vec2(0.0,1.0)), hash(i+vec2(1.0,1.0)), f.x), f.y);
  }
  void main() {
  vec2 p = vUv * 4.0;
@@ -2276,28 +2280,32 @@ function buildRampMesh(rp) {
  // =========================================================================
  const ATMOS = {
  daylight: {
- top: 0x2278b8, horizon: 0xb5dff5, fog: 0xc8e4f2, sunColor: 0xfff4d6, sunInt: 1.52,
- sunPos: [22, 34, 18], hemiSky: 0xdff2ff, hemiGround: 0x5c7044, hemiInt: 0.80,
+ top: 0x2280cc, horizon: 0xc4e8fa, fog: 0xd2ecfa, sunColor: 0xfff8e6, sunInt: 1.90,
+ sunPos: [22, 36, 18], hemiSky: 0xe6f5ff, hemiGround: 0x6f8554, hemiInt: 1.15,
+ ambCol: 0xf5faff, ambInt: 0.52, grassEm: 0.0, wallEm: 0.0,
  lanternInt: 0.0, haloOp: 0.0, paperEm: 0.12, ballLight: 0.0, stars: 0.0, firefly: 0.0,
- waterDeep: 0x0b5d66, waterShal: 0x24b8a8, exposure: 1.02
+ waterDeep: 0x0b636e, waterShal: 0x28c4b4, exposure: 1.15
  },
  dawn: {
- top: 0x4b7ab5, horizon: 0xffbe82, fog: 0xf7cfa8, sunColor: 0xffd296, sunInt: 1.65,
- sunPos: [30, 22, -10], hemiSky: 0xffebd0, hemiGround: 0x8a745c, hemiInt: 1.15,
- lanternInt: 1.8, haloOp: 0.38, paperEm: 0.85, ballLight: 0.2, stars: 0.08, firefly: 0.25,
- waterDeep: 0x1d4e6b, waterShal: 0x3b9694, exposure: 1.18
+ top: 0x4a72a8, horizon: 0xffb87a, fog: 0xf0c59c, sunColor: 0xffcf94, sunInt: 1.35,
+ sunPos: [30, 22, -10], hemiSky: 0xffe4c4, hemiGround: 0x7a6550, hemiInt: 0.90,
+ ambCol: 0xffe8cc, ambInt: 0.40, grassEm: 0.04, wallEm: 0.03,
+ lanternInt: 1.4, haloOp: 0.35, paperEm: 0.85, ballLight: 0.25, stars: 0.08, firefly: 0.25,
+ waterDeep: 0x1d4e6b, waterShal: 0x3b9694, exposure: 1.04
  },
  dusk: {
- top: 0x324285, horizon: 0xf58458, fog: 0xcf826b, sunColor: 0xffa67a, sunInt: 1.45,
- sunPos: [-30, 18, -12], hemiSky: 0xffc8bc, hemiGround: 0x705b63, hemiInt: 1.02,
- lanternInt: 3.0, haloOp: 0.68, paperEm: 1.45, ballLight: 0.45, stars: 0.35, firefly: 0.65,
- waterDeep: 0x1b2b52, waterShal: 0x3e6685, exposure: 1.22
+ top: 0x2e3b7a, horizon: 0xf2875e, fog: 0xb87668, sunColor: 0xffba8c, sunInt: 1.38,
+ sunPos: [-26, 26, 10], hemiSky: 0xffd6c4, hemiGround: 0x7c6870, hemiInt: 1.05,
+ ambCol: 0xffd8c2, ambInt: 0.65, grassEm: 0.16, wallEm: 0.12,
+ lanternInt: 3.6, haloOp: 0.72, paperEm: 1.65, ballLight: 1.15, stars: 0.35, firefly: 0.65,
+ waterDeep: 0x1d315c, waterShal: 0x457396, exposure: 1.16
  },
  night: {
- top: 0x0f2047, horizon: 0x2b4e8c, fog: 0x223e70, sunColor: 0xb8e0ff, sunInt: 1.15,
- sunPos: [-18, 30, 16], hemiSky: 0x73a6f5, hemiGround: 0x425f7d, hemiInt: 1.05,
- lanternInt: 4.2, haloOp: 0.92, paperEm: 2.2, ballLight: 0.85, stars: 1.0, firefly: 0.95,
- waterDeep: 0x0b1f3b, waterShal: 0x1d4d75, exposure: 1.32
+ top: 0x0c1b3d, horizon: 0x284980, fog: 0x1e3866, sunColor: 0xd6ecff, sunInt: 1.25,
+ sunPos: [-16, 36, 18], hemiSky: 0xa8ceff, hemiGround: 0x4f6d8c, hemiInt: 1.10,
+ ambCol: 0xb8d8ff, ambInt: 0.74, grassEm: 0.24, wallEm: 0.18,
+ lanternInt: 4.8, haloOp: 0.92, paperEm: 2.35, ballLight: 1.65, stars: 1.0, firefly: 0.95,
+ waterDeep: 0x0f2a4f, waterShal: 0x245d8c, exposure: 1.22
  }
  };
 
@@ -2331,7 +2339,11 @@ function buildRampMesh(rp) {
 
  hemiLight.color.setHex(a.hemiSky);
  hemiLight.groundColor.setHex(a.hemiGround);
- hemiLight.intensity = rainy ? a.hemiInt * 0.90 : a.hemiInt;
+ hemiLight.intensity = rainy ? a.hemiInt * 0.92 : a.hemiInt;
+ ambLight.color.setHex(a.ambCol);
+ ambLight.intensity = rainy ? a.ambInt * 0.95 : a.ambInt;
+ matGrass.emissiveIntensity = a.grassEm;
+ matWall.emissiveIntensity = a.wallEm;
  ballGlowLight.intensity = a.ballLight || 0.0;
 
  lanternLights.forEach((pl, idx) => { pl.intensity = idx < lanternHalos.length ? a.lanternInt : 0; });
