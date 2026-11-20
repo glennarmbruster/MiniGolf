@@ -3,30 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Nebula Station Links — 18-Hole Cosmic 3D Mini Golf</title>
+<title>Nebula Station — 18-Hole Space Mini Golf</title>
 <style>
   :root {
-    --panel: rgba(8, 14, 32, 0.86);
-    --panel-strong: rgba(5, 10, 24, 0.94);
-    --border: rgba(56, 189, 248, 0.36);
-    --text: #f0f9ff;
+    --panel: rgba(8, 13, 28, 0.86);
+    --panel-strong: rgba(5, 9, 20, 0.94);
+    --border: rgba(56, 189, 248, 0.34);
+    --text: #f8fafc;
     --muted: #94a3b8;
     --cyan: #38bdf8;
     --cyan-bright: #7dd3fc;
-    --violet: #c084fc;
     --gold: #facc15;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
   html, body {
     width: 100%; height: 100%; overflow: hidden;
-    background: #040612; color: var(--text);
+    background: #040611; color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   #glCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
-  #vignette {
-    position: fixed; inset: 0; pointer-events: none; z-index: 4;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 64%, rgba(2,4,14,0.45) 100%);
-  }
 
   .brand-stack {
     position: fixed; top: 12px; left: 14px; z-index: 10;
@@ -36,17 +31,19 @@
   .back-hub {
     text-decoration: none; background: var(--panel); border: 1px solid var(--border);
     color: var(--cyan-bright); font-size: 11px; font-weight: 800; padding: 5px 9px;
-    border-radius: 9px; backdrop-filter: blur(12px); transition: 0.15s;
+    border-radius: 9px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: 0.15s;
   }
-  .back-hub:hover { background: rgba(56,189,248,0.25); color: #fff; }
+  .back-hub:hover { background: rgba(56,189,248,0.24); color: #fff; }
   .brand-title {
     font-size: 19px; font-weight: 900; letter-spacing: 0.03em; color: #fff;
-    text-shadow: 0 0 16px rgba(56, 189, 248, 0.7); line-height: 1.05;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75); line-height: 1.05;
   }
   .brand-sub {
     font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
     color: #fde047; font-weight: 800; margin-top: 2px;
   }
+
   .hole-card {
     pointer-events: auto; display: flex; align-items: center; gap: 8px;
     background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -77,8 +74,7 @@
 
   .top-right {
     position: fixed; top: 12px; right: 14px; z-index: 10;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 7px;
-    max-width: calc(100vw - 28px);
+    display: flex; flex-direction: column; align-items: flex-end;
   }
   .score-pill {
     display: flex; align-items: center; gap: 14px;
@@ -92,29 +88,15 @@
   .stat-val.cyan { color: var(--cyan-bright); }
   .div { width: 1px; height: 22px; background: rgba(255,255,255,0.18); }
 
-  .atm-box {
-    background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--border); border-radius: 12px; padding: 5px 8px;
-    display: flex; flex-direction: column; gap: 4px; box-shadow: 0 10px 28px rgba(0,0,0,0.55);
-  }
-  .atm-row { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
-  .atm-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; font-weight: 700; margin-right: 2px; }
-  .pill {
-    background: rgba(255,255,255,0.08); border: 1px solid transparent; color: #e2e8f0;
-    font-size: 10.5px; font-weight: 600; padding: 3.5px 7px; border-radius: 6px; cursor: pointer; transition: 0.15s;
-    white-space: nowrap;
-  }
-  .pill:hover { background: rgba(255,255,255,0.18); color: #fff; }
-  .pill.active { background: var(--cyan); color: #04121e; font-weight: 800; box-shadow: 0 0 10px rgba(56,189,248,0.5); }
-
   .cam-rail {
     position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 10;
     display: flex; flex-direction: column; gap: 6px;
   }
   .cam-btn {
-    background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--border);
-    color: var(--text); border-radius: 9px; padding: 7px 9px; font-size: 11px; font-weight: 700;
-    cursor: pointer; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.45); transition: 0.15s;
+    background: var(--panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border); color: var(--text); border-radius: 9px;
+    padding: 7px 9px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.45); transition: 0.15s;
   }
   .cam-btn:hover { background: rgba(22, 44, 82, 0.95); }
 
@@ -124,9 +106,10 @@
   }
   .dock-tabs { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
   .dock-tab {
-    background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--border);
-    color: var(--text); border-radius: 9px; padding: 5px 11px; font-size: 11px; font-weight: 700;
-    cursor: pointer; transition: 0.15s; box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    background: var(--panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border); color: var(--text); border-radius: 9px;
+    padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.15s;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
   }
   .dock-tab:hover { background: rgba(22, 44, 82, 0.95); }
   .dock-tab.on { border-color: var(--cyan); color: var(--cyan-bright); }
@@ -149,10 +132,10 @@
     background: #fde047; border: 2px solid #04121e; box-shadow: 0 0 8px rgba(250,204,21,0.85);
   }
   .putt-btn {
-    background: linear-gradient(135deg, #38bdf8, #a855f7); color: #fff;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff;
     border: none; border-radius: 11px; padding: 10px 22px;
     font-size: 13.5px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45); transition: 0.15s;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45); transition: 0.15s;
   }
   .putt-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
   .dock-hint { font-size: 10px; color: #94a3b8; }
@@ -184,13 +167,11 @@
   .even { color: #f8fafc; font-weight: 700; }
   .over { color: #facc15; font-weight: 700; }
   #loader {
-    position: fixed; inset: 0; background: #040612; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; z-index: 100; gap: 10px; transition: opacity 0.45s;
+    position: fixed; inset: 0; background: #040611; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 100; gap: 10px; transition: opacity 0.4s;
   }
-  @media (max-width: 820px) {
-    .atm-lbl { display: none; }
-    .pill { padding: 3px 6px; font-size: 10px; }
-    .slider-grp { width: 108px; }
+  @media (max-width: 720px) {
+    .slider-grp { width: 106px; }
     .cam-rail { display: none; }
   }
 </style>
@@ -199,19 +180,18 @@
 <body>
 
 <div id="loader">
-  <div style="font-size:28px; font-weight:900; color:#7dd3fc; letter-spacing:0.08em;">NEBULA STATION LINKS</div>
-  <div style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:#94a3b8;">CALIBRATING COSMIC NEBULA &amp; ASTEROID COURSE...</div>
+  <div style="font-size:28px; font-weight:900; color:#7dd3fc; letter-spacing:0.08em;">NEBULA STATION</div>
+  <div style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:#94a3b8;">LOADING 18-HOLE ORBITAL COURSE...</div>
 </div>
 
 <canvas id="glCanvas"></canvas>
-<div id="vignette"></div>
 
 <div class="brand-stack">
   <div class="brand-row">
     <a href="../index.html" class="back-hub">◀ Courses</a>
     <div>
-      <div class="brand-title">Nebula Station Links</div>
-      <div class="brand-sub">Cosmic Nebula Championship 3D</div>
+      <div class="brand-title">Nebula Station</div>
+      <div class="brand-sub">Orbital Championship 3D</div>
     </div>
   </div>
   <div class="hole-card">
@@ -232,20 +212,6 @@
     <div class="stat"><span class="stat-lbl">Strokes</span><span class="stat-val" id="hudStrokes">0</span></div>
     <div class="div"></div>
     <div class="stat"><span class="stat-lbl">Card</span><span class="stat-val cyan" id="hudTotal">E</span></div>
-  </div>
-  <div class="atm-box">
-    <div class="atm-row" id="timeBtns">
-      <span class="atm-lbl">Nebula</span>
-      <button class="pill active" data-t="nebula">Supernova</button>
-      <button class="pill" data-t="solar">Solar Flare</button>
-      <button class="pill" data-t="eclipse">Ultraviolet</button>
-      <button class="pill" data-t="void">Emerald Core</button>
-    </div>
-    <div class="atm-row" id="skyBtns">
-      <span class="atm-lbl">Space</span>
-      <button class="pill active" data-w="calm">Starlight</button>
-      <button class="pill" data-w="meteor">Meteor Shower</button>
-    </div>
   </div>
 </div>
 
@@ -285,7 +251,7 @@
 <div class="modal-bg" id="scoreModal">
   <div class="modal">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2 id="modalHead" style="font-size:21px; font-weight:800; color:#7dd3fc;">Nebula Station Links — 18-Hole Scorecard</h2>
+      <h2 id="modalHead" style="font-size:21px; font-weight:800; color:#7dd3fc;">Nebula Station — 18-Hole Scorecard</h2>
       <button class="dock-tab" id="btnCloseModal">Close</button>
     </div>
     <div style="overflow-x:auto;"><table class="sc" id="scoreTbl"></table></div>
@@ -299,7 +265,7 @@
 <script>
 (() => {
   // =========================================================================
-  // 0. NOISE & SOBEL HEIGHT-TO-NORMAL MAP ENGINE
+  // 0. PROCEDURAL NOISE & NORMAL MAP ENGINE
   // =========================================================================
   function hash2(x, y) {
     const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
@@ -353,138 +319,124 @@
   }
 
   // =========================================================================
-  // 1. DEEP-SPACE HIGH-CONTRAST NEBULA SKYDOME + BALANCED SCI-FI PBR SUITE
+  // 1. VIVID DEEP-SPACE COSMIC NEBULA SKYDOME + GOLF COURSE PBR TEXTURES
   // =========================================================================
-  function createCosmicNebulaSkyTexture(theme = 'nebula') {
-    const w = 1024, h = 512;
+  function createCosmicNebulaSkyTexture() {
+    const w = 1536, h = 768;
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const ctx = c.getContext('2d');
 
-    // Deep obsidian-indigo space backdrop so glowing nebula clouds & stars pop!
-    const palettes = {
-      nebula:  { bg1: '#03050f', bg2: '#090d26', c1: 'rgba(234, 88, 12, 0.34)',  c2: 'rgba(147, 51, 234, 0.36)', c3: 'rgba(2, 132, 199, 0.38)', core: '#fde047' },
-      solar:   { bg1: '#0a0408', bg2: '#240b0e', c1: 'rgba(234, 88, 12, 0.42)',  c2: 'rgba(220, 38, 38, 0.34)',  c3: 'rgba(234, 179, 8, 0.36)',  core: '#fef08a' },
-      eclipse: { bg1: '#040312', bg2: '#130933', c1: 'rgba(219, 39, 119, 0.38)', c2: 'rgba(109, 40, 217, 0.40)', c3: 'rgba(14, 165, 233, 0.32)', core: '#f5d0fe' },
-      void:    { bg1: '#020813', bg2: '#061e2b', c1: 'rgba(5, 150, 105, 0.38)',  c2: 'rgba(8, 145, 178, 0.40)',  c3: 'rgba(126, 34, 206, 0.30)', core: '#6ee7b7' }
-    };
-    const pal = palettes[theme] || palettes.nebula;
-
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0.0, pal.bg1);
-    grad.addColorStop(0.5, pal.bg2);
-    grad.addColorStop(1.0, pal.bg1);
-    ctx.fillStyle = grad;
+    // Deep obsidian-navy cosmos backdrop
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0.0, '#040614');
+    bg.addColorStop(0.5, '#0b0f2b');
+    bg.addColorStop(1.0, '#040614');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
-    // Paint rich, saturated nebula clouds with dark cosmic dust lanes in between
+    // Rich, saturated multi-color nebula ribbons (fiery orange-gold, violet-magenta, electric blue)
     ctx.globalCompositeOperation = 'screen';
-    const clouds = [
-      { x: 0.20, y: 0.34, r: 175, col: pal.c1 },
-      { x: 0.31, y: 0.42, r: 145, col: pal.c2 },
-      { x: 0.48, y: 0.30, r: 195, col: pal.c2 },
-      { x: 0.66, y: 0.38, r: 185, col: pal.c3 },
-      { x: 0.82, y: 0.32, r: 160, col: pal.c1 },
-      { x: 0.10, y: 0.56, r: 155, col: pal.c3 },
-      { x: 0.55, y: 0.62, r: 170, col: pal.c1 },
-      { x: 0.88, y: 0.58, r: 165, col: pal.c2 }
+    const bands = [
+      // Fiery Orange & Amber Core Ribbon
+      { x: 0.24, y: 0.34, rx: 240, ry: 130, rot: -0.35, col: 'rgba(249, 115, 22, 0.52)' },
+      { x: 0.29, y: 0.38, rx: 170, ry: 95,  rot: -0.30, col: 'rgba(251, 191, 36, 0.45)' },
+      { x: 0.78, y: 0.32, rx: 220, ry: 120, rot: -0.32, col: 'rgba(234, 88, 12, 0.46)' },
+      // Deep Violet & Magenta Nebula Clouds
+      { x: 0.42, y: 0.30, rx: 290, ry: 165, rot: -0.25, col: 'rgba(168, 85, 247, 0.52)' },
+      { x: 0.52, y: 0.42, rx: 260, ry: 150, rot: -0.20, col: 'rgba(217, 70, 239, 0.44)' },
+      { x: 0.14, y: 0.48, rx: 250, ry: 145, rot: -0.28, col: 'rgba(147, 51, 234, 0.46)' },
+      { x: 0.88, y: 0.46, rx: 260, ry: 150, rot: -0.28, col: 'rgba(168, 85, 247, 0.48)' },
+      // Electric Cosmic Cyan & Sapphire Wisps
+      { x: 0.66, y: 0.36, rx: 270, ry: 155, rot: -0.22, col: 'rgba(14, 165, 233, 0.50)' },
+      { x: 0.72, y: 0.48, rx: 220, ry: 130, rot: -0.18, col: 'rgba(56, 189, 248, 0.42)' },
+      { x: 0.36, y: 0.55, rx: 240, ry: 130, rot: -0.24, col: 'rgba(37, 99, 235, 0.44)' },
+      { x: 0.58, y: 0.60, rx: 230, ry: 120, rot: -0.20, col: 'rgba(14, 165, 233, 0.38)' }
     ];
-    clouds.forEach((cl, idx) => {
-      for (let k = 0; k < 4; k++) {
-        const ox = ((cl.x * w + (k - 1.5) * 44) + w) % w;
-        const oy = cl.y * h + Math.sin(idx + k) * 26;
-        const rad = cl.r * (0.62 + (k % 3) * 0.20);
-        const rg = ctx.createRadialGradient(ox, oy, 6, ox, oy, rad);
-        rg.addColorStop(0.0, cl.col);
-        rg.addColorStop(0.5, cl.col.slice(0, cl.col.lastIndexOf(',')) + ', 0.14)');
+
+    bands.forEach((b, idx) => {
+      for (let k = 0; k < 5; k++) {
+        const ox = ((b.x * w + (k - 2) * 52) + w) % w;
+        const oy = b.y * h + Math.sin(idx * 1.7 + k) * 26;
+        ctx.save();
+        ctx.translate(ox, oy);
+        ctx.rotate(b.rot);
+        ctx.scale(1.0, b.ry / b.rx);
+        const rad = b.rx * (0.68 + (k % 3) * 0.18);
+        const rg = ctx.createRadialGradient(0, 0, 8, 0, 0, rad);
+        rg.addColorStop(0.0, b.col);
+        rg.addColorStop(0.55, b.col.slice(0, b.col.lastIndexOf(',')) + ', 0.20)');
         rg.addColorStop(1.0, 'rgba(0,0,0,0)');
         ctx.fillStyle = rg;
-        ctx.beginPath(); ctx.arc(ox, oy, rad, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, rad, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
     });
 
-    // Galactic Starburst Core
-    const coreG = ctx.createRadialGradient(w * 0.48, h * 0.32, 3, w * 0.48, h * 0.32, 115);
-    coreG.addColorStop(0.0, 'rgba(255, 255, 255, 0.90)');
-    coreG.addColorStop(0.22, 'rgba(253, 224, 71, 0.42)');
-    coreG.addColorStop(0.55, 'rgba(168, 85, 247, 0.16)');
+    // Bright Starburst Core
+    const coreG = ctx.createRadialGradient(w * 0.48, h * 0.32, 3, w * 0.48, h * 0.32, 130);
+    coreG.addColorStop(0.0, 'rgba(255, 255, 255, 0.96)');
+    coreG.addColorStop(0.22, 'rgba(253, 224, 71, 0.50)');
+    coreG.addColorStop(0.55, 'rgba(192, 132, 252, 0.20)');
     coreG.addColorStop(1.0, 'rgba(0,0,0,0)');
     ctx.fillStyle = coreG;
-    ctx.beginPath(); ctx.arc(w * 0.48, h * 0.32, 115, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w * 0.48, h * 0.32, 130, 0, Math.PI * 2); ctx.fill();
 
     // Crisp Starfield + 4-Point Sparkling Stars
     ctx.globalCompositeOperation = 'source-over';
-    for (let i = 0; i < 2800; i++) {
+    for (let i = 0; i < 3400; i++) {
       const sx = hash2(i * 1.3, 4.7) * w;
       const sy = hash2(9.1, i * 2.1) * h;
-      const sz = hash2(i, i) > 0.93 ? 2.1 : (hash2(i, 3.3) > 0.72 ? 1.4 : 1.0);
+      const sz = hash2(i, i) > 0.93 ? 2.2 : (hash2(i, 3.3) > 0.72 ? 1.5 : 1.0);
       const tint = i % 5 === 0 ? '#bae6fd' : (i % 7 === 0 ? '#fef08a' : (i % 9 === 0 ? '#f5d0fe' : '#ffffff'));
       ctx.fillStyle = tint;
       ctx.fillRect(sx, sy, sz, sz);
     }
-    for (let i = 0; i < 42; i++) {
+    for (let i = 0; i < 55; i++) {
       const sx = hash2(i * 7.7, 13.1) * w;
       const sy = hash2(3.9, i * 5.3) * h * 0.85;
-      const len = 5 + (i % 4) * 3.5;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.lineWidth = 1.1;
+      const len = 6 + (i % 4) * 4;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.moveTo(sx - len, sy); ctx.lineTo(sx + len, sy); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(sx, sy - len); ctx.lineTo(sx, sy + len); ctx.stroke();
-      ctx.fillStyle = pal.core;
-      ctx.beginPath(); ctx.arc(sx, sy, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef9c3';
+      ctx.beginPath(); ctx.arc(sx, sy, 2.0, 0, Math.PI * 2); ctx.fill();
     }
 
-    const tex = new THREE.CanvasTexture(c);
-    return tex;
+    return new THREE.CanvasTexture(c);
   }
 
-  // Rich, Deep Emerald Mowed Astro-Turf (matches reference artwork's lush green!)
-  function createAstroTurfPBR() {
+  // Lush, Natural Golf-Course Emerald Turf with Crisp Mowing Stripes
+  function createEmeraldTurfPBR() {
     const size = 512;
     const c = document.createElement('canvas'); c.width = c.height = size;
     const ctx = c.getContext('2d');
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
 
-    ctx.fillStyle = '#15803d'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#16803c'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
 
-    // Classic dark/light emerald mowing stripes
+    // Classic PGA-style emerald fairway mowing stripes
     for (let x = 0; x < size; x += 64) {
-      ctx.fillStyle = (x / 64) % 2 === 0 ? 'rgba(74, 222, 128, 0.16)' : 'rgba(5, 46, 22, 0.22)';
+      ctx.fillStyle = (x / 64) % 2 === 0 ? '#1ea34a' : '#136c33';
       ctx.fillRect(x, 0, 64, size);
     }
-    // Crisp subtle cyan hex-grid lines
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)'; ctx.lineWidth = 1.2;
-    hctx.strokeStyle = '#9a9a9a'; hctx.lineWidth = 1.4;
-    const r = 32, dx = r * 1.5, dy = r * Math.sqrt(3);
-    for (let row = -1; row < size / dy + 2; row++) {
-      for (let col = -1; col < size / dx + 2; col++) {
-        const cx = col * dx, cy = row * dy + (col % 2 ? dy / 2 : 0);
-        ctx.beginPath(); hctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (Math.PI / 3) * i;
-          const px = cx + r * Math.cos(a), py = cy + r * Math.sin(a);
-          if (i === 0) { ctx.moveTo(px, py); hctx.moveTo(px, py); }
-          else { ctx.lineTo(px, py); hctx.lineTo(px, py); }
-        }
-        ctx.closePath(); ctx.stroke();
-        hctx.closePath(); hctx.stroke();
-      }
-    }
-    for (let i = 0; i < 18000; i++) {
+    // Fine organic turf blades & micro-texture
+    for (let i = 0; i < 26000; i++) {
       const x = Math.random() * size, y = Math.random() * size, t = Math.random();
-      ctx.fillStyle = t > 0.62 ? 'rgba(74, 222, 128, 0.22)' : 'rgba(5, 46, 22, 0.28)';
-      ctx.fillRect(x, y, 2, 2);
+      ctx.fillStyle = t > 0.65 ? 'rgba(134, 239, 172, 0.22)' : 'rgba(5, 46, 22, 0.26)';
+      ctx.fillRect(x, y, 1.5, 2.5);
       const bv = Math.floor(85 + t * 140);
       hctx.fillStyle = `rgb(${bv},${bv},${bv})`; hctx.fillRect(x, y, 2, 2);
     }
-    const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.5);
+    const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.4);
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(0.18, 0.18); normalMap.repeat.set(0.18, 0.18); map.anisotropy = 8;
+    map.repeat.set(0.22, 0.22); normalMap.repeat.set(0.22, 0.22); map.anisotropy = 8;
     return { map, normalMap };
   }
 
-  // Brushed Gunmetal-Titanium Rail with Gold-and-Black Hazard Chevrons + Cyan LED Strip
+  // Sleek Dark-Titanium Rail with Gold/Black Hazard Chevrons + Glowing Cyan Accent Strip
   function createTitaniumRailPBR() {
     const size = 512;
     const c = document.createElement('canvas'); c.width = c.height = size;
@@ -492,12 +444,12 @@
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
 
-    ctx.fillStyle = '#475569'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#334155'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#808080'; hctx.fillRect(0, 0, size, size);
 
     for (let i = 0; i < 900; i++) {
       const y = Math.random() * size;
-      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(226,232,240,0.12)' : 'rgba(15,23,42,0.18)';
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(203,213,225,0.10)' : 'rgba(15,23,42,0.20)';
       ctx.fillRect(0, y, size, 1.5);
     }
     // Gold-and-black diagonal hazard chevron band along top bevel (v = 0.44..0.68)
@@ -515,13 +467,13 @@
     }
     ctx.restore();
 
-    // Crisp Cyan LED strip along lower inner edge (v = 0.26..0.36)
-    const ledGrad = ctx.createLinearGradient(0, size * 0.26, 0, size * 0.36);
+    // Crisp Cyan LED strip along lower inner edge (v = 0.26..0.35)
+    const ledGrad = ctx.createLinearGradient(0, size * 0.26, 0, size * 0.35);
     ledGrad.addColorStop(0.0, '#0284c7');
     ledGrad.addColorStop(0.5, '#38bdf8');
     ledGrad.addColorStop(1.0, '#0284c7');
     ctx.fillStyle = ledGrad;
-    ctx.fillRect(0, size * 0.26, size, size * 0.10);
+    ctx.fillRect(0, size * 0.26, size, size * 0.09);
 
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 2.0);
     map.wrapS = map.wrapT = THREE.RepeatWrapping; map.anisotropy = 8;
@@ -571,11 +523,11 @@
     const ctx = c.getContext('2d');
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
-    ctx.fillStyle = '#3b475c'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#334155'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
     for (let i = 0; i < 180; i++) {
       const x = Math.random() * size, y = Math.random() * size, r = 5 + Math.random() * 22;
-      ctx.fillStyle = Math.random() > 0.86 ? 'rgba(56,189,248,0.32)' : (Math.random() > 0.5 ? 'rgba(100,116,139,0.40)' : 'rgba(15,23,42,0.52)');
+      ctx.fillStyle = Math.random() > 0.86 ? 'rgba(56,189,248,0.28)' : (Math.random() > 0.5 ? 'rgba(100,116,139,0.38)' : 'rgba(15,23,42,0.55)');
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
       hctx.fillStyle = Math.random() > 0.5 ? 'rgba(215,215,215,0.45)' : 'rgba(30,30,30,0.5)';
       hctx.beginPath(); hctx.arc(x, y, r * 0.8, 0, Math.PI * 2); hctx.fill();
@@ -584,17 +536,17 @@
     return { map, normalMap };
   }
 
-  function createPlasmaBallTexture() {
+  function createGolfBallTexture() {
     const size = 512;
     const c = document.createElement('canvas'); c.width = c.height = size;
     const ctx = c.getContext('2d');
     const grad = ctx.createLinearGradient(0, 0, size, size);
-    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.5, '#e0f2fe'); grad.addColorStop(1, '#7dd3fc');
+    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.5, '#f1f5f9'); grad.addColorStop(1, '#cbd5e1');
     ctx.fillStyle = grad; ctx.fillRect(0, 0, size, size);
     for (let y = 10; y < size; y += 20) {
       const off = (Math.floor(y / 20) % 2) * 10;
       for (let x = 10 + off; x < size; x += 20) {
-        ctx.fillStyle = 'rgba(2, 132, 199, 0.25)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.14)';
         ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
       }
     }
@@ -614,19 +566,6 @@
     }
     const tex = new THREE.CanvasTexture(c);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(1, 2); return tex;
-  }
-
-  function createGlowSpriteTexture() {
-    const size = 128;
-    const c = document.createElement('canvas'); c.width = c.height = size;
-    const ctx = c.getContext('2d');
-    const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
-    g.addColorStop(0.0, 'rgba(255, 255, 255, 0.95)');
-    g.addColorStop(0.28, 'rgba(56, 189, 248, 0.55)');
-    g.addColorStop(0.62, 'rgba(168, 85, 247, 0.18)');
-    g.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(c);
   }
 
   // =========================================================================
@@ -697,7 +636,7 @@
   }
 
   // =========================================================================
-  // 3. THREE.JS RENDERER, COSMIC SKYDOME & BALANCED 3-POINT SPACE LIGHTING
+  // 3. THREE.JS RENDERER, COSMIC SKYDOME & NEUTRAL CRISP STUDIO LIGHTING
   // =========================================================================
   const canvas = document.getElementById('glCanvas');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -709,29 +648,21 @@
   renderer.toneMappingExposure = 1.0;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 0.1, 460);
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 460);
 
-  const skyTextures = {
-    nebula: createCosmicNebulaSkyTexture('nebula'),
-    solar: createCosmicNebulaSkyTexture('solar'),
-    eclipse: createCosmicNebulaSkyTexture('eclipse'),
-    void: createCosmicNebulaSkyTexture('void')
-  };
-  const skyDomeMat = new THREE.MeshBasicMaterial({ map: skyTextures.nebula, side: THREE.BackSide, depthWrite: false });
-  const skyDome = new THREE.Mesh(new THREE.SphereGeometry(290, 40, 28), skyDomeMat);
+  // Full-sky high-resolution cosmic nebula skydome
+  const skyDomeMat = new THREE.MeshBasicMaterial({ map: createCosmicNebulaSkyTexture(), side: THREE.BackSide, depthWrite: false });
+  const skyDome = new THREE.Mesh(new THREE.SphereGeometry(290, 48, 32), skyDomeMat);
   scene.add(skyDome);
 
-  // Calibrated 3-point lighting: rich shadows, crisp highlights, ZERO blowout!
-  const ambLight = new THREE.AmbientLight(0xc7d2fe, 0.36);
+  // Clean neutral lighting so emerald green stays rich emerald green and details never blow out!
+  const ambLight = new THREE.AmbientLight(0xf8fafc, 0.42);
   scene.add(ambLight);
-  const hemiLight = new THREE.HemisphereLight(0x93c5fd, 0x1e1b4b, 0.48);
+  const hemiLight = new THREE.HemisphereLight(0xf1f5f9, 0x1e293b, 0.52);
   scene.add(hemiLight);
-  const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.48);
-  rimLight.position.set(-22, 18, -24);
-  scene.add(rimLight);
 
-  const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.25);
-  sunLight.position.set(18, 30, 16);
+  const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.32);
+  sunLight.position.set(18, 32, 16);
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.width = 2048; sunLight.shadow.mapSize.height = 2048;
   sunLight.shadow.camera.near = 2; sunLight.shadow.camera.far = 140;
@@ -741,43 +672,29 @@
   sunLight.shadow.bias = -0.0005; sunLight.shadow.normalBias = 0.025;
   scene.add(sunLight); scene.add(sunLight.target);
 
-  const ballGlowLight = new THREE.PointLight(0x38bdf8, 0.55, 10, 1.4);
-  scene.add(ballGlowLight);
-
-  const pylonLights = [];
-  const pylonHalos = [];
-  const glowSpriteTex = createGlowSpriteTexture();
-  for (let i = 0; i < 6; i++) {
-    const pl = new THREE.PointLight(0x38bdf8, 0.65, 13, 1.5);
-    scene.add(pl); pylonLights.push(pl);
-  }
-
   // Materials
-  const turfPBR = createAstroTurfPBR();
+  const turfPBR = createEmeraldTurfPBR();
   const railPBR = createTitaniumRailPBR();
   const astPBR = createAsteroidPBR();
-  const ballTex = createPlasmaBallTexture();
+  const ballTex = createGolfBallTexture();
   const chevronTex = createChevronTexture();
 
   const matGrass = new THREE.MeshStandardMaterial({
-    map: turfPBR.map, normalMap: turfPBR.normalMap, normalScale: new THREE.Vector2(0.75, 0.75),
-    emissive: 0x052e16, emissiveIntensity: 0.06,
-    roughness: 0.78, metalness: 0.02
+    map: turfPBR.map, normalMap: turfPBR.normalMap, normalScale: new THREE.Vector2(0.7, 0.7),
+    roughness: 0.86, metalness: 0.02
   });
   const matWall = new THREE.MeshStandardMaterial({
     map: railPBR.map, normalMap: railPBR.normalMap, normalScale: new THREE.Vector2(1.0, 1.0),
-    emissive: 0x0f172a, emissiveIntensity: 0.04,
-    roughness: 0.42, metalness: 0.28
+    roughness: 0.42, metalness: 0.35
   });
   const matAsteroid = new THREE.MeshStandardMaterial({
     map: astPBR.map, normalMap: astPBR.normalMap, normalScale: new THREE.Vector2(1.6, 1.6),
-    emissive: 0x090d16, emissiveIntensity: 0.03,
     roughness: 0.88, metalness: 0.12
   });
-  const matCyanGlow = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 1.15, roughness: 0.25 });
-  const matVioletGlow = new THREE.MeshStandardMaterial({ color: 0xc084fc, emissive: 0x7e22ce, emissiveIntensity: 1.15, roughness: 0.25 });
-  const matGoldAlloy = new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0x713f12, emissiveIntensity: 0.18, metalness: 0.45, roughness: 0.28 });
-  const matDarkAlloy = new THREE.MeshStandardMaterial({ color: 0x334155, emissive: 0x0f172a, emissiveIntensity: 0.08, metalness: 0.45, roughness: 0.38 });
+  const matCyanGlow = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 1.25, roughness: 0.25 });
+  const matVioletGlow = new THREE.MeshStandardMaterial({ color: 0xc084fc, emissive: 0x7e22ce, emissiveIntensity: 1.25, roughness: 0.25 });
+  const matGoldAlloy = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.55, roughness: 0.28 });
+  const matDarkAlloy = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.50, roughness: 0.38 });
 
   const voidUniforms = { uTime: { value: 0 } };
   const matVoidShader = new THREE.ShaderMaterial({
@@ -797,14 +714,13 @@
   });
 
   // =========================================================================
-  // 4. COMPACT FLOATING ASTEROID BASE, RINGED GAS GIANT, STATION & STARDUST
-  //    (Tailored footprint so the deep cosmic nebula surrounds the entire course!)
+  // 4. FLOATING ASTEROID BASE, RINGED GAS GIANT, STATION & SATELLITE ISLANDS
   // =========================================================================
   const envGroup = new THREE.Group();
   scene.add(envGroup);
 
-  // Compact craggy asteroid island tucked neatly underneath the fairway
-  const islandBaseGeo = new THREE.ConeGeometry(8.2, 8.5, 18, 4);
+  // Craggy floating asteroid rock under the fairway
+  const islandBaseGeo = new THREE.ConeGeometry(7.2, 7.5, 18, 4);
   islandBaseGeo.rotateX(Math.PI);
   const ibPos = islandBaseGeo.attributes.position;
   for (let i = 0; i < ibPos.count; i++) {
@@ -814,81 +730,58 @@
   }
   islandBaseGeo.computeVertexNormals();
   const islandBaseMesh = new THREE.Mesh(islandBaseGeo, matAsteroid);
-  islandBaseMesh.scale.set(0.95, 1.0, 1.95);
-  islandBaseMesh.position.y = -4.3;
+  islandBaseMesh.scale.set(0.95, 1.0, 2.05);
+  islandBaseMesh.position.y = -3.8;
   islandBaseMesh.receiveShadow = true;
   envGroup.add(islandBaseMesh);
 
-  // Sleek cyan anti-gravity ring under the fairway
-  const antiGravRing = new THREE.Mesh(new THREE.TorusGeometry(8.1, 0.16, 10, 48), matCyanGlow);
-  antiGravRing.rotation.x = Math.PI / 2;
-  antiGravRing.scale.set(0.95, 1.95, 1.0);
-  antiGravRing.position.y = -0.25;
-  envGroup.add(antiGravRing);
-
-  // Giant Luminous Ringed Gas Giant Planet in the upper-right nebula sky
+  // Ringed Gas Giant Planet in the upper nebula sky
   const planetGroup = new THREE.Group();
   const planetMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(32, 48, 36),
-    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), emissive: 0x1e3a8a, emissiveIntensity: 0.22, roughness: 0.72 })
+    new THREE.SphereGeometry(30, 48, 36),
+    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), roughness: 0.75 })
   );
   planetGroup.add(planetMesh);
-  const ringGeo = new THREE.RingGeometry(41, 66, 72);
+  const ringGeo = new THREE.RingGeometry(38, 62, 72);
   const rPos = ringGeo.attributes.position, rUv = ringGeo.attributes.uv;
   for (let i = 0; i < rPos.count; i++) {
     const rad = Math.hypot(rPos.getX(i), rPos.getY(i));
-    rUv.setXY(i, (rad - 41) / (66 - 41), 0.5);
+    rUv.setXY(i, (rad - 38) / (62 - 38), 0.5);
   }
   const ringMesh = new THREE.Mesh(
     ringGeo,
-    new THREE.MeshBasicMaterial({ map: createPlanetRingTexture(), side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+    new THREE.MeshBasicMaterial({ map: createPlanetRingTexture(), side: THREE.DoubleSide, transparent: true, opacity: 0.86 })
   );
   ringMesh.rotation.x = Math.PI / 2;
   planetGroup.add(ringMesh);
-  planetGroup.position.set(32, 32, -120);
+  planetGroup.position.set(34, 34, -125);
   planetGroup.rotation.set(0.32, 0.2, -0.26);
   envGroup.add(planetGroup);
 
   // Cratered Moon
-  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(7.5, 28, 28), matAsteroid);
-  moonMesh.position.set(-48, 32, -96);
+  const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(7.2, 28, 28), matAsteroid);
+  moonMesh.position.set(-46, 30, -98);
   envGroup.add(moonMesh);
 
   // Rotating Orbital Space Station Ring
   const stationRing = new THREE.Group();
-  stationRing.add(new THREE.Mesh(new THREE.TorusGeometry(15, 1.15, 14, 48), matDarkAlloy));
-  const sGlow = new THREE.Mesh(new THREE.TorusGeometry(15, 0.26, 8, 48), matCyanGlow);
-  sGlow.position.z = 1.0; stationRing.add(sGlow);
+  stationRing.add(new THREE.Mesh(new THREE.TorusGeometry(14, 1.1, 14, 48), matDarkAlloy));
+  const sGlow = new THREE.Mesh(new THREE.TorusGeometry(14, 0.24, 8, 48), matCyanGlow);
+  sGlow.position.z = 0.95; stationRing.add(sGlow);
   for (let sp = 0; sp < 4; sp++) {
-    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 30, 8), matDarkAlloy);
+    const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 28, 8), matDarkAlloy);
     spoke.rotation.z = (sp * Math.PI) / 4; stationRing.add(spoke);
   }
-  stationRing.position.set(-30, 19, -58);
+  stationRing.position.set(-28, 18, -60);
   stationRing.rotation.set(0.35, 0.45, 0);
   envGroup.add(stationRing);
 
-  // Hovering Starfighter Shuttle
-  const shuttleGroup = new THREE.Group();
-  const hull = new THREE.Mesh(new THREE.ConeGeometry(1.1, 4.8, 6), matDarkAlloy);
-  hull.rotation.x = Math.PI / 2; shuttleGroup.add(hull);
-  const cockpit = new THREE.Mesh(new THREE.SphereGeometry(0.58, 12, 12), matCyanGlow);
-  cockpit.scale.set(0.9, 0.55, 1.6); cockpit.position.set(0, 0.42, -0.2); shuttleGroup.add(cockpit);
-  const wings = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.14, 1.6), matDarkAlloy);
-  wings.position.set(0, 0, 1.0); shuttleGroup.add(wings);
-  [-1.1, 1.1].forEach(ex => {
-    const eng = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 1.2, 10), matCyanGlow);
-    eng.rotation.x = Math.PI / 2; eng.position.set(ex, -0.05, 2.1); shuttleGroup.add(eng);
-  });
-  shuttleGroup.position.set(18, 4.5, -18);
-  shuttleGroup.rotation.y = -0.65;
-  envGroup.add(shuttleGroup);
-
-  // Floating Satellite Asteroid Islands around the course
+  // Floating Satellite Asteroid Islands around the course (with green turf caps!)
   const asteroids = [];
-  for (let i = 0; i < 22; i++) {
-    const ang = (i / 22) * Math.PI * 2;
-    const dist = 22 + (i % 4) * 8;
-    const geo = new THREE.IcosahedronGeometry(1.3 + (i % 3) * 0.85, 2);
+  for (let i = 0; i < 18; i++) {
+    const ang = (i / 18) * Math.PI * 2;
+    const dist = 20 + (i % 4) * 8;
+    const geo = new THREE.IcosahedronGeometry(1.2 + (i % 3) * 0.8, 2);
     const pos = geo.attributes.position;
     for (let v = 0; v < pos.count; v++) {
       const vx = pos.getX(v), vy = pos.getY(v), vz = pos.getZ(v);
@@ -897,13 +790,13 @@
     }
     geo.computeVertexNormals();
     const ast = new THREE.Mesh(geo, matAsteroid);
-    ast.position.set(Math.cos(ang) * dist, -4 + (i % 5) * 4.2, Math.sin(ang) * dist);
+    ast.position.set(Math.cos(ang) * dist, -3 + (i % 5) * 3.8, Math.sin(ang) * dist);
     envGroup.add(ast);
-    asteroids.push({ mesh: ast, rx: 0.14 + (i % 3) * 0.08, ry: 0.18 + (i % 4) * 0.08 });
+    asteroids.push({ mesh: ast, rx: 0.12 + (i % 3) * 0.06, ry: 0.16 + (i % 4) * 0.06 });
   }
 
-  // Drifting Cosmic Stardust + Streaking Meteor Shower
-  const dustCount = 240;
+  // Drifting Cosmic Stardust
+  const dustCount = 220;
   const dustGeo = new THREE.BufferGeometry();
   const dustPos = new Float32Array(dustCount * 3);
   for (let i = 0; i < dustCount; i++) {
@@ -912,19 +805,7 @@
     dustPos[i * 3 + 2] = (Math.random() - 0.5) * 65;
   }
   dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-  envGroup.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xbae6fd, size: 0.22, transparent: true, opacity: 0.8 })));
-
-  const meteorCount = 75;
-  const meteorGeo = new THREE.BufferGeometry();
-  const meteorPos = new Float32Array(meteorCount * 6);
-  for (let i = 0; i < meteorCount; i++) {
-    const x = (Math.random() - 0.5) * 95, y = 8 + Math.random() * 34, z = (Math.random() - 0.5) * 95;
-    meteorPos[i * 6] = x; meteorPos[i * 6 + 1] = y; meteorPos[i * 6 + 2] = z;
-    meteorPos[i * 6 + 3] = x - 2.6; meteorPos[i * 6 + 4] = y - 1.8; meteorPos[i * 6 + 5] = z + 1.2;
-  }
-  meteorGeo.setAttribute('position', new THREE.BufferAttribute(meteorPos, 3));
-  const meteorLines = new THREE.LineSegments(meteorGeo, new THREE.LineBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.9 }));
-  meteorLines.visible = false; scene.add(meteorLines);
+  envGroup.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.22, transparent: true, opacity: 0.75 })));
 
   // =========================================================================
   // 5. CURVED FAIRWAY & TITANIUM RAIL GEOMETRY GENERATORS
@@ -987,7 +868,7 @@
     return pts;
   }
 
-  function buildCurvedRailMesh(loopPts, wallHeight = 0.86, wallThick = 0.52, isInnerIsland = false) {
+  function buildCurvedRailMesh(loopPts, wallHeight = 0.84, wallThick = 0.50, isInnerIsland = false) {
     const n = loopPts.length;
     const profile = [
       [0.0, 0.0, 0.0], [0.0, wallHeight - 0.12, 0.42], [0.10, wallHeight, 0.52],
@@ -1298,7 +1179,7 @@
   ];
 
   // =========================================================================
-  // 7. COURSE BUILDER, SHADED 3D ASTRONAUT GOLFER + PLASMA PUTTER, & OBSTACLES
+  // 7. COURSE BUILDER, SLEEK PUTTER, & SCI-FI OBSTACLES
   // =========================================================================
   const courseGroup = new THREE.Group();
   scene.add(courseGroup);
@@ -1306,13 +1187,13 @@
   const ballRadius = 0.22;
   const ballMesh = new THREE.Mesh(
     new THREE.SphereGeometry(ballRadius, 36, 36),
-    new THREE.MeshStandardMaterial({ map: ballTex, emissive: 0x0284c7, emissiveIntensity: 0.18, roughness: 0.18, metalness: 0.1 })
+    new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.22, metalness: 0.08 })
   );
   ballMesh.castShadow = true; scene.add(ballMesh);
 
   const ballShadowDisc = new THREE.Mesh(
     new THREE.CircleGeometry(ballRadius * 1.18, 22),
-    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.42 })
+    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.44 })
   );
   ballShadowDisc.rotation.x = -Math.PI / 2; scene.add(ballShadowDisc);
 
@@ -1322,51 +1203,21 @@
   );
   readyRing.rotation.x = -Math.PI / 2; scene.add(readyRing);
 
-  // Detailed, Properly Shaded 3D Astronaut Golfer + Glowing Plasma Putter Assembly
-  const golferRig = new THREE.Group();
-  const matSuit = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.52, metalness: 0.08 });
-  const matSuitTrim = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.65, metalness: 0.2 });
-  const matVisor = new THREE.MeshStandardMaterial({ color: 0xd97706, emissive: 0x92400e, emissiveIntensity: 0.25, metalness: 0.85, roughness: 0.15 });
-
-  const astroBody = new THREE.Group();
-  astroBody.position.set(0.75, 0, -0.05);
-  [-0.14, 0.14].forEach(lx => {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.10, 0.68, 10), matSuit);
-    leg.position.set(lx, 0.36, 0); leg.castShadow = true; astroBody.add(leg);
-    const knee = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.15), matSuitTrim);
-    knee.position.set(lx, 0.42, 0.03); astroBody.add(knee);
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.26), matSuitTrim);
-    boot.position.set(lx, 0.06, 0.04); astroBody.add(boot);
-  });
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.20, 0.64, 12), matSuit);
-  torso.position.set(0, 0.98, 0); torso.rotation.z = 0.14; torso.castShadow = true; astroBody.add(torso);
-  const chestRig = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.26), matSuitTrim);
-  chestRig.position.set(-0.04, 1.02, 0); chestRig.rotation.z = 0.14; astroBody.add(chestRig);
-  const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.10, 12), matSuitTrim);
-  belt.position.set(0.04, 0.68, 0); astroBody.add(belt);
-  const pack = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.50, 0.24), matSuitTrim);
-  pack.position.set(0.19, 1.02, 0); pack.rotation.z = 0.14; pack.castShadow = true; astroBody.add(pack);
-  const packLed = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.26), matCyanGlow);
-  packLed.position.set(0.30, 1.02, 0); astroBody.add(packLed);
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.24, 18, 16), matSuit);
-  helmet.position.set(-0.08, 1.48, 0); helmet.castShadow = true; astroBody.add(helmet);
-  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.205, 16, 14, -Math.PI * 0.65, Math.PI * 0.7, 0.3, Math.PI * 0.55), matVisor);
-  visor.position.set(-0.13, 1.48, 0); astroBody.add(visor);
-  golferRig.add(astroBody);
-
-  const putterPivot = new THREE.Group();
-  putterPivot.position.set(0.56, 1.18, 0);
-  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.58, 8), matSuit);
-  armL.position.set(-0.26, -0.24, 0.10); armL.rotation.set(0.18, 0, -0.52); putterPivot.add(armL);
-  const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.58, 8), matSuit);
-  armR.position.set(-0.26, -0.24, -0.10); armR.rotation.set(-0.18, 0, -0.52); putterPivot.add(armR);
-
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.024, 1.05, 8), matVioletGlow);
-  shaft.position.set(-0.56, -0.68, 0); shaft.rotation.z = -0.32; putterPivot.add(shaft);
-  const clubHead = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.18), matCyanGlow);
-  clubHead.position.set(-0.74, -1.10, 0); putterPivot.add(clubHead);
-  golferRig.add(putterPivot);
-  scene.add(golferRig);
+  // Sleek Sci-Fi Plasma Putter (Clean, unobstructed view of ball and aim line!)
+  const putterGroup = new THREE.Group();
+  const putterHead = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.16, 0.20), matDarkAlloy);
+  putterHead.position.set(0, 0.11, 0); putterHead.castShadow = true;
+  const putterLed = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.04, 0.22), matCyanGlow);
+  putterLed.position.set(0, 0.14, 0);
+  const putterShaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.022, 0.026, 2.1, 10),
+    new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 })
+  );
+  putterShaft.position.set(0.2, 1.15, 0); putterShaft.rotation.z = -0.1;
+  const putterGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.038, 0.6, 10), matDarkAlloy);
+  putterGrip.position.set(0.3, 2.05, 0); putterGrip.rotation.z = -0.1;
+  putterGroup.add(putterHead, putterLed, putterShaft, putterGrip);
+  scene.add(putterGroup);
 
   const fxParticles = [];
   const fxGeo = new THREE.SphereGeometry(0.075, 6, 6);
@@ -1390,8 +1241,8 @@
 
   const state = {
     holeIdx: 0, strokes: 0, scores: Array(HOLES.length).fill(null),
-    time: 'nebula', weather: 'calm', camMode: 'follow', guideOn: true,
-    camYaw: 0, camPitch: 0.44, camDist: 9.8,
+    camMode: 'follow', guideOn: true,
+    camYaw: 0, camPitch: 0.42, camDist: 9.8,
     ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vy: 0, vz: 0, lastSafeX: 0, lastSafeZ: 10.2, portalCD: 0, inHole: false, sinkT: 0 },
     aiming: false, aimPower: 0.45, aimAngle: Math.PI,
     putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null, dynWindmills: [], dynMovers: [], dynPortals: []
@@ -1416,24 +1267,6 @@
       if (d < minD) minD = d;
     }
     return minD;
-  }
-
-  function buildPlasmaPylon(x, z, lightObj) {
-    const g = new THREE.Group();
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.52, 0.26, 6), matDarkAlloy);
-    base.position.y = 0.13; base.castShadow = true; base.receiveShadow = true; g.add(base);
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.20, 1.05, 8), matDarkAlloy);
-    stem.position.y = 0.74; stem.castShadow = true; g.add(stem);
-    const core = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.48, 8), matCyanGlow);
-    core.position.y = 1.46; g.add(core);
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.28, 6), matGoldAlloy);
-    cap.position.y = 1.84; g.add(cap);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowSpriteTex, color: 0x38bdf8, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending, depthWrite: false }));
-    halo.position.set(0, 1.46, 0); halo.scale.set(2.0, 2.0, 1); g.add(halo);
-    pylonHalos.push(halo);
-    g.position.set(x, 0, z);
-    courseGroup.add(g);
-    lightObj.position.set(x, 1.65, z);
   }
 
   function buildBumperMesh(x, y, z, r) {
@@ -1505,10 +1338,9 @@
     g.position.set(bp.x, 0.252, bp.z); courseGroup.add(g);
   }
 
-  // Sculpted Lunar Regolith Sand Bunkers with glowing cyan trim rim
   function buildBunkerMesh(bk) {
     const g = new THREE.Group();
-    const sand = new THREE.Mesh(new THREE.CircleGeometry(1.0, 28), new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.92 }));
+    const sand = new THREE.Mesh(new THREE.CircleGeometry(1.0, 28), new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.94 }));
     sand.rotation.x = -Math.PI / 2; sand.scale.set(bk.rx, bk.rz, 1); g.add(sand);
     const rim = new THREE.Mesh(new THREE.RingGeometry(0.95, 1.03, 28), matCyanGlow);
     rim.rotation.x = -Math.PI / 2; rim.scale.set(bk.rx, bk.rz, 1); rim.position.y = 0.004; g.add(rim);
@@ -1538,7 +1370,6 @@
 
   function buildHole(idx) {
     clearGroup(courseGroup);
-    pylonHalos.length = 0;
     state.holeIdx = idx;
     const h = HOLES[idx];
     state.strokes = 0;
@@ -1550,13 +1381,13 @@
     state.wallSegs = []; state.dynWindmills = []; state.dynMovers = []; state.dynPortals = [];
 
     courseGroup.add(buildFairwayTurfMesh(h.outer, h.island));
-    courseGroup.add(buildCurvedRailMesh(h.outer, 0.86, 0.52, false));
+    courseGroup.add(buildCurvedRailMesh(h.outer, 0.84, 0.50, false));
     for (let i = 0; i < h.outer.length; i++) {
       const a = h.outer[i], b = h.outer[(i + 1) % h.outer.length];
       state.wallSegs.push([a.x, a.z, b.x, b.z]);
     }
     if (h.island) {
-      courseGroup.add(buildCurvedRailMesh(h.island, 0.86, 0.44, true));
+      courseGroup.add(buildCurvedRailMesh(h.island, 0.84, 0.44, true));
       for (let i = 0; i < h.island.length; i++) {
         const a = h.island[i], b = h.island[(i + 1) % h.island.length];
         state.wallSegs.push([a.x, a.z, b.x, b.z]);
@@ -1580,30 +1411,26 @@
     h.voids.forEach(buildVoidHazardMesh);
     h.portals.forEach(buildPortalMesh);
 
+    // Glowing Cyan Flagstick & Cup
     const cupHole = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 24), new THREE.MeshBasicMaterial({ color: 0x020617 }));
     cupHole.position.set(h.cup.x, 0.23, h.cup.z); courseGroup.add(cupHole);
     const cupRim = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.45, 24), matCyanGlow);
     cupRim.rotation.x = -Math.PI / 2; cupRim.position.set(h.cup.x, 0.246, h.cup.z); courseGroup.add(cupRim);
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.8, 12), matCyanGlow);
     pole.position.set(h.cup.x, 1.62, h.cup.z); courseGroup.add(pole);
-    const flagMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.58, 8, 2), new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.85, side: THREE.DoubleSide }));
+    const flagMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.58, 8, 2), new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.9, side: THREE.DoubleSide }));
     flagMesh.position.set(h.cup.x + 0.5, 2.66, h.cup.z); courseGroup.add(flagMesh);
     state.flagMesh = flagMesh;
 
+    // Sleek Sci-Fi Tee Pad + Flanking Low-Profile Emitter Pods (matches reference tee box!)
     const teePad = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.48, 0.03, 20), matCyanGlow);
     teePad.position.set(h.tee.x, 0.242, h.tee.z); courseGroup.add(teePad);
-
-    const totalPts = h.outer.length;
-    let lIdx = 0;
-    for (let k = 0; k < 6; k++) {
-      const idxP = Math.floor(((k + 0.5) / 6) * totalPts) % totalPts;
-      const p = h.outer[idxP], pN = h.outer[(idxP + 1) % totalPts];
-      const dx = pN.x - p.x, dz = pN.z - p.z, l = Math.hypot(dx, dz) || 1;
-      const lx = p.x + (dz / l) * 1.45, lz = p.z + (-dx / l) * 1.45;
-      if (pointInPoly(lx, lz, h.outer) || minDistToPoly(lx, lz, h.outer) < 1.05) continue;
-      buildPlasmaPylon(lx, lz, pylonLights[lIdx++]);
-    }
-    for (let i = lIdx; i < pylonLights.length; i++) pylonLights[i].intensity = 0;
+    [-1.1, 1.1].forEach(ox => {
+      const pod = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.72), matDarkAlloy);
+      pod.position.set(h.tee.x + ox, 0.31, h.tee.z); pod.castShadow = true; courseGroup.add(pod);
+      const podLed = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.52), matCyanGlow);
+      podLed.position.set(h.tee.x + ox, 0.38, h.tee.z); courseGroup.add(podLed);
+    });
 
     const dx = h.cup.x - h.tee.x, dz = h.cup.z - h.tee.z;
     state.aimAngle = Math.atan2(dx, dz);
@@ -1616,47 +1443,11 @@
     document.getElementById('holeNumBadge').textContent = String(idx + 1).padStart(2, '0');
     document.getElementById('holeSelect').value = String(idx);
     document.getElementById('holeSub').textContent = `HOLE ${idx + 1} OF ${HOLES.length} • PAR ${h.par}`;
-    applyAtmosphere();
     updateHUD();
   }
 
   // =========================================================================
-  // 8. 4 BALANCED COSMIC NEBULA THEMES (DEEP SPACE CONTRAST + FULL CLARITY!)
-  // =========================================================================
-  const ATMOS = {
-    nebula: {
-      sunCol: 0xfff7ed, sunInt: 1.25, hemiSky: 0x93c5fd, hemiGnd: 0x1e1b4b, hemiInt: 0.48,
-      ambCol: 0xc7d2fe, ambInt: 0.36, pylonCol: 0x38bdf8, pylonInt: 0.65
-    },
-    solar: {
-      sunCol: 0xffedd5, sunInt: 1.35, hemiSky: 0xfde68a, hemiGnd: 0x451a03, hemiInt: 0.48,
-      ambCol: 0xfef3c7, ambInt: 0.38, pylonCol: 0xfacc15, pylonInt: 0.72
-    },
-    eclipse: {
-      sunCol: 0xf3e8ff, sunInt: 1.20, hemiSky: 0xd8b4fe, hemiGnd: 0x2e1065, hemiInt: 0.46,
-      ambCol: 0xe9d5ff, ambInt: 0.36, pylonCol: 0xe879f9, pylonInt: 0.75
-    },
-    void: {
-      sunCol: 0xd1fae5, sunInt: 1.25, hemiSky: 0x6ee7b7, hemiGnd: 0x022c22, hemiInt: 0.48,
-      ambCol: 0xa7f3d0, ambInt: 0.36, pylonCol: 0x34d399, pylonInt: 0.72
-    }
-  };
-
-  function applyAtmosphere() {
-    const a = ATMOS[state.time];
-    skyDomeMat.map = skyTextures[state.time] || skyTextures.nebula;
-    skyDomeMat.needsUpdate = true;
-
-    sunLight.color.setHex(a.sunCol); sunLight.intensity = a.sunInt;
-    hemiLight.color.setHex(a.hemiSky); hemiLight.groundColor.setHex(a.hemiGnd); hemiLight.intensity = a.hemiInt;
-    ambLight.color.setHex(a.ambCol); ambLight.intensity = a.ambInt;
-    pylonLights.forEach((pl, idx) => { pl.color.setHex(a.pylonCol); pl.intensity = idx < pylonHalos.length ? a.pylonInt : 0; });
-    pylonHalos.forEach(sp => sp.material.color.setHex(a.pylonCol));
-    meteorLines.visible = state.weather === 'meteor';
-  }
-
-  // =========================================================================
-  // 9. DUAL INPUT (SLIDERS + LAUNCH OR DIRECT DRAG-BACK) & PHYSICS
+  // 8. DUAL INPUT (SLIDERS + LAUNCH OR DIRECT DRAG-BACK) & PHYSICS
   // =========================================================================
   const rngAim = document.getElementById('rngAim'), rngPower = document.getElementById('rngPower');
   const lblAim = document.getElementById('lblAim'), lblPower = document.getElementById('lblPower');
@@ -1683,7 +1474,7 @@
     state.ball.vz = Math.cos(state.aimAngle) * spd;
     state.strokes++; updateHUD(); sfxPutt(state.aimPower);
     spawnFX(state.ball.x, 0.3, state.ball.z, 0x38bdf8, 8, 2.6);
-    state.putterSwingT = 0.25;
+    state.putterSwingT = 0.22;
   }
 
   rngAim.addEventListener('input', () => {
@@ -1775,12 +1566,12 @@
     const stopped = ballStopped();
     aimGroup.visible = stopped && state.guideOn;
     if (stopped && state.putterSwingT <= 0) {
-      golferRig.visible = true;
-      golferRig.position.set(state.ball.x, 0.24, state.ball.z);
-      golferRig.rotation.y = state.aimAngle;
-      putterPivot.rotation.x = -(0.22 + (state.aiming ? state.aimPower * 0.65 : state.aimPower * 0.32));
+      putterGroup.visible = true;
+      const pullBack = 0.36 + (state.aiming ? state.aimPower * 1.1 : state.aimPower * 0.45);
+      putterGroup.position.set(state.ball.x - Math.sin(state.aimAngle) * pullBack, 0.24, state.ball.z - Math.cos(state.aimAngle) * pullBack);
+      putterGroup.rotation.y = state.aimAngle;
     } else if (state.putterSwingT <= 0) {
-      golferRig.visible = false;
+      putterGroup.visible = false;
     }
 
     if (!aimGroup.visible) return;
@@ -1808,8 +1599,9 @@
 
     if (state.putterSwingT > 0) {
       state.putterSwingT -= dt;
-      putterPivot.rotation.x = 0.55 * (1 - state.putterSwingT / 0.25);
-      if (state.putterSwingT <= 0) golferRig.visible = false;
+      putterGroup.position.x += Math.sin(state.aimAngle) * dt * 6.5;
+      putterGroup.position.z += Math.cos(state.aimAngle) * dt * 6.5;
+      if (state.putterSwingT <= 0) putterGroup.visible = false;
     }
 
     for (let i = fxParticles.length - 1; i >= 0; i--) {
@@ -1963,7 +1755,7 @@
   }
 
   // =========================================================================
-  // 10. UI, 18-HOLE SCORECARD & MAIN LOOP
+  // 9. UI, 18-HOLE SCORECARD & MAIN LOOP
   // =========================================================================
   function updateHUD() {
     document.getElementById('hudStrokes').textContent = state.strokes;
@@ -1987,7 +1779,7 @@
       return hRow + pRow + sRow;
     }
     document.getElementById('scoreTbl').innerHTML = buildNineTable(0, 9, 'OUT') + buildNineTable(9, 18, 'IN');
-    document.getElementById('modalHead').textContent = final ? 'Orbital Championship Complete!' : 'Nebula Station Links — 18-Hole Scorecard';
+    document.getElementById('modalHead').textContent = final ? 'Orbital Championship Complete!' : 'Nebula Station — 18-Hole Scorecard';
     let tPar = 0, tScr = 0, played = 0;
     HOLES.forEach((h, i) => { if (state.scores[i] !== null) { tPar += h.par; tScr += state.scores[i]; played++; } });
     const d = tScr - tPar;
@@ -1999,14 +1791,6 @@
     document.getElementById('scoreModal').classList.add('open');
   }
 
-  document.querySelectorAll('#timeBtns .pill').forEach(b => b.addEventListener('click', () => {
-    document.querySelectorAll('#timeBtns .pill').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); state.time = b.dataset.t; applyAtmosphere();
-  }));
-  document.querySelectorAll('#skyBtns .pill').forEach(b => b.addEventListener('click', () => {
-    document.querySelectorAll('#skyBtns .pill').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); state.weather = b.dataset.w; applyAtmosphere();
-  }));
   document.getElementById('btnCam').addEventListener('click', e => {
     state.camMode = state.camMode === 'follow' ? 'overview' : 'follow';
     e.target.textContent = state.camMode === 'follow' ? 'Course view' : 'Follow ball';
@@ -2053,11 +1837,9 @@
     skyDome.rotation.y += dt * 0.006;
     planetMesh.rotation.y += dt * 0.025;
     stationRing.rotation.z += dt * 0.14;
-    shuttleGroup.position.y = 4.5 + Math.sin(now * 0.0022) * 0.45;
     asteroids.forEach(a => { a.mesh.rotation.x += a.rx * dt; a.mesh.rotation.y += a.ry * dt; });
 
     ballMesh.position.set(state.ball.x, state.ball.y, state.ball.z);
-    ballGlowLight.position.set(state.ball.x, state.ball.y + 2.2, state.ball.z);
     ballShadowDisc.position.set(state.ball.x, 0.243, state.ball.z);
     const airH = Math.max(0, state.ball.y - (0.24 + ballRadius));
     ballShadowDisc.scale.setScalar(Math.max(0.45, 1.0 - airH * 0.18));
@@ -2087,20 +1869,6 @@
     }
     dustGeo.attributes.position.needsUpdate = true;
 
-    if (state.weather === 'meteor') {
-      const mp = meteorGeo.attributes.position.array;
-      for (let i = 0; i < meteorCount; i++) {
-        mp[i * 6] -= 28 * dt; mp[i * 6 + 1] -= 18 * dt; mp[i * 6 + 2] += 12 * dt;
-        mp[i * 6 + 3] -= 28 * dt; mp[i * 6 + 4] -= 18 * dt; mp[i * 6 + 5] += 12 * dt;
-        if (mp[i * 6 + 1] < -4) {
-          const nx = 15 + Math.random() * 65, ny = 24 + Math.random() * 22, nz = (Math.random() - 0.5) * 85;
-          mp[i * 6] = nx; mp[i * 6 + 1] = ny; mp[i * 6 + 2] = nz;
-          mp[i * 6 + 3] = nx - 2.6; mp[i * 6 + 4] = ny - 1.8; mp[i * 6 + 5] = nz + 1.2;
-        }
-      }
-      meteorGeo.attributes.position.needsUpdate = true;
-    }
-
     if (state.camMode === 'overview') {
       camera.position.lerp(new THREE.Vector3(0, 22, 24), 0.08);
       camera.lookAt(0, 1.5, -4);
@@ -2109,7 +1877,7 @@
       const cy = state.ball.y + Math.sin(state.camPitch) * state.camDist;
       const cz = state.ball.z + Math.cos(state.camYaw) * Math.cos(state.camPitch) * state.camDist;
       camera.position.lerp(new THREE.Vector3(cx, cy, cz), 0.12);
-      camera.lookAt(state.ball.x, state.ball.y + 0.45, state.ball.z);
+      camera.lookAt(state.ball.x, state.ball.y + 0.55, state.ball.z);
     }
 
     sunLight.target.position.set(state.ball.x, 0, state.ball.z);
@@ -2129,8 +1897,8 @@
   buildHole(0);
   setTimeout(() => {
     const ld = document.getElementById('loader');
-    if (ld) { ld.style.opacity = '0'; setTimeout(() => ld.remove(), 420); }
-  }, 250);
+    if (ld) { ld.style.opacity = '0'; setTimeout(() => ld.remove(), 400); }
+  }, 220);
   requestAnimationFrame(animate);
 })();
 </script>
