@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Zen Dragon Links — 18-Hole Grand Championship 3D</title>
+<style>
+ :root {
+ --panel: rgba(16, 30, 29, 0.84);
+ --panel-strong: rgba(12, 24, 24, 0.92);
+ --border: rgba(235, 215, 175, 0.22);
+ --text: #f6f2e9;
+ --muted: #b4c2bc;
+ --gold: #e6c687;
+ --gold-bright: #f5d89a;
+ --accent: #34d399;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+ html, body {
+ width: 100%; height: 100%; overflow: hidden;
+ background: #101b1b; color: var(--text);
+ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+ }
+ #glCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
+ #vignette {
+ position: fixed; inset: 0; pointer-events: none; z-index: 4;
+ background: radial-gradient(ellipse at center, rgba(0,0,0,0) 62%, rgba(8,14,14,0.34) 100%);
+ }
+
+ /* Brand & Top-Left Hole Card */
+ .brand-stack {
+ position: fixed; top: 14px; left: 18px; z-index: 10;
+ display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+ }
+ .brand-title {
+ font-family: Georgia, "Times New Roman", serif;
+ font-size: 22px; font-weight: 700; letter-spacing: 0.02em; color: #fffaf0;
+ text-shadow: 0 2px 10px rgba(0,0,0,0.45); line-height: 1.05;
+ }
+ .brand-sub {
+ font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+ color: var(--gold); font-weight: 700; margin-top: 2px;
+ text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+ }
+ .hole-card {
+ pointer-events: auto; display: flex; align-items: center; gap: 10px;
+ background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+ border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px;
+ box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+ }
+ .hole-badge {
+ width: 34px; height: 34px; border-radius: 50%;
+ border: 1.5px solid var(--gold); background: rgba(230, 198, 135, 0.12);
+ display: flex; align-items: center; justify-content: center;
+ font-weight: 800; font-size: 13px; color: var(--gold-bright);
+ }
+ .hole-meta { display: flex; flex-direction: column; min-width: 140px; }
+ .hole-name { font-size: 13.5px; font-weight: 700; color: #fff; }
+ .hole-sub { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: 1px; }
+ .nav-arrows { display: flex; gap: 4px; margin-left: 4px; }
+ .hole-select {
+ background: rgba(255,255,255,0.08); border: 1px solid rgba(235,215,175,0.22);
+ color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 12px; font-weight: 700;
+ cursor: pointer; outline: none; max-width: 175px;
+ }
+ .hole-select option { background: #101f1f; color: #f6f2e9; }
+ .mini-btn {
+ background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+ color: var(--text); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 800;
+ cursor: pointer; transition: 0.15s;
+ }
+ .mini-btn:hover { background: rgba(230,198,135,0.22); color: #fff; }
+
+ /* Top-Right Score & Atmosphere Controls */
+ .top-right {
+ position: fixed; top: 14px; right: 18px; z-index: 10;
+ display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+ }
+ .score-pill {
+ display: flex; align-items: center; gap: 16px;
+ background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+ border: 1px solid var(--border); border-radius: 14px; padding: 8px 16px;
+ box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+ }
+ .stat { display: flex; flex-direction: column; align-items: center; }
+ .stat-lbl { font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+ .stat-val { font-family: Georgia, serif; font-size: 20px; font-weight: 700; color: #fff; line-height: 1.1; }
+ .stat-val.gold { color: var(--gold-bright); }
+
+ .atm-box {
+ background: var(--panel); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+ border: 1px solid var(--border); border-radius: 12px; padding: 6px 9px;
+ display: flex; flex-direction: column; gap: 4px; box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+ }
+ .atm-row { display: flex; align-items: center; gap: 4px; }
+ .atm-lbl { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; width: 38px; }
+ .pill {
+ background: rgba(255,255,255,0.07); border: 1px solid transparent; color: #cbd5e1;
+ font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 7px; cursor: pointer; transition: 0.15s;
+ }
+ .pill:hover { background: rgba(255,255,255,0.16); color: #fff; }
+ .pill.active { background: var(--gold); color: #162422; font-weight: 800; }
+
+ /* Right-Side Camera Zoom/Rotate Controls */
+ .cam-rail {
+ position: fixed; right: 18px; top: 50%; transform: translateY(-50%); z-index: 10;
+ display: flex; flex-direction: column; gap: 6px;
+ }
+ .cam-btn {
+ background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--border);
+ color: var(--text); border-radius: 10px; padding: 8px 10px; font-size: 12px; font-weight: 700;
+ cursor: pointer; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.32); transition: 0.15s;
+ }
+ .cam-btn:hover { background: rgba(30, 52, 50, 0.95); }
+
+ /* Bottom Luxury Putt Control Dock */
+ .bottom-dock {
+ position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 10;
+ display: flex; flex-direction: column; align-items: center; gap: 7px; max-width: 96vw;
+ }
+ .dock-tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+ .dock-tab {
+ background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--border);
+ color: var(--text); border-radius: 10px; padding: 6px 12px; font-size: 11.5px; font-weight: 700;
+ cursor: pointer; transition: 0.15s; box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+ }
+ .dock-tab:hover { background: rgba(30, 54, 52, 0.95); }
+ .dock-tab.on { border-color: var(--gold); color: var(--gold-bright); }
+
+ .putt-console {
+ display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;
+ background: var(--panel-strong); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+ border: 1px solid var(--border); border-radius: 16px; padding: 10px 16px;
+ box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+ }
+ .slider-grp { display: flex; flex-direction: column; gap: 4px; width: 148px; }
+ .slider-head { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+ .slider-head span.val { color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+ input[type=range] {
+ -webkit-appearance: none; width: 100%; height: 5px; border-radius: 99px;
+ background: rgba(230, 198, 135, 0.25); outline: none; cursor: pointer;
+ }
+ input[type=range]::-webkit-slider-thumb {
+ -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+ background: var(--gold-bright); border: 2px solid #132220; box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+ }
+ .putt-btn {
+ background: linear-gradient(180deg, #f3d79b, #d8b16a); color: #16221f;
+ border: none; border-radius: 12px; padding: 11px 24px;
+ font-family: Georgia, serif; font-size: 15px; font-weight: 800; cursor: pointer;
+ box-shadow: 0 6px 18px rgba(216, 177, 106, 0.35); transition: 0.15s;
+ }
+ .putt-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+ .putt-btn:active { transform: translateY(0); }
+ .dock-hint { font-size: 10.5px; color: var(--muted); letter-spacing: 0.02em; }
+
+ #banner {
+ position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%) scale(0.85);
+ background: rgba(12, 24, 24, 0.94); backdrop-filter: blur(16px);
+ border: 2px solid var(--gold); border-radius: 20px; padding: 20px 38px; text-align: center;
+ z-index: 25; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+ box-shadow: 0 24px 64px rgba(0,0,0,0.75);
+ }
+ #banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+ #bannerTitle { font-family: Georgia, serif; font-size: 32px; font-weight: 800; color: var(--gold-bright); letter-spacing: 0.03em; }
+ #bannerSub { font-size: 14px; color: #e2e8f0; margin-top: 4px; font-weight: 600; }
+
+ .modal-bg {
+ position: fixed; inset: 0; background: rgba(6,12,12,0.82); backdrop-filter: blur(8px);
+ display: none; align-items: center; justify-content: center; z-index: 40; padding: 18px;
+ }
+ .modal-bg.open { display: flex; }
+ .modal {
+ background: #101f1f; border: 1px solid var(--border); border-radius: 20px;
+ max-width: 780px; width: 100%; padding: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.78);
+ }
+ table.sc { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 20px; }
+ table.sc th, table.sc td { padding: 8px 5px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
+ table.sc th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+ .under { color: #34d399; font-weight: 800; }
+ .even { color: #f8fafc; font-weight: 700; }
+ .over { color: var(--gold); font-weight: 700; }
+ #loader {
+ position: fixed; inset: 0; background: #0d1818; display: flex; flex-direction: column;
+ align-items: center; justify-content: center; z-index: 100; gap: 10px; transition: opacity 0.45s;
+ }
+ @media (max-width: 780px) {
+ .atm-lbl { display: none; }
+ .pill { padding: 3px 6px; font-size: 10px; }
+ .slider-grp { width: 110px; }
+ .cam-rail { display: none; }
+ }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="loader">
+ <div style="font-family:Georgia,serif; font-size:28px; font-weight:700; color:#f5d89a; letter-spacing:0.04em;">Zen Dragon Links</div>
+ <div style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:#94a3b8;">THE JADE GARDEN • SCULPTING 3D WORLD</div>
+</div>
+
+<canvas id="glCanvas"></canvas>
+<div id="vignette"></div>
+
+<!-- Top-Left Brand + Hole Info -->
+<div class="brand-stack">
+ <div style="display:flex; align-items:center; gap:10px; pointer-events:auto;">
+ <a href="../index.html" style="text-decoration:none; background:rgba(16,30,29,0.84); border:1px solid rgba(235,215,175,0.28); color:#f5d89a; font-size:11px; font-weight:800; padding:6px 10px; border-radius:10px; backdrop-filter:blur(10px);">◀ Courses</a>
+ <div>
+ <div class="brand-title">Zen Dragon Links</div>
+ <div class="brand-sub">The Jade Garden</div>
+ </div>
+ </div>
+ <div class="hole-card">
+ <div class="hole-badge" id="holeNumBadge">01</div>
+ <div class="hole-meta">
+ <select id="holeSelect" class="hole-select" title="Jump to any of the 18 holes"></select>
+ <div class="hole-sub" id="holeSub">HOLE 1 OF 18 • PAR 2</div>
+ </div>
+ <div class="nav-arrows">
+ <button class="mini-btn" id="btnPrevHole" title="Previous Hole">◀</button>
+ <button class="mini-btn" id="btnNextHole" title="Next Hole">▶</button>
+ </div>
+ </div>
+</div>
+
+<!-- Top-Right Score + Time/Weather Atmosphere -->
+<div class="top-right">
+ <div class="score-pill">
+ <div class="stat"><span class="stat-lbl">Strokes</span><span class="stat-val" id="hudStrokes">0</span></div>
+ <div class="div"></div>
+ <div class="stat"><span class="stat-lbl">Card</span><span class="stat-val gold" id="hudTotal">E</span></div>
+ </div>
+ <div class="atm-box">
+ <div class="atm-row" id="timeBtns">
+ <span class="atm-lbl">Time</span>
+ <button class="pill active" data-t="daylight">Daylight</button>
+ <button class="pill" data-t="dawn">Dawn</button>
+ <button class="pill" data-t="dusk">Dusk</button>
+ <button class="pill" data-t="night">Night</button>
+ </div>
+ <div class="atm-row" id="skyBtns">
+ <span class="atm-lbl">Sky</span>
+ <button class="pill active" data-w="clear">Clear Skies</button>
+ <button class="pill" data-w="rainy">Rainy</button>
+ </div>
+ </div>
+</div>
+
+<!-- Right-Side Camera Controls -->
+<div class="cam-rail">
+ <button class="cam-btn" id="btnZoomIn" title="Zoom In">＋</button>
+ <button class="cam-btn" id="btnZoomOut" title="Zoom Out">－</button>
+ <button class="cam-btn" id="btnRotate" title="Rotate 45°">Rotate</button>
+</div>
+
+<!-- Bottom Precision & Drag-to-Putt Dock -->
+<div class="bottom-dock">
+ <div class="dock-tabs">
+ <button class="dock-tab" id="btnCam">Course view</button>
+ <button class="dock-tab on" id="btnGuide">Guide: ON</button>
+ <button class="dock-tab" id="btnScore">Scorecard</button>
+ <button class="dock-tab" id="btnReset">Reset Ball</button>
+ <button class="dock-tab on" id="btnSound">Sound: ON</button>
+ </div>
+ <div class="putt-console">
+ <div class="slider-grp">
+ <div class="slider-head"><span>AIM</span><span class="val" id="lblAim">0°</span></div>
+ <input type="range" id="rngAim" min="-180" max="180" value="0" step="1">
+ </div>
+ <div class="slider-grp">
+ <div class="slider-head"><span>POWER</span><span class="val" id="lblPower">45%</span></div>
+ <input type="range" id="rngPower" min="5" max="100" value="45" step="1">
+ </div>
+ <button class="putt-btn" id="btnPutt">Putt</button>
+ </div>
+ <div class="dock-hint">Use sliders + Putt, or drag directly back from the ball • Drag sky/sand to orbit</div>
+</div>
+
+<div id="banner">
+ <div id="bannerTitle">BIRDIE!</div>
+ <div id="bannerSub">2 Strokes on Par 3</div>
+</div>
+
+<div class="modal-bg" id="scoreModal">
+ <div class="modal">
+ <div style="display:flex; justify-content:space-between; align-items:center;">
+ <h2 id="modalHead" style="font-family:Georgia,serif; font-size:22px; color:#f5d89a;">Zen Dragon Links — Scorecard</h2>
+ <button class="dock-tab" id="btnCloseModal">Close</button>
+ </div>
+ <div style="overflow-x:auto;"><table class="sc" id="scoreTbl"></table></div>
+ <div style="display:flex; justify-content:space-between; align-items:center;">
+ <div id="scoreSummary" style="font-weight:700; color:#cbd5e1;"></div>
+ <button class="putt-btn" id="btnNewRound" style="padding:9px 18px; font-size:14px;">Play Again</button>
+ </div>
+ </div>
+</div>
+
+<script>
+(() => {
+ // =========================================================================
+ // 0. NOISE & SOBEL HEIGHT-TO-NORMAL MAP UTILITIES
+ // =========================================================================
+ function hash2(x, y) {
+ const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+ return h - Math.floor(h);
+ }
+ function noise2(x, y) {
+ const ix = Math.floor(x), iy = Math.floor(y);
+ const fx = x - ix, fy = y - iy;
+ const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+ const a = hash2(ix, iy), b = hash2(ix + 1, iy);
+ const c = hash2(ix, iy + 1), d = hash2(ix + 1, iy + 1);
+ return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+ }
+ function fbm(x, y, octaves = 5) {
+ let v = 0, amp = 0.5, freq = 1.0;
+ for (let i = 0; i < octaves; i++) {
+ v += amp * noise2(x * freq, y * freq);
+ freq *= 2.04; amp *= 0.5;
+ }
+ return v;
+ }
+ function ridgedFbm(x, y, octaves = 5) {
+ let v = 0, amp = 0.52, freq = 1.0, weight = 1.0;
+ for (let i = 0; i < octaves; i++) {
+ let n = 1.0 - Math.abs(noise2(x * freq, y * freq) * 2.0 - 1.0);
+ n = n * n * weight;
+ weight = Math.min(1.0, Math.max(0.0, n * 1.8));
+ v += n * amp;
+ freq *= 2.08; amp *= 0.48;
+ }
+ return v;
+ }
+
+ function heightCanvasToNormalTexture(heightCanvas, strength = 2.2) {
+ const w = heightCanvas.width, h = heightCanvas.height;
+ const src = heightCanvas.getContext('2d').getImageData(0, 0, w, h).data;
+ const outC = document.createElement('canvas'); outC.width = w; outC.height = h;
+ const outCtx = outC.getContext('2d');
+ const dst = outCtx.createImageData(w, h);
+ const d = dst.data;
+ const getH = (x, y) => src[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255.0;
+ for (let y = 0; y < h; y++) {
+ for (let x = 0; x < w; x++) {
+ const tl = getH(x - 1, y - 1), l = getH(x - 1, y), bl = getH(x - 1, y + 1);
+ const t = getH(x, y - 1), b = getH(x, y + 1);
+ const tr = getH(x + 1, y - 1), r = getH(x + 1, y), br = getH(x + 1, y + 1);
+ const dx = (tr + 2 * r + br) - (tl + 2 * l + bl);
+ const dy = (bl + 2 * b + br) - (tl + 2 * t + tr);
+ let nx = -dx * strength, ny = -dy * strength, nz = 1.0;
+ const len = Math.hypot(nx, ny, nz) || 1;
+ nx /= len; ny /= len; nz /= len;
+ const idx = (y * w + x) * 4;
+ d[idx] = Math.round((nx * 0.5 + 0.5) * 255);
+ d[idx + 1] = Math.round((ny * 0.5 + 0.5) * 255);
+ d[idx + 2] = Math.round((nz * 0.5 + 0.5) * 255);
+ d[idx + 3] = 255;
+ }
+ }
+ outCtx.putImageData(dst, 0, 0);
+ const tex = new THREE.CanvasTexture(outC);
+ tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = 8;
+ return tex;
+ }
+
+ // =========================================================================
+ // 1. PAINTERLY PHOTOREALISTIC PBR TEXTURE SUITE
+ // =========================================================================
+ function createGrassPBR() {
+ const size = 512;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const hC = document.createElement('canvas'); hC.width = hC.height = size;
+ const hctx = hC.getContext('2d');
+
+ // Warm sunlit manicured emerald-jade green (matches serene Zen garden aesthetic)
+ ctx.fillStyle = '#206b1a'; ctx.fillRect(0, 0, size, size);
+ hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
+
+ for (let x = 0; x < size; x += 64) {
+ ctx.fillStyle = (x / 64) % 2 === 0 ? 'rgba(255,255,240,0.032)' : 'rgba(0,25,0,0.036)';
+ ctx.fillRect(x, 0, 64, size);
+ }
+ for (let i = 0; i < 240; i++) {
+ const x = Math.random() * size, y = Math.random() * size, r = 18 + Math.random() * 44;
+ const g = ctx.createRadialGradient(x, y, 2, x, y, r);
+ g.addColorStop(0, Math.random() > 0.5 ? 'rgba(116, 184, 56, 0.16)' : 'rgba(34, 88, 22, 0.18)');
+ g.addColorStop(1, 'rgba(0,0,0,0)');
+ ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+ }
+ for (let i = 0; i < 34000; i++) {
+ const x = Math.random() * size, y = Math.random() * size;
+ const len = 3 + Math.random() * 6, ang = (Math.random() - 0.5) * 1.1, t = Math.random();
+ ctx.strokeStyle = t > 0.72 ? '#42a826' : (t > 0.34 ? '#277d1c' : '#144d0f');
+ ctx.lineWidth = 1.05;
+ ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); ctx.stroke();
+ const bv = Math.floor(88 + t * 155);
+ hctx.strokeStyle = `rgb(${bv},${bv},${bv})`;
+ hctx.beginPath(); hctx.moveTo(x, y); hctx.lineTo(x + Math.sin(ang) * len, y - Math.cos(ang) * len); hctx.stroke();
+ }
+ const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.4); map.encoding = THREE.sRGBEncoding;
+ map.wrapS = map.wrapT = THREE.RepeatWrapping;
+ map.repeat.set(0.18, 0.18); normalMap.repeat.set(0.18, 0.18); map.anisotropy = 8;
+ return { map, normalMap };
+ }
+
+ // TWO-TONE SCULPTED TRAVERTINE + FIELDSTONE BASE WALL PBR (Matches high-end Zen masonry!)
+ function createTravertineWallPBR() {
+ const size = 512;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const hC = document.createElement('canvas'); hC.width = hC.height = size;
+ const hctx = hC.getContext('2d');
+
+ // Warm sunlit travertine sandstone base
+ ctx.fillStyle = '#d4b58f'; ctx.fillRect(0, 0, size, size);
+ hctx.fillStyle = '#858585'; hctx.fillRect(0, 0, size, size);
+
+ // Subtle warm plaster/travertine mottling across the whole wall
+ for (let i = 0; i < 650; i++) {
+ const x = Math.random() * size, y = Math.random() * size;
+ const rx = 14 + Math.random() * 52, ry = 8 + Math.random() * 24, rot = Math.random() * Math.PI;
+ ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+ const g = ctx.createRadialGradient(0, 0, 2, 0, 0, rx);
+ const light = Math.random() > 0.45;
+ g.addColorStop(0, light ? 'rgba(248, 232, 206, 0.24)' : 'rgba(150, 112, 74, 0.22)');
+ g.addColorStop(1, 'rgba(0,0,0,0)');
+ ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+ ctx.restore();
+
+ hctx.save(); hctx.translate(x, y); hctx.rotate(rot);
+ const bg = hctx.createRadialGradient(0, 0, 1, 0, 0, rx * 0.75);
+ bg.addColorStop(0, light ? 'rgba(210,210,210,0.18)' : 'rgba(50,50,50,0.18)');
+ bg.addColorStop(1, 'rgba(128,128,128,0)');
+ hctx.fillStyle = bg; hctx.beginPath(); hctx.ellipse(0, 0, rx * 0.75, ry * 0.75, 0, 0, Math.PI * 2); hctx.fill();
+ hctx.restore();
+ }
+
+ // Darker weathered fieldstone/cobble skirting along the lower outer wall edge (v near 0.0 and 0.85..1.0)
+ function drawStoneSkirting(yStart, yEnd) {
+ for (let i = 0; i < 180; i++) {
+ const x = Math.random() * size;
+ const y = yStart + Math.random() * (yEnd - yStart);
+ const rw = 16 + Math.random() * 26, rh = 9 + Math.random() * 14;
+ ctx.fillStyle = Math.random() > 0.5 ? 'rgba(124, 96, 68, 0.55)' : 'rgba(164, 134, 98, 0.5)';
+ ctx.strokeStyle = 'rgba(68, 50, 34, 0.55)'; ctx.lineWidth = 2;
+ ctx.beginPath(); ctx.ellipse(x, y, rw * 0.5, rh * 0.5, (Math.random() - 0.5) * 0.3, 0, Math.PI * 2);
+ ctx.fill(); ctx.stroke();
+
+ hctx.fillStyle = 'rgba(215,215,215,0.55)';
+ hctx.strokeStyle = 'rgba(25,25,25,0.85)'; hctx.lineWidth = 3;
+ hctx.beginPath(); hctx.ellipse(x, y, rw * 0.5, rh * 0.5, 0, 0, Math.PI * 2);
+ hctx.fill(); hctx.stroke();
+ }
+ }
+ drawStoneSkirting(size * 0.84, size);
+ drawStoneSkirting(0, size * 0.14);
+
+ // Fine mineral grain
+ for (let i = 0; i < 6000; i++) {
+ const x = Math.random() * size, y = Math.random() * size;
+ ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,250,240,0.09)' : 'rgba(72,48,28,0.1)';
+ ctx.fillRect(x, y, 2, 2);
+ }
+
+ const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 2.3); map.encoding = THREE.sRGBEncoding;
+ map.wrapS = map.wrapT = THREE.RepeatWrapping; map.anisotropy = 8;
+ return { map, normalMap };
+ }
+
+ // Warm Ochre / Umber Stratified Hero Cliff Rock PBR (matches Zen rock crags!)
+ function createOchreCliffPBR() {
+ const size = 512;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const hC = document.createElement('canvas'); hC.width = hC.height = size;
+ const hctx = hC.getContext('2d');
+
+ ctx.fillStyle = '#73563a'; ctx.fillRect(0, 0, size, size);
+ hctx.fillStyle = '#7a7a7a'; hctx.fillRect(0, 0, size, size);
+
+ // Diagonal geological strata & warm sunlit ochre fractures
+ for (let i = 0; i < 900; i++) {
+ const x = Math.random() * size, y = Math.random() * size;
+ const rw = 10 + Math.random() * 44, rh = 6 + Math.random() * 20;
+ const p = Math.random();
+ ctx.save(); ctx.translate(x, y); ctx.rotate(-0.35 + (Math.random() - 0.5) * 0.4);
+ ctx.fillStyle = p > 0.84 ? 'rgba(84, 114, 48, 0.28)' : (p > 0.45 ? 'rgba(158, 120, 76, 0.28)' : 'rgba(54, 38, 24, 0.36)');
+ ctx.beginPath(); ctx.ellipse(0, 0, rw, rh, 0, 0, Math.PI * 2); ctx.fill();
+ ctx.restore();
+
+ hctx.save(); hctx.translate(x, y); hctx.rotate(-0.35);
+ hctx.fillStyle = p > 0.5 ? 'rgba(225,225,225,0.28)' : 'rgba(24,24,24,0.32)';
+ hctx.beginPath(); hctx.ellipse(0, 0, rw * 0.8, rh * 0.8, 0, 0, Math.PI * 2); hctx.fill();
+ hctx.restore();
+ }
+ const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 3.2); map.encoding = THREE.sRGBEncoding;
+ map.wrapS = map.wrapT = THREE.RepeatWrapping; map.anisotropy = 8;
+ return { map, normalMap };
+ }
+
+ // FINE, CREAMY-CHAMPAGNE RAKED ZEN SAND COURTYARD PBR (High frequency delicate grooves!)
+ function createCourtyardSandPBR() {
+ const size = 1024, worldSpan = 108.0;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const hC = document.createElement('canvas'); hC.width = hC.height = size;
+ const hctx = hC.getContext('2d');
+
+ const imgA = ctx.createImageData(size, size), imgH = hctx.createImageData(size, size);
+ const dA = imgA.data, dH = imgH.data;
+
+ // Concentric raked rings around our sculpted courtyard crags & boulders
+ const rocks = [
+ [-11.5, -2.5], [-13.0, 5.5], [13.0, -7.5], [13.5, 4.5], [0.0, -22.5]
+ ];
+
+ for (let py = 0; py < size; py++) {
+ const wz = (py / size - 0.5) * worldSpan;
+ for (let px = 0; px < size; px++) {
+ const wx = (px / size - 0.5) * worldSpan;
+ // Delicate, fine parallel S-wave Zen raking (frequency = 11.5 for crisp fine grooves!)
+ const baseWave = wz + Math.sin(wx * 0.08) * 2.1 + Math.cos(wx * 0.04) * 1.2;
+ let groove = Math.sin(baseWave * 11.5);
+ for (let r = 0; r < rocks.length; r++) {
+ const d = Math.hypot(wx - rocks[r][0], wz - rocks[r][1]);
+ if (d < 7.2) {
+ const t = Math.max(0, Math.min(1, (7.2 - d) / 4.2));
+ const smooth = t * t * (3 - 2 * t);
+ groove = groove * (1 - smooth) + Math.sin(d * 11.8) * smooth;
+ }
+ }
+
+ const grain = hash2(px * 0.77, py * 0.77) * 0.08 + noise2(wx * 2.2, wz * 2.2) * 0.08;
+ const g01 = groove * 0.5 + 0.5;
+
+ // Warm champagne-cream Zen sand palette (bright, serene, sunlit!)
+ const sr = (202 + g01 * 34) * (0.94 + grain);
+ const sg = (180 + g01 * 30) * (0.94 + grain);
+ const sb = (136 + g01 * 24) * (0.94 + grain);
+
+ const idx = (py * size + px) * 4;
+ dA[idx] = Math.min(255, sr);
+ dA[idx + 1] = Math.min(255, sg);
+ dA[idx + 2] = Math.min(255, sb);
+ dA[idx + 3] = 255;
+
+ const hVal = Math.max(0, Math.min(255, g01 * 215 + grain * 120));
+ dH[idx] = dH[idx + 1] = dH[idx + 2] = hVal;
+ dH[idx + 3] = 255;
+ }
+ }
+ ctx.putImageData(imgA, 0, 0);
+ hctx.putImageData(imgH, 0, 0);
+ const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 1.9); map.encoding = THREE.sRGBEncoding;
+ map.anisotropy = 8;
+ return { map, normalMap };
+ }
+
+ function createGlowSpriteTexture() {
+ const size = 128;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
+ g.addColorStop(0.0, 'rgba(255, 248, 210, 1.0)');
+ g.addColorStop(0.24, 'rgba(255, 200, 100, 0.65)');
+ g.addColorStop(0.58, 'rgba(255, 140, 40, 0.16)');
+ g.addColorStop(1.0, 'rgba(255, 100, 0, 0.0)');
+ ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+ return new THREE.CanvasTexture(c);
+ }
+
+ function createLeafSprigTexture(species) {
+ const size = 256;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ ctx.clearRect(0, 0, size, size);
+
+ ctx.strokeStyle = '#3b2416'; ctx.lineCap = 'round'; ctx.lineWidth = 4.5;
+ ctx.beginPath(); ctx.moveTo(128, 242); ctx.quadraticCurveTo(124, 155, 130, 56); ctx.stroke();
+ ctx.lineWidth = 2.8;
+ const subTwigs = [
+ [127, 185, 62, 135], [127, 175, 194, 130],
+ [128, 135, 58, 78], [129, 128, 198, 75],
+ [129, 92, 92, 42], [129, 88, 168, 44]
+ ];
+ subTwigs.forEach(s => { ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); ctx.stroke(); });
+
+ if (species === 'sakura') {
+ const cols = ['#f472b6', '#f9a8d4', '#ec4899', '#fbcfe8', '#e8689f'];
+ for (let i = 0; i < 82; i++) {
+ const tw = subTwigs[i % subTwigs.length], t = 0.22 + Math.random() * 0.85;
+ const cx = tw[0] + (tw[2] - tw[0]) * t + (Math.random() - 0.5) * 44;
+ const cy = tw[1] + (tw[3] - tw[1]) * t + (Math.random() - 0.5) * 44;
+ const r = 6.5 + Math.random() * 6.5;
+ ctx.fillStyle = cols[Math.floor(Math.random() * cols.length)];
+ for (let p = 0; p < 5; p++) {
+ const a = (p / 5) * Math.PI * 2 + i;
+ ctx.beginPath(); ctx.ellipse(cx + Math.cos(a) * r * 0.55, cy + Math.sin(a) * r * 0.55, r * 0.55, r * 0.36, a, 0, Math.PI * 2); ctx.fill();
+ }
+ ctx.fillStyle = '#c95c84'; ctx.beginPath(); ctx.arc(cx, cy, r * 0.16, 0, Math.PI * 2); ctx.fill();
+ }
+ } else if (species === 'maple') {
+ const cols = ['#d94e1f', '#ea7317', '#b82a14', '#f59e0b', '#c93c18'];
+ for (let i = 0; i < 76; i++) {
+ const tw = subTwigs[i % subTwigs.length], t = 0.2 + Math.random() * 0.88;
+ const cx = tw[0] + (tw[2] - tw[0]) * t + (Math.random() - 0.5) * 46;
+ const cy = tw[1] + (tw[3] - tw[1]) * t + (Math.random() - 0.5) * 46;
+ const r = 9.5 + Math.random() * 7.5;
+ ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.random() * Math.PI * 2);
+ ctx.fillStyle = cols[Math.floor(Math.random() * cols.length)];
+ ctx.beginPath();
+ for (let l = 0; l < 5; l++) {
+ const a = (l / 5) * Math.PI * 2;
+ ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+ ctx.lineTo(Math.cos(a + 0.32) * r * 0.36, Math.sin(a + 0.32) * r * 0.36);
+ }
+ ctx.closePath(); ctx.fill(); ctx.restore();
+ }
+ } else {
+ const cols = ['#2f6b24', '#418530', '#589c3d', '#22521a', '#6eb04c'];
+ for (let i = 0; i < 115; i++) {
+ const tw = subTwigs[i % subTwigs.length], t = 0.15 + Math.random() * 0.9;
+ const cx = tw[0] + (tw[2] - tw[0]) * t + (Math.random() - 0.5) * 48;
+ const cy = tw[1] + (tw[3] - tw[1]) * t + (Math.random() - 0.5) * 44;
+ ctx.strokeStyle = cols[Math.floor(Math.random() * cols.length)]; ctx.lineWidth = 2.6;
+ for (let n = 0; n < 7; n++) {
+ const a = -Math.PI * 0.85 + (n / 6) * Math.PI * 1.1 + (Math.random() - 0.5) * 0.3;
+ const len = 11 + Math.random() * 9;
+ ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len); ctx.stroke();
+ }
+ }
+ }
+ const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4; return tex;
+ }
+
+ function createBarkTexture() {
+ const size = 256;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ ctx.fillStyle = '#473020'; ctx.fillRect(0, 0, size, size);
+ for (let i = 0; i < 280; i++) {
+ const x = Math.random() * size, w = 2 + Math.random() * 6;
+ ctx.fillStyle = Math.random() > 0.5 ? 'rgba(25,14,8,0.45)' : 'rgba(105,76,52,0.34)';
+ ctx.fillRect(x, 0, w, size);
+ }
+ const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
+ }
+
+ function createStarBallTexture() {
+ const size = 512;
+ const c = document.createElement('canvas'); c.width = c.height = size;
+ const ctx = c.getContext('2d');
+ const grad = ctx.createLinearGradient(0, 0, size, size);
+ grad.addColorStop(0, '#fef08a'); grad.addColorStop(0.5, '#facc15'); grad.addColorStop(1, '#ca8a04');
+ ctx.fillStyle = grad; ctx.fillRect(0, 0, size, size);
+ for (let y = 10; y < size; y += 20) {
+ const off = (Math.floor(y / 20) % 2) * 10;
+ for (let x = 10 + off; x < size; x += 20) {
+ ctx.fillStyle = 'rgba(146, 64, 14, 0.18)';
+ ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+ }
+ }
+ ctx.fillStyle = '#1d4ed8'; ctx.fillRect(0, size * 0.455, size, size * 0.09);
+ function drawStar(cx, cy, spikes, outerR, innerR) {
+ let rot = Math.PI / 2 * 3; const step = Math.PI / spikes;
+ ctx.beginPath(); ctx.moveTo(cx, cy - outerR);
+ for (let i = 0; i < spikes; i++) {
+ ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR); rot += step;
+ ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR); rot += step;
+ }
+ ctx.closePath(); ctx.fillStyle = '#dc2626'; ctx.fill();
+ ctx.lineWidth = 4; ctx.strokeStyle = '#7f1d1d'; ctx.stroke();
+ }
+ drawStar(size * 0.25, size * 0.5, 5, 62, 26);
+ drawStar(size * 0.75, size * 0.5, 5, 62, 26);
+ const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8; return tex;
+ }
+
+ function createChevronTexture() {
+ const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+ const ctx = c.getContext('2d');
+ ctx.clearRect(0, 0, 256, 256);
+ ctx.strokeStyle = 'rgba(254, 240, 138, 0.6)';
+ ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+ for (let y = 55; y < 240; y += 85) {
+ ctx.beginPath(); ctx.moveTo(45, y + 36); ctx.lineTo(128, y); ctx.lineTo(211, y + 36); ctx.stroke();
+ }
+ const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
+ tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(1, 2); return tex;
+ }
+
+ // =========================================================================
+ // 2. WEB AUDIO SYNTHESIZER
+ // =========================================================================
+ let soundOn = true, audioCtx = null, rainSrc = null, rainGain = null;
+ function initAudio() {
+ if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ if (audioCtx.state === 'suspended') audioCtx.resume();
+ }
+ function sfxPutt(pwr) {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime;
+ const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'triangle';
+ o.frequency.setValueAtTime(160 + pwr * 150, t);
+ o.frequency.exponentialRampToValueAtTime(52, t + 0.085);
+ g.gain.setValueAtTime(0.32 * Math.max(0.25, pwr), t);
+ g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.095);
+ }
+ function sfxBounce(spd, isBumper = false) {
+ if (!soundOn) return; initAudio();
+ const v = Math.min(0.32, spd / 24);
+ if (v < 0.02) return;
+ const t = audioCtx.currentTime;
+ const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = isBumper ? 'square' : 'sine';
+ o.frequency.setValueAtTime(isBumper ? 460 : 285, t);
+ o.frequency.exponentialRampToValueAtTime(isBumper ? 185 : 115, t + 0.07);
+ g.gain.setValueAtTime(v, t);
+ g.gain.exponentialRampToValueAtTime(0.001, t + 0.075);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.08);
+ }
+ function sfxSplash() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, len = Math.floor(audioCtx.sampleRate * 0.35);
+ const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate), d = buf.getChannelData(0);
+ for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.09));
+ const src = audioCtx.createBufferSource(); src.buffer = buf;
+ const flt = audioCtx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 620;
+ const g = audioCtx.createGain(); g.gain.setValueAtTime(0.32, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+ src.connect(flt); flt.connect(g); g.connect(audioCtx.destination); src.start(t);
+ }
+ function sfxJump() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sine'; o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(520, t + 0.18);
+ g.gain.setValueAtTime(0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.21);
+ }
+ function sfxBoost() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sawtooth'; o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(680, t + 0.16);
+ const flt = audioCtx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1200;
+ g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+ o.connect(flt); flt.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.19);
+ }
+ function sfxPortal() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime;
+ [440, 660, 880, 1320].forEach((f, i) => {
+ const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sine'; o.frequency.setValueAtTime(f, t + i * 0.045);
+ g.gain.setValueAtTime(0.15, t + i * 0.045); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.045 + 0.25);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t + i * 0.045); o.stop(t + i * 0.045 + 0.26);
+ });
+ }
+ function sfxCup() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime;
+ [523.25, 587.33, 659.25, 783.99, 1046.5].forEach((f, i) => {
+ const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sine';
+ o.frequency.setValueAtTime(f, t + i * 0.068);
+ g.gain.setValueAtTime(0.19, t + i * 0.068);
+ g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.068 + 0.45);
+ o.connect(g); g.connect(audioCtx.destination);
+ o.start(t + i * 0.068); o.stop(t + i * 0.068 + 0.46);
+ });
+ }
+ function syncRainAudio() {
+ if (!soundOn || state.weather !== 'rainy') {
+ if (rainGain && audioCtx) rainGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.25);
+ return;
+ }
+ initAudio();
+ if (!rainSrc) {
+ const len = audioCtx.sampleRate * 2;
+ const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+ const d = buf.getChannelData(0);
+ for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+ rainSrc = audioCtx.createBufferSource(); rainSrc.buffer = buf; rainSrc.loop = true;
+ const flt = audioCtx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 880;
+ rainGain = audioCtx.createGain(); rainGain.gain.value = 0.0001;
+ rainSrc.connect(flt); flt.connect(rainGain); rainGain.connect(audioCtx.destination);
+ rainSrc.start();
+ }
+ rainGain.gain.setTargetAtTime(0.06, audioCtx.currentTime, 0.3);
+ }
+
+ // =========================================================================
+ // 3. THREE.JS RENDERER, MISTY JADE SKY IBL & LIGHTING
+ // =========================================================================
+ const canvas = document.getElementById('glCanvas');
+ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+ renderer.setSize(window.innerWidth, window.innerHeight);
+ renderer.shadowMap.enabled = true;
+ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+ renderer.toneMapping = THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure = 1.06;
+ renderer.outputEncoding = THREE.sRGBEncoding;
+
+ const scene = new THREE.Scene();
+ const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 420);
+
+ const pmremGen = new THREE.PMREMGenerator(renderer);
+ pmremGen.compileEquirectangularShader();
+ let envRT = null;
+
+ const skyUniforms = {
+ topColor: { value: new THREE.Color(0x6b9396) },
+ horizonColor: { value: new THREE.Color(0xdbe8df) },
+ sunDir: { value: new THREE.Vector3(0.4, 0.55, -0.7).normalize() },
+ sunColor: { value: new THREE.Color(0xfff5dc) },
+ starAlpha: { value: 0.0 }
+ };
+ const skyMat = new THREE.ShaderMaterial({
+ side: THREE.BackSide, depthWrite: false, uniforms: skyUniforms,
+ vertexShader: `
+ varying vec3 vWorldPos;
+ void main() { vec4 wp = modelMatrix * vec4(position, 1.0); vWorldPos = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }
+ `,
+ fragmentShader: `
+ uniform vec3 topColor; uniform vec3 horizonColor; uniform vec3 sunDir; uniform vec3 sunColor; uniform float starAlpha;
+ varying vec3 vWorldPos;
+ float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+ void main() {
+ vec3 dir = normalize(vWorldPos);
+ float h = clamp(dir.y, 0.0, 1.0);
+ vec3 col = mix(horizonColor, topColor, pow(h, 0.52));
+ float sunAmt = max(dot(dir, normalize(sunDir)), 0.0);
+ col += sunColor * pow(sunAmt, 14.0) * 0.35;
+ col += sunColor * smoothstep(0.996, 0.9992, sunAmt) * 1.25;
+ if (starAlpha > 0.01 && dir.y > 0.08) {
+ vec2 grid = floor(dir.xz / (dir.y + 0.1) * 95.0);
+ col += vec3(1.0) * step(0.993, hash(grid)) * starAlpha * smoothstep(0.08, 0.35, dir.y);
+ }
+ gl_FragColor = vec4(col, 1.0);
+ }
+ `
+ });
+ scene.add(new THREE.Mesh(new THREE.SphereGeometry(260, 32, 20), skyMat));
+
+ const iblScene = new THREE.Scene();
+ iblScene.add(new THREE.Mesh(new THREE.SphereGeometry(20, 24, 16), skyMat));
+ function updateSkyIBL() {
+ if (envRT) envRT.dispose();
+ envRT = pmremGen.fromScene(iblScene, 0.04);
+ scene.environment = envRT.texture;
+ }
+
+ const hemiLight = new THREE.HemisphereLight(0xf6f3e8, 0x5c694b, 0.72);
+ scene.add(hemiLight);
+
+ const sunLight = new THREE.DirectionalLight(0xfff1d2, 1.38);
+ sunLight.position.set(22, 32, 18);
+ sunLight.castShadow = true;
+ sunLight.shadow.mapSize.width = 2048; sunLight.shadow.mapSize.height = 2048;
+ sunLight.shadow.camera.near = 2; sunLight.shadow.camera.far = 135;
+ const dCam = 35;
+ sunLight.shadow.camera.left = -dCam; sunLight.shadow.camera.right = dCam;
+ sunLight.shadow.camera.top = dCam; sunLight.shadow.camera.bottom = -dCam;
+ sunLight.shadow.bias = -0.0005; sunLight.shadow.normalBias = 0.025;
+ scene.add(sunLight); scene.add(sunLight.target);
+
+ const shrineLight = new THREE.PointLight(0xff6a1a, 3.0, 22, 2);
+ const ballGlowLight = new THREE.PointLight(0xdbeafe, 0, 14, 1.2);
+ scene.add(ballGlowLight);
+ scene.add(shrineLight);
+
+ const lanternLights = [];
+ const lanternHalos = [];
+ const glowSpriteTex = createGlowSpriteTexture();
+ for (let i = 0; i < 6; i++) {
+ const pl = new THREE.PointLight(0xffb84d, 0, 26, 1.05);
+ scene.add(pl); lanternLights.push(pl);
+ }
+
+ // Materials
+ const grassPBR = createGrassPBR();
+ const wallPBR = createTravertineWallPBR();
+ const cliffPBR = createOchreCliffPBR();
+ const sandPBR = createCourtyardSandPBR();
+ const barkTex = createBarkTexture();
+ const ballTex = createStarBallTexture();
+ const chevronTex = createChevronTexture();
+
+ const matGrass = new THREE.MeshStandardMaterial({
+ map: grassPBR.map, normalMap: grassPBR.normalMap, normalScale: new THREE.Vector2(0.75, 0.75),
+ roughness: 0.88, metalness: 0.01, envMapIntensity: 0.18
+ });
+ const matWall = new THREE.MeshStandardMaterial({
+ map: wallPBR.map, normalMap: wallPBR.normalMap, normalScale: new THREE.Vector2(1.1, 1.1),
+ roughness: 0.72, metalness: 0.03, envMapIntensity: 0.75
+ });
+ const matCourtyardSand = new THREE.MeshStandardMaterial({
+ map: sandPBR.map, normalMap: sandPBR.normalMap, normalScale: new THREE.Vector2(1.15, 1.15),
+ roughness: 0.92, metalness: 0.01, envMapIntensity: 0.22
+ });
+ const matCliff = new THREE.MeshStandardMaterial({
+ map: cliffPBR.map, normalMap: cliffPBR.normalMap, normalScale: new THREE.Vector2(1.45, 1.45),
+ roughness: 0.88, metalness: 0.03, envMapIntensity: 0.55
+ });
+ const matPagodaRoof = new THREE.MeshStandardMaterial({ color: 0x265452, roughness: 0.45, metalness: 0.15, envMapIntensity: 0.95 });
+ const matPagodaRed = new THREE.MeshStandardMaterial({ color: 0x8f2424, roughness: 0.52, metalness: 0.05 });
+ const matGoldTrim = new THREE.MeshStandardMaterial({ color: 0xd9b36c, metalness: 0.78, roughness: 0.25, envMapIntensity: 1.2 });
+ const matBark = new THREE.MeshStandardMaterial({ map: barkTex, roughness: 0.92, envMapIntensity: 0.35 });
+ const matWoodDark = new THREE.MeshStandardMaterial({ color: 0x3b2416, roughness: 0.8 });
+ const matLanternStone = new THREE.MeshStandardMaterial({
+ map: wallPBR.map, normalMap: wallPBR.normalMap, color: 0xdfcba9, roughness: 0.78, envMapIntensity: 0.65
+ });
+ const matLanternPaper = new THREE.MeshStandardMaterial({
+ color: 0xfff8dc, emissive: 0xffb347, emissiveIntensity: 0.28, roughness: 0.45
+ });
+ const matSprigSakura = new THREE.MeshStandardMaterial({ map: createLeafSprigTexture('sakura'), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.74 });
+ const matSprigMaple = new THREE.MeshStandardMaterial({ map: createLeafSprigTexture('maple'), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.76 });
+ const matSprigPine = new THREE.MeshStandardMaterial({ map: createLeafSprigTexture('pine'), alphaTest: 0.38, side: THREE.DoubleSide, roughness: 0.80 });
+
+ const lavaUniforms = { uTime: { value: 0 } };
+ const matLavaShader = new THREE.ShaderMaterial({
+ uniforms: lavaUniforms,
+ vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+ fragmentShader: `
+ uniform float uTime; varying vec2 vUv;
+ float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+ float noise(vec2 p){
+ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+ return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y);
+ }
+ void main() {
+ vec2 p = vUv * 4.0;
+ float n = noise(p + vec2(0.0, -uTime * 0.9)) * 0.6 + noise(p * 2.3 + vec2(uTime * 0.5, -uTime * 1.4)) * 0.4;
+ float core = smoothstep(0.95, 0.15, length(vUv - vec2(0.5, 0.35)));
+ vec3 col = mix(vec3(0.55, 0.08, 0.02), vec3(1.0, 0.38, 0.04), n);
+ col = mix(col, vec3(1.0, 0.92, 0.45), smoothstep(0.55, 0.95, n * 0.6 + core * 0.65));
+ gl_FragColor = vec4(col, 1.0);
+ }
+ `
+ });
+
+ // Realistic GLSL Animated Water Shader
+ const waterUniforms = {
+ uTime: { value: 0 },
+ uDeepColor: { value: new THREE.Color(0x165359) },
+ uShallowColor: { value: new THREE.Color(0x3ba89e) },
+ uSkyColor: { value: new THREE.Color(0xdbe8df) },
+ uSunDir: { value: new THREE.Vector3(0.4, 0.6, 0.5).normalize() },
+ uSunColor: { value: new THREE.Color(0xfff5dc) },
+ uRain: { value: 0.0 }
+ };
+ const matWaterShader = new THREE.ShaderMaterial({
+ transparent: true, uniforms: waterUniforms,
+ vertexShader: `
+ uniform float uTime; varying vec2 vUv; varying vec3 vWorldPos;
+ void main() {
+ vUv = uv; vec3 p = position;
+ p.z += sin(p.x * 1.4 + uTime * 2.1) * 0.02 + cos(p.y * 1.6 - uTime * 1.7) * 0.02;
+ vec4 wp = modelMatrix * vec4(p, 1.0); vWorldPos = wp.xyz;
+ gl_Position = projectionMatrix * viewMatrix * wp;
+ }
+ `,
+ fragmentShader: `
+ uniform float uTime; uniform vec3 uDeepColor; uniform vec3 uShallowColor;
+ uniform vec3 uSkyColor; uniform vec3 uSunDir; uniform vec3 uSunColor; uniform float uRain;
+ varying vec2 vUv; varying vec3 vWorldPos;
+ float waveHeight(vec2 p, float t) {
+ float w = sin(p.x * 2.2 + t * 1.9 + sin(p.y * 1.5)) * 0.24
+ + cos(p.y * 2.8 - t * 1.5 + cos(p.x * 1.8)) * 0.22
+ + sin((p.x + p.y) * 3.6 + t * 2.4) * 0.14;
+ if (uRain > 0.1) {
+ vec2 cell = floor(p * 1.4), f = fract(p * 1.4) - 0.5;
+ float phase = fract(t * 1.4 + fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453));
+ w += smoothstep(0.08, 0.0, abs(length(f) - phase * 0.45)) * (1.0 - phase) * 0.65 * uRain;
+ }
+ return w;
+ }
+ void main() {
+ vec2 p = vWorldPos.xz; float distC = length(vUv - 0.5) * 2.0, eps = 0.08;
+ vec3 N = normalize(vec3(waveHeight(p-vec2(eps,0), uTime) - waveHeight(p+vec2(eps,0), uTime), 1.8,
+ waveHeight(p-vec2(0,eps), uTime) - waveHeight(p+vec2(0,eps), uTime)));
+ vec3 V = normalize(cameraPosition - vWorldPos);
+ float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.2);
+ float caustics = pow(max(0.0, sin(p.x * 3.5 + uTime * 2.2) * cos(p.y * 3.5 - uTime * 1.8)), 3.0);
+ vec3 waterCol = mix(uDeepColor, uShallowColor, smoothstep(0.25, 0.92, distC))
+ + vec3(0.16, 0.30, 0.30) * caustics * (1.0 - fresnel);
+ vec3 col = mix(waterCol, uSkyColor, clamp(fresnel * 0.80 + 0.12, 0.0, 0.9));
+ vec3 H = normalize(normalize(uSunDir) + V);
+ col += uSunColor * pow(max(dot(N, H), 0.0), 96.0) * (1.1 - uRain * 0.6);
+ float foam = smoothstep(0.86, 0.97, distC) * (0.5 + 0.5 * sin(uTime * 2.5 + p.x * 3.0));
+ col = mix(col, vec3(0.94, 0.98, 0.97), foam * 0.45);
+ gl_FragColor = vec4(col, mix(0.86, 0.96, fresnel) * smoothstep(1.0, 0.93, distC));
+ }
+ `
+ });
+
+ // =========================================================================
+ // 4. GENTLY UNDULATING ZEN SAND COURTYARD + LOWERED, SERENE MISTY MOUNTAINS
+ // =========================================================================
+ const envGroup = new THREE.Group();
+ scene.add(envGroup);
+
+ // Gently sculpted courtyard sand (perfectly flat at y=0 inside course radius 16, gently undulating dunes beyond!)
+ function buildCourtyardSandMesh() {
+ const geo = new THREE.PlaneGeometry(108, 108, 72, 72);
+ geo.rotateX(-Math.PI / 2);
+ const pos = geo.attributes.position;
+ for (let i = 0; i < pos.count; i++) {
+ const x = pos.getX(i), z = pos.getZ(i);
+ const d = Math.hypot(x, z);
+ const duneMask = Math.max(0, Math.min(1, (d - 18.0) / 18.0));
+ const sm = duneMask * duneMask * (3 - 2 * duneMask);
+ const y = sm * (fbm(x * 0.04 + 2.1, z * 0.04 - 1.3, 3) * 2.8 - 0.4);
+ pos.setY(i, y);
+ }
+ geo.computeVertexNormals();
+ const mesh = new THREE.Mesh(geo, matCourtyardSand);
+ mesh.receiveShadow = true;
+ envGroup.add(mesh);
+ }
+ buildCourtyardSandMesh();
+
+ // LOWERED, SERENE MISTY JADE MOUNTAIN RANGE (Fixed: ~45% lower so they frame the vista gracefully!)
+ function buildSereneMountainRange() {
+ const segs = 128, size = 340;
+ const geo = new THREE.PlaneGeometry(size, size, segs, segs);
+ geo.rotateX(-Math.PI / 2);
+ const pos = geo.attributes.position;
+ const colors = new Float32Array(pos.count * 3);
+
+ const colBase = new THREE.Color(0x4f7a46);
+ const colMid = new THREE.Color(0x3a664b);
+ const colRidge = new THREE.Color(0x385261);
+ const colMist = new THREE.Color(0x6c8c9e);
+ const tmpCol = new THREE.Color();
+
+ for (let i = 0; i < pos.count; i++) {
+ const x = pos.getX(i), z = pos.getZ(i);
+ const dist = Math.hypot(x, z);
+ const valleyMask = Math.max(0, Math.min(1, (dist - 44) / 42));
+ const smoothMask = valleyMask * valleyMask * (3 - 2 * valleyMask);
+
+ let h = -0.5;
+ if (smoothMask > 0.001) {
+ const rolling = fbm(x * 0.017 + 3.8, z * 0.017 - 1.5, 4) * 7.5;
+ const ridges = ridgedFbm(x * 0.013 - 2.4, z * 0.013 + 3.2, 5) * 22.0; // Gracefully lowered!
+ const outerLift = Math.max(0, (dist - 90) * 0.08);
+ h = -0.35 + smoothMask * (rolling + ridges + outerLift);
+ }
+ pos.setY(i, h);
+
+ const eh = h + (noise2(x * 0.06, z * 0.06) - 0.5) * 3.0;
+ if (eh < 7) tmpCol.copy(colBase).lerp(colMid, Math.max(0, eh / 7));
+ else if (eh < 15) tmpCol.copy(colMid).lerp(colRidge, (eh - 7) / 8);
+ else tmpCol.copy(colRidge).lerp(colMist, Math.min(1, (eh - 15) / 14));
+
+ colors[i * 3] = tmpCol.r; colors[i * 3 + 1] = tmpCol.g; colors[i * 3 + 2] = tmpCol.b;
+ }
+
+ geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+ geo.computeVertexNormals();
+ const mtnNormal = cliffPBR.normalMap.clone(); mtnNormal.needsUpdate = true; mtnNormal.repeat.set(18, 18);
+ const terrain = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+ vertexColors: true, normalMap: mtnNormal, normalScale: new THREE.Vector2(0.8, 0.8),
+ roughness: 0.95, metalness: 0.01, envMapIntensity: 0.4
+ }));
+ terrain.receiveShadow = true;
+ envGroup.add(terrain);
+ }
+ buildSereneMountainRange();
+
+ // =========================================================================
+ // 5. HERO ARCHITECTURE: SWEPT-EAVE JADE PAGODA ON STEPPED TERRACE + OCHRE CRAGS
+ // =========================================================================
+ function createHeroJadePagoda(x, z) {
+ const g = new THREE.Group();
+
+ // Multi-tiered carved travertine stone terrace platform
+ const step1 = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.75, 9.2), matWall);
+ step1.position.y = 0.37; step1.castShadow = true; step1.receiveShadow = true; g.add(step1);
+ const step2 = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.75, 7.6), matWall);
+ step2.position.y = 1.12; step2.castShadow = true; step2.receiveShadow = true; g.add(step2);
+ const step3 = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.65, 6.2), matWall);
+ step3.position.y = 1.82; step3.castShadow = true; step3.receiveShadow = true; g.add(step3);
+
+ // Helper: Swept Curved Pagoda Roof with upturned corners & gold ridge trim
+ function createCurvedRoof(w, y) {
+ const rg = new THREE.Group();
+ const segs = 12;
+ const geo = new THREE.ConeGeometry(w * 0.86, 1.35, 4, segs);
+ geo.rotateY(Math.PI / 4);
+ const pos = geo.attributes.position;
+ for (let i = 0; i < pos.count; i++) {
+ const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+ // Concave sweeping eave flare toward outer edge!
+ const rad = Math.hypot(vx, vz) / (w * 0.86);
+ const flare = Math.pow(rad, 2.2) * 0.55;
+ pos.setXYZ(i, vx * (1 + rad * 0.14), vy + flare, vz * (1 + rad * 0.14));
+ }
+ geo.computeVertexNormals();
+ const roofMesh = new THREE.Mesh(geo, matPagodaRoof);
+ roofMesh.castShadow = true; roofMesh.receiveShadow = true; rg.add(roofMesh);
+
+ // Gold trim band along eave rim
+ const trim = new THREE.Mesh(new THREE.BoxGeometry(w * 1.12, 0.08, w * 1.12), matGoldTrim);
+ trim.position.y = -0.18; rg.add(trim);
+
+ rg.position.y = y;
+ return rg;
+ }
+
+ // 3 Elegant Open-Column Tiers with Crimson Core & Swept Jade Roofs
+ for (let t = 0; t < 3; t++) {
+ const w = 4.5 - t * 0.75;
+ const yBase = 2.15 + t * 2.55;
+
+ // Recessed crimson sanctuary walls
+ const core = new THREE.Mesh(new THREE.BoxGeometry(w * 0.74, 2.0, w * 0.74), matPagodaRed);
+ core.position.y = yBase + 1.0; core.castShadow = true; g.add(core);
+
+ // 4 Exterior crimson lacquer corner pillars
+ const off = w * 0.46;
+ [[-off, -off], [off, -off], [off, off], [-off, off]].forEach(pt => {
+ const col = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.1, 10), matPagodaRed);
+ col.position.set(pt[0], yBase + 1.05, pt[1]); col.castShadow = true; g.add(col);
+ });
+
+ g.add(createCurvedRoof(w * 1.25, yBase + 2.3));
+ }
+
+ // Ornate golden temple spire (Sōrin)
+ const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.18, 2.8, 10), matGoldTrim);
+ spire.position.y = 11.4; g.add(spire);
+ const orb = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), matGoldTrim);
+ orb.position.y = 10.6; g.add(orb);
+
+ g.position.set(x, 0, z);
+ envGroup.add(g);
+ }
+ // Place Hero Jade Pagoda prominently in the mid-ground scenic vista!
+ createHeroJadePagoda(3.5, -24.5);
+
+ // =========================================================================
+ // 5B. COASTAL ZEN LIGHTHOUSE WITH ROTATING VOLUMETRIC BEAM + TORII GATES
+ // =========================================================================
+ const lighthouseBeacon = new THREE.Group();
+ let lighthouseBeamMat = null;
+ function createCoastalLighthouse(x, z) {
+ const g = new THREE.Group();
+ // Rocky cliff headland base
+ const headGeo = new THREE.IcosahedronGeometry(3.8, 3);
+ const hp = headGeo.attributes.position;
+ for (let i = 0; i < hp.count; i++) {
+ const vx = hp.getX(i), vy = hp.getY(i), vz = hp.getZ(i);
+ const n = 0.8 + 0.34 * ridgedFbm(vx * 0.45 + 3.1, vz * 0.45 + vy * 0.4, 3);
+ hp.setXYZ(i, vx * n, vy * n, vz * n);
+ }
+ headGeo.computeVertexNormals();
+ const headland = new THREE.Mesh(headGeo, matCliff);
+ headland.scale.set(1.3, 0.85, 1.3); headland.position.y = 1.4;
+ headland.castShadow = true; headland.receiveShadow = true; g.add(headland);
+
+ // Stone octagonal foundation
+ const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 2.05, 1.4, 12), matWall);
+ base.position.y = 3.6; base.castShadow = true; base.receiveShadow = true; g.add(base);
+
+ // Red & White striped tapered lighthouse tower (5 bands)
+ const matLHWhite = new THREE.MeshStandardMaterial({ color: 0xf8f5ee, roughness: 0.55 });
+ const matLHRed = new THREE.MeshStandardMaterial({ color: 0xc22b2b, roughness: 0.48 });
+ const bands = [
+ { y: 5.2, rT: 1.46, rB: 1.62, h: 1.9, m: matLHWhite },
+ { y: 7.1, rT: 1.30, rB: 1.46, h: 1.9, m: matLHRed },
+ { y: 9.0, rT: 1.15, rB: 1.30, h: 1.9, m: matLHWhite },
+ { y: 10.9, rT: 1.02, rB: 1.15, h: 1.9, m: matLHRed },
+ { y: 12.6, rT: 0.92, rB: 1.02, h: 1.5, m: matLHWhite }
+ ];
+ bands.forEach(b => {
+ const seg = new THREE.Mesh(new THREE.CylinderGeometry(b.rT, b.rB, b.h, 20), b.m);
+ seg.position.y = b.y; seg.castShadow = true; seg.receiveShadow = true; g.add(seg);
+ });
+
+ // Wrap-around gallery deck & dark iron railing
+ const gallery = new THREE.Mesh(new THREE.CylinderGeometry(1.38, 1.12, 0.35, 20), matWoodDark);
+ gallery.position.y = 13.45; gallery.castShadow = true; g.add(gallery);
+ const rail = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.045, 8, 24), matWoodDark);
+ rail.rotation.x = Math.PI / 2; rail.position.y = 14.05; g.add(rail);
+
+ // Glass lantern room + glowing Fresnel core
+ const glass = new THREE.Mesh(
+ new THREE.CylinderGeometry(0.86, 0.86, 1.35, 16),
+ new THREE.MeshStandardMaterial({ color: 0xfff8dc, emissive: 0xffd166, emissiveIntensity: 0.85, transparent: true, opacity: 0.72, roughness: 0.1 })
+ );
+ glass.position.y = 14.3; g.add(glass);
+
+ // Pagoda-inspired crimson dome cap + golden finial
+ const dome = new THREE.Mesh(new THREE.ConeGeometry(1.18, 1.05, 16), matLHRed);
+ dome.position.y = 15.48; dome.castShadow = true; g.add(dome);
+ const fin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), matGoldTrim);
+ fin.position.y = 16.08; g.add(fin);
+
+ // Rotating Dual Volumetric Light Cones!
+ lighthouseBeamMat = new THREE.MeshBasicMaterial({
+ color: 0xfff3c4, transparent: true, opacity: 0.16,
+ blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+ });
+ [-1, 1].forEach(dir => {
+ const coneGeo = new THREE.ConeGeometry(3.8, 26, 20, 1, true);
+ coneGeo.translate(0, -13, 0);
+ coneGeo.rotateZ(dir * Math.PI / 2);
+ const beam = new THREE.Mesh(coneGeo, lighthouseBeamMat);
+ beam.rotation.z = dir * 0.14; // slight downward tilt toward course
+ lighthouseBeacon.add(beam);
+ });
+ lighthouseBeacon.position.set(0, 14.35, 0);
+ g.add(lighthouseBeacon);
+
+ g.position.set(x, 0, z);
+ envGroup.add(g);
+ }
+ createCoastalLighthouse(-20.5, -18.5);
+
+ // Curved-Beam Crimson Torii Gates framing the scenic horizon
+ function createToriiGate(x, z, scale = 1, rotY = 0) {
+ const g = new THREE.Group();
+ [-1.8, 1.8].forEach(px => {
+ const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.48, 0.52, 12), matCliff);
+ ped.position.set(px, 0.25, 0); ped.castShadow = true; g.add(ped);
+ const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 5.1, 14), matPagodaRed);
+ pil.position.set(px, 2.7, 0); pil.castShadow = true; g.add(pil);
+ });
+ const kasagi = new THREE.CatmullRomCurve3([
+ new THREE.Vector3(-2.9, 5.4, 0), new THREE.Vector3(-1.3, 5.08, 0),
+ new THREE.Vector3(0, 5.04, 0), new THREE.Vector3(1.3, 5.08, 0), new THREE.Vector3(2.9, 5.4, 0)
+ ]);
+ const topB = new THREE.Mesh(new THREE.TubeGeometry(kasagi, 20, 0.22, 8, false), matPagodaRed);
+ topB.castShadow = true; g.add(topB);
+ const capB = new THREE.Mesh(new THREE.TubeGeometry(kasagi, 20, 0.13, 8, false), matWoodDark);
+ capB.position.y = 0.20; g.add(capB);
+ const subB = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.25, 0.32), matPagodaRed);
+ subB.position.set(0, 4.1, 0); g.add(subB);
+ const strut = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.85, 0.26), matPagodaRed);
+ strut.position.set(0, 4.58, 0); g.add(strut);
+ g.position.set(x, 0, z); g.scale.setScalar(scale); g.rotation.y = rotY;
+ envGroup.add(g);
+ }
+ createToriiGate(-13.5, -28.0, 1.35, 0.24);
+ createToriiGate(16.5, -26.0, 1.35, -0.22);
+
+
+ // Sculpted Dramatic Ochre Hero Cliff Crags flanking the courtyard (like the reference!)
+ function createHeroCliffCrag(x, z, sx, sy, sz, rotY = 0, seedOff = 1.0) {
+ const geo = new THREE.IcosahedronGeometry(2.6, 3);
+ const pos = geo.attributes.position;
+ for (let i = 0; i < pos.count; i++) {
+ const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+ const n = 0.74 + 0.42 * ridgedFbm(vx * 0.55 + seedOff, vz * 0.55 + vy * 0.45, 4);
+ pos.setXYZ(i, vx * n, vy * n, vz * n);
+ }
+ geo.computeVertexNormals();
+ const rock = new THREE.Mesh(geo, matCliff);
+ rock.position.set(x, sy * 1.15, z);
+ rock.scale.set(sx, sy, sz);
+ rock.rotation.y = rotY;
+ rock.castShadow = true; rock.receiveShadow = true;
+ envGroup.add(rock);
+ }
+
+ // Dramatic warm ochre rock crags framing the Pagoda & Garden
+ createHeroCliffCrag(-11.5, -20.5, 1.5, 2.2, 1.2, 0.3, 2.1);
+ createHeroCliffCrag(-4.8, -23.0, 1.1, 2.4, 0.9, -0.4, 5.4);
+ createHeroCliffCrag(19.5, -10.0, 1.7, 2.5, 1.5, 0.6, 8.7);
+ createHeroCliffCrag(18.5, 2.5, 1.4, 1.8, 1.3, -0.2, 11.2);
+ createHeroCliffCrag(-16.0, 6.0, 1.3, 1.1, 1.1, 0.8, 14.5);
+
+ // Botanical Fern & Moss Tufts around crags
+ function createFernTuft(x, z, scale = 1) {
+ const g = new THREE.Group();
+ const matFern = new THREE.MeshStandardMaterial({ color: 0x3b6e26, roughness: 0.78, side: THREE.DoubleSide });
+ for (let f = 0; f < 7; f++) {
+ const a = (f / 7) * Math.PI * 2;
+ const blade = new THREE.Mesh(new THREE.ConeGeometry(0.16, 1.05, 4), matFern);
+ blade.scale.set(1.0, 1.0, 0.2);
+ blade.position.set(Math.cos(a) * 0.25, 0.35, Math.sin(a) * 0.25);
+ blade.rotation.set(Math.sin(a) * 0.65, -a, -Math.cos(a) * 0.65);
+ blade.castShadow = true; g.add(blade);
+ }
+ g.position.set(x, 0, z); g.scale.setScalar(scale); envGroup.add(g);
+ }
+
+ // BOTANICAL INSTANCED LEAF-SPRIG TREES (Delicate Sakura, Warm Autumn Maple, Jade Pine)
+ const leafInstances = { sakura: [], maple: [], pine: [] };
+ function addBotanicalTree(x, z, scale = 1, species = 'sakura') {
+ const g = new THREE.Group();
+ const seed = Math.abs(x * 13.7 + z * 7.3);
+ const rand = (n) => { const s = Math.sin(seed + n * 12.9898) * 43758.5453; return s - Math.floor(s); };
+
+ const trunkPts = [
+ new THREE.Vector3(0, 0, 0),
+ new THREE.Vector3((rand(1) - 0.5) * 0.45, 1.3, (rand(2) - 0.5) * 0.45),
+ new THREE.Vector3((rand(3) - 0.5) * 0.65, 2.7, (rand(4) - 0.5) * 0.65),
+ new THREE.Vector3((rand(5) - 0.5) * 0.4, 3.8, (rand(6) - 0.5) * 0.4)
+ ];
+ const trunkCurve = new THREE.CatmullRomCurve3(trunkPts);
+ const trunkMesh = new THREE.Mesh(new THREE.TubeGeometry(trunkCurve, 12, 0.26, 8, false), matBark);
+ trunkMesh.castShadow = true; trunkMesh.receiveShadow = true; g.add(trunkMesh);
+
+ const rootBase = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.48, 0.72, 9), matBark);
+ rootBase.position.y = 0.34; rootBase.castShadow = true; g.add(rootBase);
+
+ const numLimbs = 6, dummy = new THREE.Object3D();
+ for (let l = 0; l < numLimbs; l++) {
+ const a = (l / numLimbs) * Math.PI * 2 + rand(l + 10) * 0.5;
+ const startY = 2.0 + (l / numLimbs) * 1.4, reach = 1.9 + rand(l + 20) * 1.1, endY = startY + 0.9 + rand(l + 30) * 1.0;
+ const p0 = trunkCurve.getPoint(Math.min(0.95, startY / 3.8));
+ const p1 = new THREE.Vector3(p0.x + Math.cos(a) * reach * 0.55, (startY + endY) * 0.52, p0.z + Math.sin(a) * reach * 0.55);
+ const p2 = new THREE.Vector3(p0.x + Math.cos(a) * reach, endY, p0.z + Math.sin(a) * reach);
+ const limbCurve = new THREE.CatmullRomCurve3([p0, p1, p2]);
+ const limbMesh = new THREE.Mesh(new THREE.TubeGeometry(limbCurve, 8, 0.10, 6, false), matBark);
+ limbMesh.castShadow = true; g.add(limbMesh);
+
+ for (let c = 0; c < 24; c++) {
+ const lt = 0.40 + rand(l * 40 + c) * 0.60, bp = limbCurve.getPoint(lt);
+ dummy.position.set(
+ x + (bp.x + (rand(l * 40 + c + 100) - 0.5) * 1.9) * scale,
+ (bp.y + (rand(l * 40 + c + 200) - 0.35) * 1.2) * scale,
+ z + (bp.z + (rand(l * 40 + c + 300) - 0.5) * 1.9) * scale
+ );
+ dummy.rotation.set((rand(l * 40 + c + 400) - 0.5) * 1.4, rand(l * 40 + c + 500) * Math.PI * 2, (rand(l * 40 + c + 600) - 0.5) * 1.2);
+ const s = (0.85 + rand(l * 40 + c + 700) * 0.65) * scale;
+ dummy.scale.set(s, s, s); dummy.updateMatrix();
+ leafInstances[species].push(dummy.matrix.clone());
+ }
+ }
+ g.position.set(x, 0, z); g.scale.setScalar(scale); envGroup.add(g);
+ }
+
+ function finalizeBotanicalCanopies() {
+ const cardGeo = new THREE.PlaneGeometry(1.42, 1.42);
+ const mapMat = { sakura: matSprigSakura, maple: matSprigMaple, pine: matSprigPine };
+ Object.keys(leafInstances).forEach(sp => {
+ const mats = leafInstances[sp];
+ if (!mats.length) return;
+ const inst = new THREE.InstancedMesh(cardGeo, mapMat[sp], mats.length);
+ mats.forEach((m, idx) => inst.setMatrixAt(idx, m));
+ inst.castShadow = true; inst.receiveShadow = true; inst.instanceMatrix.needsUpdate = true;
+ envGroup.add(inst);
+ });
+ }
+
+ // Place graceful Japanese trees framing the Pagoda & Crags
+ addBotanicalTree(-9.5, -18.5, 1.35, 'sakura');
+ addBotanicalTree(-14.5, -13.5, 1.3, 'maple');
+ addBotanicalTree(-3.5, -19.5, 1.25, 'pine');
+ addBotanicalTree(14.0, -18.5, 1.35, 'maple');
+ addBotanicalTree(15.5, -12.5, 1.3, 'pine');
+ addBotanicalTree(17.5, 7.5, 1.35, 'pine');
+ addBotanicalTree(-17.5, 10.0, 1.35, 'maple');
+ addBotanicalTree(12.0, -25.0, 1.4, 'sakura');
+ finalizeBotanicalCanopies();
+
+ // Koi Pond + GLSL Water + Lily Pads + Arched Footbridge (Left Courtyard)
+ const koiGroup = new THREE.Group();
+ const pondX = -20, pondZ = -5, pondR = 7.8;
+ const pondBed = new THREE.Mesh(new THREE.CircleGeometry(pondR, 42), new THREE.MeshStandardMaterial({ color: 0x223e3b, normalMap: cliffPBR.normalMap, roughness: 0.9 }));
+ pondBed.rotation.x = -Math.PI / 2; pondBed.position.set(pondX, -0.25, pondZ); envGroup.add(pondBed);
+ const pondWater = new THREE.Mesh(new THREE.CircleGeometry(pondR, 48), matWaterShader);
+ pondWater.rotation.x = -Math.PI / 2; pondWater.position.set(pondX, 0.06, pondZ); envGroup.add(pondWater);
+
+ for (let b = 0; b < 22; b++) {
+ const a = (b / 22) * Math.PI * 2, rr = pondR - 0.1 + (b % 3) * 0.25;
+ const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8 + (b % 4) * 0.2, 1), matCliff);
+ stone.scale.set(1.2, 0.55, 1.0); stone.position.set(pondX + Math.cos(a) * rr, 0.2, pondZ + Math.sin(a) * rr);
+ stone.rotation.y = a; stone.castShadow = true; stone.receiveShadow = true; envGroup.add(stone);
+ }
+
+ const matLily = new THREE.MeshStandardMaterial({ color: 0x3b7a2c, roughness: 0.55 });
+ const matLotus = new THREE.MeshStandardMaterial({ color: 0xf49cbb, emissive: 0x9d174d, emissiveIntensity: 0.12, roughness: 0.4 });
+ [[-3.0, -2.3], [-1.9, -3.2], [3.3, 2.0], [2.2, 2.9], [-3.8, 2.6], [3.5, -2.2]].forEach((lp, i) => {
+ const pad = new THREE.Mesh(new THREE.CircleGeometry(0.52 + (i % 2) * 0.16, 16, 0.25, Math.PI * 1.85), matLily);
+ pad.rotation.x = -Math.PI / 2; pad.rotation.z = i * 1.1; pad.position.set(pondX + lp[0], 0.09, pondZ + lp[1]); envGroup.add(pad);
+ if (i % 2 === 0) {
+ const lotus = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.22, 6), matLotus);
+ lotus.position.set(pondX + lp[0], 0.17, pondZ + lp[1]); lotus.rotation.x = Math.PI; envGroup.add(lotus);
+ }
+ });
+
+ const bridgeGroup = new THREE.Group();
+ for (let p = -6; p <= 6; p++) {
+ const t = p / 6;
+ const plank = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.12, 2.1), matWoodDark);
+ plank.position.set(p * 0.65, 0.42 + Math.cos(t * Math.PI * 0.5) * 1.05, 0);
+ plank.rotation.z = -Math.sin(t * Math.PI * 0.5) * 0.25; plank.castShadow = true; bridgeGroup.add(plank);
+ }
+ [-1.0, 1.0].forEach(zSide => {
+ const railPts = [];
+ for (let p = -6; p <= 6; p++) { const t = p / 6; railPts.push(new THREE.Vector3(p * 0.65, 1.2 + Math.cos(t * Math.PI * 0.5) * 1.05, zSide)); }
+ const rail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(railPts), 16, 0.08, 8, false), matPagodaRed);
+ rail.castShadow = true; bridgeGroup.add(rail);
+ });
+ bridgeGroup.position.set(pondX, 0, pondZ); bridgeGroup.rotation.y = 0.45; envGroup.add(bridgeGroup);
+
+ const koiFish = [];
+ for (let k = 0; k < 7; k++) {
+ const fish = new THREE.Group();
+ const body = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.68, 8), new THREE.MeshBasicMaterial({ color: k % 2 === 0 ? 0xf97316 : (k % 3 === 0 ? 0xffffff : 0xfacc15) }));
+ body.rotation.x = Math.PI / 2; fish.add(body); koiGroup.add(fish);
+ koiFish.push({ mesh: fish, ang: k * 0.9, rad: 1.7 + (k % 4) * 1.25, spd: 0.45 + k * 0.06 });
+ }
+ koiGroup.position.set(pondX, -0.02, pondZ); envGroup.add(koiGroup);
+
+ // Sculpted Zen Courtyard Boulders (matching concentric sand rings!)
+ function createZenBoulder(x, z, sx, sy, sz, rotY = 0) {
+ const geo = new THREE.IcosahedronGeometry(1.35, 3);
+ const pos = geo.attributes.position;
+ for (let i = 0; i < pos.count; i++) {
+ const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+ const n = 0.86 + 0.26 * fbm(vx * 1.4 + x, vz * 1.4 + vy + z, 3);
+ pos.setXYZ(i, vx * n, vy * n, vz * n);
+ }
+ geo.computeVertexNormals();
+ const rock = new THREE.Mesh(geo, matCliff);
+ rock.position.set(x, sy * 0.46, z); rock.scale.set(sx, sy, sz); rock.rotation.y = rotY;
+ rock.castShadow = true; rock.receiveShadow = true; envGroup.add(rock);
+ createFernTuft(x + sx * 0.95, z + sz * 0.65, 0.8);
+ }
+ createZenBoulder(-11.5, -2.5, 1.6, 0.95, 1.4, 0.4);
+ createZenBoulder(-13.0, 5.5, 1.3, 0.65, 1.2, 1.1);
+ createZenBoulder( 13.0, -7.5, 1.9, 1.25, 1.7, -0.5);
+ createZenBoulder( 13.5, 4.5, 1.4, 0.8, 1.3, 0.8);
+
+ // Drifting Sakura Petals + Evening Fireflies
+ const petalCount = 160;
+ const petalGeo = new THREE.BufferGeometry();
+ const petalPos = new Float32Array(petalCount * 3);
+ for (let i = 0; i < petalCount; i++) {
+ petalPos[i * 3] = (Math.random() - 0.5) * 46;
+ petalPos[i * 3 + 1] = 0.5 + Math.random() * 11;
+ petalPos[i * 3 + 2] = (Math.random() - 0.5) * 46;
+ }
+ petalGeo.setAttribute('position', new THREE.BufferAttribute(petalPos, 3));
+ envGroup.add(new THREE.Points(petalGeo, new THREE.PointsMaterial({ color: 0xf9c5d5, size: 0.20, transparent: true, opacity: 0.85 })));
+
+ const fireflyCount = 65;
+ const ffGeo = new THREE.BufferGeometry();
+ const ffPos = new Float32Array(fireflyCount * 3);
+ for (let i = 0; i < fireflyCount; i++) {
+ ffPos[i * 3] = (Math.random() - 0.5) * 40;
+ ffPos[i * 3 + 1] = 0.6 + Math.random() * 3.6;
+ ffPos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+ }
+ ffGeo.setAttribute('position', new THREE.BufferAttribute(ffPos, 3));
+ const ffMat = new THREE.PointsMaterial({ color: 0xfef08a, size: 0.26, transparent: true, opacity: 0.0 });
+ envGroup.add(new THREE.Points(ffGeo, ffMat));
+
+ // =========================================================================
+ // 6. CURVED & ROUNDED-CORNER FAIRWAY / TWO-TONE TRAVERTINE WALL GENERATORS
+ // =========================================================================
+ function createRoundedPolygon(verts, arcSteps = 8) {
+ const pts = [], n = verts.length;
+ for (let i = 0; i < n; i++) {
+ const prev = verts[(i - 1 + n) % n], curr = verts[i], next = verts[(i + 1) % n], r = curr.r || 0;
+ if (r <= 0.01) { pts.push({ x: curr.x, z: curr.z }); continue; }
+ const v1x = prev.x - curr.x, v1z = prev.z - curr.z, v2x = next.x - curr.x, v2z = next.z - curr.z;
+ const l1 = Math.hypot(v1x, v1z), l2 = Math.hypot(v2x, v2z);
+ const u1x = v1x / l1, u1z = v1z / l1, u2x = v2x / l2, u2z = v2z / l2;
+ const dot = Math.max(-0.999, Math.min(0.999, u1x * u2x + u1z * u2z));
+ const halfAng = Math.acos(dot) / 2;
+ const tanDist = Math.min(r / Math.tan(halfAng), l1 * 0.45, l2 * 0.45), effR = tanDist * Math.tan(halfAng);
+ const pStart = { x: curr.x + u1x * tanDist, z: curr.z + u1z * tanDist };
+ const pEnd = { x: curr.x + u2x * tanDist, z: curr.z + u2z * tanDist };
+ const bx = u1x + u2x, bz = u1z + u2z, bl = Math.hypot(bx, bz), cDist = effR / Math.sin(halfAng);
+ const cx = curr.x + (bx / bl) * cDist, cz = curr.z + (bz / bl) * cDist;
+ let a1 = Math.atan2(pStart.z - cz, pStart.x - cx), a2 = Math.atan2(pEnd.z - cz, pEnd.x - cx), diff = a2 - a1;
+ while (diff > Math.PI) diff -= Math.PI * 2;
+ while (diff < -Math.PI) diff += Math.PI * 2;
+ for (let s = 0; s <= arcSteps; s++) {
+ const a = a1 + diff * (s / arcSteps);
+ pts.push({ x: cx + Math.cos(a) * effR, z: cz + Math.sin(a) * effR });
+ }
+ }
+ return pts;
+ }
+
+ function createCurvedCorridor(spineCoords, halfW, samples = 48) {
+ const curve = new THREE.CatmullRomCurve3(spineCoords.map(p => new THREE.Vector3(p[0], 0, p[1])));
+ const leftPts = [], rightPts = [];
+ for (let i = 0; i <= samples; i++) {
+ const t = i / samples, p = curve.getPoint(t), tan = curve.getTangent(t);
+ const nx = -tan.z, nz = tan.x;
+ leftPts.push({ x: p.x - nx * halfW, z: p.z - nz * halfW });
+ rightPts.push({ x: p.x + nx * halfW, z: p.z + nz * halfW });
+ }
+ const pts = [];
+ for (let i = 0; i <= samples; i++) pts.push(rightPts[i]);
+ const endP = curve.getPoint(1), endTan = curve.getTangent(1), endBaseA = Math.atan2(endTan.x, -endTan.z);
+ for (let s = 1; s < 12; s++) {
+ const a = endBaseA - (s / 12) * Math.PI;
+ pts.push({ x: endP.x + Math.cos(a) * halfW, z: endP.z + Math.sin(a) * halfW });
+ }
+ for (let i = samples; i >= 0; i--) pts.push(leftPts[i]);
+ const startP = curve.getPoint(0), startTan = curve.getTangent(0), startBaseA = Math.atan2(-startTan.x, startTan.z);
+ for (let s = 1; s < 12; s++) {
+ const a = startBaseA - (s / 12) * Math.PI;
+ pts.push({ x: startP.x + Math.cos(a) * halfW, z: startP.z + Math.sin(a) * halfW });
+ }
+ return pts;
+ }
+
+ function ensureOutwardWinding(pts, wantOutward = true) {
+ let area = 0;
+ for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; area += (a.x * b.z - b.x * a.z); }
+ if ((wantOutward && area < 0) || (!wantOutward && area > 0)) pts.reverse();
+ return pts;
+ }
+
+ function buildCurvedStoneWallMesh(loopPts, wallHeight = 0.92, wallThick = 0.56, isInnerIsland = false) {
+ const n = loopPts.length;
+ const profile = [
+ [0.0, 0.0, 0.0], [0.0, wallHeight - 0.13, 0.42], [0.10, wallHeight, 0.52],
+ [wallThick - 0.10, wallHeight, 0.70], [wallThick, wallHeight - 0.13, 0.80], [wallThick, 0.0, 1.0]
+ ];
+ const pLen = profile.length, positions = [], uvs = [], indices = [], normals = [];
+ const dirSign = isInnerIsland ? -1 : 1;
+ for (let i = 0; i < n; i++) {
+ const pPrev = loopPts[(i - 1 + n) % n], pCurr = loopPts[i], pNext = loopPts[(i + 1) % n];
+ const e1x = pCurr.x - pPrev.x, e1z = pCurr.z - pPrev.z, e2x = pNext.x - pCurr.x, e2z = pNext.z - pCurr.z;
+ const l1 = Math.hypot(e1x, e1z) || 1, l2 = Math.hypot(e2x, e2z) || 1;
+ const n1x = (e1z / l1) * dirSign, n1z = (-e1x / l1) * dirSign, n2x = (e2z / l2) * dirSign, n2z = (-e2x / l2) * dirSign;
+ let mx = n1x + n2x, mz = n1z + n2z; const ml = Math.hypot(mx, mz) || 1; mx /= ml; mz /= ml;
+ const miter = Math.min(1.6, 1.0 / Math.max(0.55, mx * n1x + mz * n1z));
+ normals.push({ x: mx * miter, z: mz * miter });
+ }
+ let arcDist = 0;
+ for (let i = 0; i <= n; i++) {
+ const idx = i % n, pt = loopPts[idx], nm = normals[idx];
+ if (i > 0) { const prev = loopPts[(i - 1) % n]; arcDist += Math.hypot(pt.x - prev.x, pt.z - prev.z); }
+ for (let j = 0; j < pLen; j++) {
+ positions.push(pt.x + nm.x * profile[j][0], profile[j][1], pt.z + nm.z * profile[j][0]);
+ uvs.push(arcDist * 0.25, profile[j][2]);
+ }
+ }
+ for (let i = 0; i < n; i++) {
+ const rowA = i * pLen, rowB = (i + 1) * pLen;
+ for (let j = 0; j < pLen - 1; j++) {
+ const a = rowA + j, b = rowB + j, c = rowB + j + 1, d = rowA + j + 1;
+ if (!isInnerIsland) indices.push(a, b, c, a, c, d);
+ else indices.push(a, c, b, a, d, c);
+ }
+ }
+ const geo = new THREE.BufferGeometry();
+ geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+ geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+ geo.setIndex(indices); geo.computeVertexNormals();
+ const mesh = new THREE.Mesh(geo, matWall);
+ mesh.castShadow = true; mesh.receiveShadow = true; return mesh;
+ }
+
+ function buildFairwayTurfMesh(outerPts, islandPts = null) {
+ const shape = new THREE.Shape();
+ outerPts.forEach((p, i) => { if (i === 0) shape.moveTo(p.x, -p.z); else shape.lineTo(p.x, -p.z); });
+ shape.closePath();
+ if (islandPts) {
+ const holePath = new THREE.Path();
+ islandPts.forEach((p, i) => { if (i === 0) holePath.moveTo(p.x, -p.z); else holePath.lineTo(p.x, -p.z); });
+ holePath.closePath(); shape.holes.push(holePath);
+ }
+ const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.24, bevelEnabled: false, curveSegments: 1 });
+ const mesh = new THREE.Mesh(geo, matGrass);
+ mesh.rotation.x = -Math.PI / 2; mesh.receiveShadow = true; return mesh;
+ }
+
+ // =========================================================================
+ // 7. 6 SCULPTED CHAMPIONSHIP HOLES (Featuring "Ribbon of Stone" Hairpin!)
+ // =========================================================================
+ const HOLES = [
+ // ==================== FRONT 9: THE JADE GARDEN ====================
+ {
+ name: "Dragon's Gate", par: 2, tee: { x: 0, z: 10.2 }, cup: { x: 0, z: -10.2 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.2, z: 12.8, r: 2.2 }, { x: 3.2, z: 12.8, r: 2.2 },
+ { x: 3.2, z: -13.0, r: 2.9 }, { x: -3.2, z: -13.0, r: 2.9 }
+ ], 10)),
+ island: null,
+ bumpers: [
+ { x: 0, z: 3.3, r: 0.52 }, { x: -1.65, z: -0.4, r: 0.52 },
+ { x: 1.65, z: -0.4, r: 0.52 }, { x: 0, z: -4.1, r: 0.52 }
+ ],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: -13.2
+ },
+ {
+ name: "Ribbon of Stone", par: 3, tee: { x: -5.4, z: 8.6 }, cup: { x: 3.2, z: 7.2 },
+ outer: ensureOutwardWinding(createCurvedCorridor([
+ [-5.4, 8.8], [-5.2, 1.0], [0.5, -6.5], [6.8, -4.5], [5.8, 3.2], [3.2, 7.5]
+ ], 2.45, 56)),
+ island: null, bumpers: [{ x: 6.2, z: -1.2, r: 0.5 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: null
+ },
+ {
+ name: "Old Windmill Pass", par: 3, tee: { x: 0, z: 11.2 }, cup: { x: 0, z: -10.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.4, z: 13.5, r: 2.4 }, { x: 3.4, z: 13.5, r: 2.4 },
+ { x: 3.4, z: -13.4, r: 2.8 }, { x: -3.4, z: -13.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [], ramps: [],
+ windmills: [{ x: 0, z: 0.0, speed: 1.45, bladeLen: 2.15 }],
+ movers: [], boosts: [],
+ bunkers: [{ x: -2.0, z: -5.5, rx: 0.95, rz: 1.35 }, { x: 2.0, z: -5.5, rx: 0.95, rz: 1.35 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Leap of the Koi", par: 3, tee: { x: 0, z: 11.5 }, cup: { x: 0, z: -10.5 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.2, z: 13.8, r: 2.2 }, { x: 3.2, z: 13.8, r: 2.2 },
+ { x: 3.2, z: -13.2, r: 2.8 }, { x: -3.2, z: -13.2, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [{ x: -1.6, z: -7.2, r: 0.48 }, { x: 1.6, z: -7.2, r: 0.48 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 3.2, w: 3.0, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.5 }],
+ windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [{ x: 0, z: -1.2, w: 5.8, d: 4.2 }],
+ portals: [], shrineBackZ: -13.4
+ },
+ {
+ name: "Crescent Lotus Bank", par: 3, tee: { x: -5.2, z: 9.8 }, cup: { x: 5.2, z: -9.8 },
+ outer: ensureOutwardWinding(createCurvedCorridor([
+ [-5.2, 10.2], [-6.8, 2.0], [-2.5, -6.2], [5.2, -10.0]
+ ], 2.65, 48)),
+ island: null, bumpers: [{ x: -4.6, z: 0.2, r: 0.54 }, { x: 0.5, z: -6.8, r: 0.54 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: -4.2, z: 5.2, rx: 0.85, rz: 1.15 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Twin Lantern Oval", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -11.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -4.4, z: 14.5, r: 3.4 }, { x: 4.4, z: 14.5, r: 3.4 },
+ { x: 4.4, z: -14.2, r: 3.4 }, { x: -4.4, z: -14.2, r: 3.4 }
+ ], 12)),
+ island: ensureOutwardWinding(createRoundedPolygon([
+ { x: -1.15, z: 3.2, r: 1.05 }, { x: 1.15, z: 3.2, r: 1.05 },
+ { x: 1.15, z: -3.2, r: 1.05 }, { x: -1.15, z: -3.2, r: 1.05 }
+ ], 10), false),
+ bumpers: [{ x: -2.75, z: 5.8, r: 0.48 }, { x: 2.75, z: 5.8, r: 0.48 }, { x: 0, z: -6.8, r: 0.56 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: -14.5
+ },
+ {
+ name: "Sliding Shoji Gates", par: 3, tee: { x: 0, z: 11.4 }, cup: { x: 0, z: -10.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.5, z: 13.8, r: 2.4 }, { x: 3.5, z: 13.8, r: 2.4 },
+ { x: 3.5, z: -13.4, r: 2.8 }, { x: -3.5, z: -13.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [
+ { cx: 0, cz: 3.2, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.6, phase: 0 },
+ { cx: 0, cz: -3.8, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.9, phase: 2.4 }
+ ],
+ boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Mount Fuji Boost", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -10.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.5, z: 14.6, r: 2.5 }, { x: 3.5, z: 14.6, r: 2.5 },
+ { x: 3.5, z: -13.6, r: 3.1 }, { x: -3.5, z: -13.6, r: 3.1 }
+ ], 10)),
+ island: null,
+ slopes: [{ x1: -3.2, z1: -4.2, x2: 3.2, z2: 3.8, fx: 0, fz: 5.8 }],
+ bumpers: [{ x: -1.65, z: -7.0, r: 0.52 }, { x: 1.65, z: -7.0, r: 0.52 }],
+ gates: [], ramps: [], windmills: [], movers: [],
+ boosts: [{ x: 0, z: 6.4, w: 2.2, d: 2.8, fx: 0, fz: -24.0 }],
+ bunkers: [], waters: [], portals: [], shrineBackZ: -13.8
+ },
+ {
+ name: "Pagoda Portal Shortcut", par: 3, tee: { x: -4.2, z: 11.4 }, cup: { x: 4.2, z: -10.5 },
+ outer: ensureOutwardWinding(createCurvedCorridor([
+ [-4.2, 11.8], [-4.5, 4.0], [0.0, 0.0], [4.5, -4.0], [4.2, -10.8]
+ ], 2.65, 50)),
+ island: null, bumpers: [{ x: 0, z: 0, r: 0.62 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: 2.2, z: -2.2, rx: 0.9, rz: 0.9 }],
+ waters: [],
+ portals: [{ inX: -4.4, inZ: 5.2, outX: 4.2, outZ: -6.4, outAngle: Math.PI }],
+ shrineBackZ: null
+ },
+ // ==================== BACK 9: LIGHTHOUSE COAST & DRAGON'S PEAK ====================
+ {
+ name: "Lighthouse Bluff Jump", par: 3, tee: { x: -4.6, z: 11.0 }, cup: { x: 4.6, z: -10.2 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -6.8, z: 13.5, r: 2.6 }, { x: 6.8, z: 13.5, r: 2.6 },
+ { x: 6.8, z: -13.0, r: 3.0 }, { x: -6.8, z: -13.0, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -2.4, z: -6.8, r: 0.58 }, { x: 2.4, z: 5.5, r: 0.58 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 8.2, boost: 4.2 }],
+ windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: 0.5, z: -1.6, rx: 3.6, rz: 2.1 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Twin Windmill Alley", par: 4, tee: { x: 0, z: 12.6 }, cup: { x: 0, z: -12.0 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.6, z: 14.8, r: 2.4 }, { x: 3.6, z: 14.8, r: 2.4 },
+ { x: 3.6, z: -14.4, r: 2.8 }, { x: -3.6, z: -14.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [{ x: 0, z: 0.0, r: 0.55 }],
+ gates: [], slopes: [], ramps: [],
+ windmills: [
+ { x: 0, z: 4.8, speed: 1.5, bladeLen: 2.1 },
+ { x: 0, z: -4.8, speed: -1.75, bladeLen: 2.1 }
+ ],
+ movers: [], boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: -14.6
+ },
+ {
+ name: "Turbo Switchback", par: 4, tee: { x: -5.4, z: 9.2 }, cup: { x: 3.4, z: 7.4 },
+ outer: ensureOutwardWinding(createCurvedCorridor([
+ [-5.4, 9.5], [-5.2, 0.5], [0.5, -7.5], [6.8, -4.8], [5.8, 3.0], [3.4, 7.8]
+ ], 2.55, 56)),
+ island: null, bumpers: [{ x: 0.5, z: -7.2, r: 0.52 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [],
+ boosts: [
+ { x: -5.2, z: 3.2, w: 2.0, d: 2.8, fx: 0, fz: -22.0 },
+ { x: 6.2, z: -1.2, w: 2.0, d: 2.8, fx: -4.0, fz: 22.0 }
+ ],
+ bunkers: [], waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Emperor's Pinball Arena", par: 3, tee: { x: 0, z: 11.8 }, cup: { x: 0, z: -11.2 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -5.4, z: 14.2, r: 4.2 }, { x: 5.4, z: 14.2, r: 4.2 },
+ { x: 5.4, z: -13.8, r: 4.2 }, { x: -5.4, z: -13.8, r: 4.2 }
+ ], 12)),
+ island: null,
+ bumpers: [
+ { x: -2.2, z: 5.0, r: 0.62 }, { x: 2.2, z: 5.0, r: 0.62 },
+ { x: 0, z: 1.0, r: 0.72 },
+ { x: -2.6, z: -3.2, r: 0.62 }, { x: 2.6, z: -3.2, r: 0.62 },
+ { x: 0, z: -6.5, r: 0.55 }
+ ],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [{ x: -4.1, z: 0.5, w: 1.7, d: 3.6 }, { x: 4.1, z: 0.5, w: 1.7, d: 3.6 }],
+ portals: [], shrineBackZ: null
+ },
+ {
+ name: "Double Canyon Jump", par: 4, tee: { x: 0, z: 13.0 }, cup: { x: 0, z: -12.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.4, z: 15.0, r: 2.2 }, { x: 3.4, z: 15.0, r: 2.2 },
+ { x: 3.4, z: -14.8, r: 2.8 }, { x: -3.4, z: -14.8, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [],
+ ramps: [
+ { x: 0, z: 7.4, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 },
+ { x: 0, z: -1.8, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 }
+ ],
+ windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [
+ { x: 0, z: 3.4, w: 6.2, d: 3.6 },
+ { x: 0, z: -5.8, w: 6.2, d: 3.6 }
+ ],
+ portals: [], shrineBackZ: -15.0
+ },
+ {
+ name: "Shifting Zen Labyrinth", par: 4, tee: { x: 0, z: 12.6 }, cup: { x: 0, z: -11.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -4.0, z: 14.8, r: 2.8 }, { x: 4.0, z: 14.8, r: 2.8 },
+ { x: 4.0, z: -14.4, r: 3.0 }, { x: -4.0, z: -14.4, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -2.2, z: 0.0, r: 0.48 }, { x: 2.2, z: 0.0, r: 0.48 }],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [
+ { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.5, phase: 0 },
+ { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 2.0, phase: 2.0 },
+ { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.7, phase: 4.0 }
+ ],
+ boosts: [],
+ bunkers: [{ x: -2.5, z: -8.8, rx: 0.9, rz: 1.2 }, { x: 2.5, z: -8.8, rx: 0.9, rz: 1.2 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Portal of the Waves", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -11.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -4.6, z: 14.5, r: 3.4 }, { x: 4.6, z: 14.5, r: 3.4 },
+ { x: 4.6, z: -14.2, r: 3.4 }, { x: -4.6, z: -14.2, r: 3.4 }
+ ], 12)),
+ island: ensureOutwardWinding(createRoundedPolygon([
+ { x: -1.15, z: 3.2, r: 1.05 }, { x: 1.15, z: 3.2, r: 1.05 },
+ { x: 1.15, z: -3.2, r: 1.05 }, { x: -1.15, z: -3.2, r: 1.05 }
+ ], 10), false),
+ bumpers: [{ x: 2.8, z: 0.0, r: 0.55 }],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.8, phase: 0 }],
+ boosts: [], bunkers: [], waters: [],
+ portals: [{ inX: -2.8, inZ: 0.0, outX: 0.0, outZ: -7.8, outAngle: Math.PI }],
+ shrineBackZ: -14.5
+ },
+ {
+ name: "Volcano Ridge Assault", par: 4, tee: { x: 0, z: 13.0 }, cup: { x: 0, z: -12.0 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.6, z: 15.0, r: 2.4 }, { x: 3.6, z: 15.0, r: 2.4 },
+ { x: 3.6, z: -14.6, r: 3.0 }, { x: -3.6, z: -14.6, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -1.8, z: -8.2, r: 0.5 }, { x: 1.8, z: -8.2, r: 0.5 }],
+ gates: [],
+ slopes: [{ x1: -3.3, z1: -4.5, x2: 3.3, z2: 4.0, fx: 0, fz: 6.2 }],
+ ramps: [],
+ windmills: [{ x: 0, z: -5.2, speed: 1.65, bladeLen: 2.1 }],
+ movers: [],
+ boosts: [{ x: 0, z: 6.8, w: 2.2, d: 2.8, fx: 0, fz: -25.0 }],
+ bunkers: [], waters: [], portals: [], shrineBackZ: -14.8
+ },
+ {
+ name: "Grand Dragon Finale", par: 4, tee: { x: 0, z: 13.2 }, cup: { x: 0, z: -12.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.8, z: 15.2, r: 2.6 }, { x: 3.8, z: 15.2, r: 2.6 },
+ { x: 3.8, z: -14.8, r: 3.2 }, { x: -3.8, z: -14.8, r: 3.2 }
+ ], 10)),
+ island: null,
+ bumpers: [{ x: -1.65, z: -8.4, r: 0.52 }, { x: 1.65, z: -8.4, r: 0.52 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 7.2, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.8, boost: 5.0 }],
+ windmills: [{ x: 0, z: -3.2, speed: 1.65, bladeLen: 2.2 }],
+ movers: [], boosts: [], bunkers: [],
+ waters: [{ x: 0, z: 3.0, w: 6.8, d: 3.8 }],
+ portals: [], shrineBackZ: -15.0
+ }
+ ];
+
+ // =========================================================================
+ // 8. COURSE BUILDER, SWEPT-ROOF TŌRŌ LANTERNS & 3D PUTTER
+ // =========================================================================
+ const courseGroup = new THREE.Group();
+ scene.add(courseGroup);
+
+ const ballRadius = 0.22;
+ const ballMesh = new THREE.Mesh(
+ new THREE.SphereGeometry(ballRadius, 36, 36),
+ new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.14, metalness: 0.08, envMapIntensity: 1.15 })
+ );
+ ballMesh.castShadow = true; scene.add(ballMesh);
+
+ const ballShadowDisc = new THREE.Mesh(
+ new THREE.CircleGeometry(ballRadius * 1.18, 22),
+ new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.36 })
+ );
+ ballShadowDisc.rotation.x = -Math.PI / 2; scene.add(ballShadowDisc);
+
+ const readyRing = new THREE.Mesh(
+ new THREE.RingGeometry(0.32, 0.38, 28),
+ new THREE.MeshBasicMaterial({ color: 0xf5d89a, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
+ );
+ readyRing.rotation.x = -Math.PI / 2; scene.add(readyRing);
+
+ // Sleek 3D Golf Putter (Always visible beside ball when stopped!)
+ const putterGroup = new THREE.Group();
+ const putterHead = new THREE.Mesh(
+ new THREE.BoxGeometry(0.68, 0.18, 0.22),
+ new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15, envMapIntensity: 1.3 })
+ );
+ putterHead.position.set(0, 0.12, 0); putterHead.castShadow = true;
+ const putterShaft = new THREE.Mesh(
+ new THREE.CylinderGeometry(0.024, 0.028, 2.3, 10),
+ new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.92, roughness: 0.18, envMapIntensity: 1.2 })
+ );
+ putterShaft.position.set(0.2, 1.25, 0); putterShaft.rotation.z = -0.1;
+ const putterGrip = new THREE.Mesh(
+ new THREE.CylinderGeometry(0.042, 0.04, 0.65, 10),
+ new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 })
+ );
+ putterGrip.position.set(0.3, 2.25, 0); putterGrip.rotation.z = -0.1;
+ putterGroup.add(putterHead, putterShaft, putterGrip);
+ scene.add(putterGroup);
+
+ const fxParticles = [];
+ const fxGeo = new THREE.SphereGeometry(0.075, 6, 6);
+ function spawnFX(x, y, z, colorHex, count = 16, speed = 5.5) {
+ const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+ for (let i = 0; i < count; i++) {
+ const m = new THREE.Mesh(fxGeo, mat);
+ m.position.set(x, y, z);
+ const a = Math.random() * Math.PI * 2, spd = (0.35 + Math.random() * 0.65) * speed;
+ scene.add(m);
+ fxParticles.push({ mesh: m, vx: Math.cos(a) * spd, vy: 2.5 + Math.random() * 4.5, vz: Math.sin(a) * spd, life: 0.7 + Math.random() * 0.5 });
+ }
+ }
+
+ const aimGroup = new THREE.Group(); scene.add(aimGroup);
+ const aimDots = [];
+ for (let i = 0; i < 16; i++) {
+ const dot = new THREE.Mesh(new THREE.SphereGeometry(0.09 - i * 0.003, 12, 12), new THREE.MeshBasicMaterial({ color: 0xf5d89a }));
+ aimGroup.add(dot); aimDots.push(dot);
+ }
+
+ const rainCount = 1500;
+ const rainGeo = new THREE.BufferGeometry();
+ const rainPos = new Float32Array(rainCount * 6);
+ for (let i = 0; i < rainCount; i++) {
+ const x = (Math.random() - 0.5) * 65, y = Math.random() * 28, z = (Math.random() - 0.5) * 65;
+ rainPos[i * 6] = x; rainPos[i * 6 + 1] = y; rainPos[i * 6 + 2] = z;
+ rainPos[i * 6 + 3] = x - 0.18; rainPos[i * 6 + 4] = y - 0.9; rainPos[i * 6 + 5] = z;
+ }
+ rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+ const rainLines = new THREE.LineSegments(rainGeo, new THREE.LineBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.5 }));
+ rainLines.visible = false; scene.add(rainLines);
+
+ const state = {
+ holeIdx: 0, strokes: 0, scores: Array(HOLES.length).fill(null),
+ time: 'daylight', weather: 'clear', camMode: 'follow', guideOn: true,
+ camYaw: 0, camPitch: 0.44, camDist: 9.6,
+ ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vy: 0, vz: 0, lastSafeX: 0, lastSafeZ: 10.2, portalCD: 0, inHole: false, sinkT: 0 },
+ aiming: false, aimPower: 0.45, aimAngle: Math.PI,
+ putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null, dynWindmills: [], dynMovers: [], dynPortals: []
+ };
+
+ function clearGroup(grp) { while (grp.children.length > 0) grp.remove(grp.children[0]); }
+ function pointInPoly(x, z, pts) {
+ let inside = false;
+ for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+ const xi = pts[i].x, zi = pts[i].z, xj = pts[j].x, zj = pts[j].z;
+ if (((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / ((zj - zi) || 1e-9) + xi)) inside = !inside;
+ }
+ return inside;
+ }
+ function minDistToPoly(x, z, pts) {
+ let minD = Infinity;
+ for (let i = 0; i < pts.length; i++) {
+ const a = pts[i], b = pts[(i + 1) % pts.length];
+ const vx = b.x - a.x, vz = b.z - a.z, l2 = vx * vx + vz * vz || 1;
+ const t = Math.max(0, Math.min(1, ((x - a.x) * vx + (z - a.z) * vz) / l2));
+ const d = Math.hypot(x - (a.x + t * vx), z - (a.z + t * vz));
+ if (d < minD) minD = d;
+ }
+ return minD;
+ }
+
+ 
+function buildRampMesh(rp) {
+ const g = new THREE.Group();
+ const ang = Math.atan2(rp.dirX, rp.dirZ);
+ // Angled 3D wooden launch ramp wedge!
+ const shape = new THREE.Shape();
+ shape.moveTo(-rp.d / 2, 0);
+ shape.lineTo(rp.d / 2, 0);
+ shape.lineTo(rp.d / 2, 0.52);
+ shape.closePath();
+ const geo = new THREE.ExtrudeGeometry(shape, { depth: rp.w, bevelEnabled: false });
+ geo.translate(0, 0, -rp.w / 2);
+ geo.rotateY(-Math.PI / 2);
+ const matRamp = new THREE.MeshStandardMaterial({ color: 0x9c6638, map: barkTex, roughness: 0.65 });
+ const wedge = new THREE.Mesh(geo, matRamp);
+ wedge.castShadow = true; wedge.receiveShadow = true; g.add(wedge);
+
+ // Bright gold launch chevrons painted on top slope
+ const chev = new THREE.Mesh(
+ new THREE.PlaneGeometry(rp.w * 0.85, rp.d * 0.9),
+ new THREE.MeshBasicMaterial({ map: chevronTex, transparent: true, opacity: 0.88 })
+ );
+ chev.rotation.x = -Math.PI / 2 + 0.23;
+ chev.position.set(0, 0.30, 0);
+ g.add(chev);
+
+ g.position.set(rp.x, 0.24, rp.z);
+ g.rotation.y = ang;
+ courseGroup.add(g);
+ }
+
+ function buildWindmillMesh(wm) {
+ const g = new THREE.Group();
+ // Traditional Japanese stone & timber mill house straddling the center
+ const house = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.82, 2.35, 8), matWall);
+ house.position.y = 1.18; house.castShadow = true; house.receiveShadow = true; g.add(house);
+ const roof = new THREE.Mesh(new THREE.ConeGeometry(1.18, 0.95, 8), matPagodaRoof);
+ roof.position.y = 2.75; roof.castShadow = true; g.add(roof);
+ const finial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), matGoldTrim);
+ finial.position.y = 3.28; g.add(finial);
+
+ // Rotating 4-blade timber & crimson sail hub (mounted on front face)
+ const rotor = new THREE.Group();
+ rotor.position.set(0, 1.48, 0.78);
+ const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.26, 12), matGoldTrim);
+ hub.rotation.x = Math.PI / 2; rotor.add(hub);
+ const matSail = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+ for (let b = 0; b < 4; b++) {
+ const armG = new THREE.Group();
+ armG.rotation.z = (b * Math.PI) / 2;
+ const spar = new THREE.Mesh(new THREE.BoxGeometry(0.11, wm.bladeLen, 0.08), matWoodDark);
+ spar.position.y = wm.bladeLen / 2; spar.castShadow = true; armG.add(spar);
+ const sail = new THREE.Mesh(new THREE.BoxGeometry(0.42, wm.bladeLen * 0.72, 0.04), matSail);
+ sail.position.set(0.16, wm.bladeLen * 0.58, 0.02); sail.castShadow = true; armG.add(sail);
+ const trim = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.10, 0.06), matPagodaRed);
+ trim.position.set(0.16, wm.bladeLen * 0.92, 0.02); armG.add(trim);
+ rotor.add(armG);
+ }
+ g.add(rotor);
+ g.position.set(wm.x, 0.24, wm.z);
+ courseGroup.add(g);
+ state.dynWindmills.push({ def: wm, rotor, angle: 0 });
+ }
+
+ function buildMoverMesh(mv) {
+ const g = new THREE.Group();
+ const block = new THREE.Mesh(new THREE.BoxGeometry(mv.w, 0.92, mv.d), matWall);
+ block.position.y = 0.46; block.castShadow = true; block.receiveShadow = true; g.add(block);
+ const cap = new THREE.Mesh(new THREE.BoxGeometry(mv.w + 0.08, 0.14, mv.d + 0.08), matPagodaRoof);
+ cap.position.y = 0.96; cap.castShadow = true; g.add(cap);
+ g.position.set(mv.cx, 0.24, mv.cz);
+ courseGroup.add(g);
+ state.dynMovers.push({ def: mv, mesh: g, x: mv.cx, z: mv.cz });
+ }
+
+ function buildBoostMesh(bp) {
+ const g = new THREE.Group();
+ const pad = new THREE.Mesh(
+ new THREE.PlaneGeometry(bp.w, bp.d),
+ new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.42 })
+ );
+ pad.rotation.x = -Math.PI / 2; g.add(pad);
+ const chev = new THREE.Mesh(
+ new THREE.PlaneGeometry(bp.w * 0.85, bp.d * 0.9),
+ new THREE.MeshBasicMaterial({ map: chevronTex, color: 0x67e8f9, transparent: true, opacity: 0.92 })
+ );
+ chev.rotation.x = -Math.PI / 2; chev.position.y = 0.01;
+ chev.rotation.z = Math.atan2(bp.fx, -bp.fz);
+ g.add(chev);
+ g.position.set(bp.x, 0.252, bp.z);
+ courseGroup.add(g);
+ }
+
+ function buildBunkerMesh(bk) {
+ const mesh = new THREE.Mesh(
+ new THREE.CircleGeometry(1.0, 28),
+ new THREE.MeshStandardMaterial({ color: 0xe6c27a, roughness: 0.95 })
+ );
+ mesh.rotation.x = -Math.PI / 2;
+ mesh.scale.set(bk.rx, bk.rz, 1);
+ mesh.position.set(bk.x, 0.248, bk.z);
+ mesh.receiveShadow = true;
+ courseGroup.add(mesh);
+ }
+
+ function buildWaterHazardMesh(wt) {
+ const mesh = new THREE.Mesh(new THREE.PlaneGeometry(wt.w, wt.d, 16, 12), matWaterShader);
+ mesh.rotation.x = -Math.PI / 2;
+ mesh.position.set(wt.x, 0.249, wt.z);
+ courseGroup.add(mesh);
+ }
+
+ function buildPortalMesh(pt) {
+ function makeArch(x, z, colHex) {
+ const g = new THREE.Group();
+ const arch = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.14, 12, 24, Math.PI), matGoldTrim);
+ arch.position.y = 0.05; arch.castShadow = true; g.add(arch);
+ const swirl = new THREE.Mesh(
+ new THREE.CircleGeometry(0.62, 20, 0, Math.PI),
+ new THREE.MeshBasicMaterial({ color: colHex, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
+ );
+ swirl.position.y = 0.05; g.add(swirl);
+ g.position.set(x, 0.24, z);
+ courseGroup.add(g);
+ return swirl;
+ }
+ const sIn = makeArch(pt.inX, pt.inZ, 0x34d399);
+ const sOut = makeArch(pt.outX, pt.outZ, 0xfbbf24);
+ state.dynPortals.push({ def: pt, sIn, sOut });
+ }
+
+ function buildBumperMesh(x, y, z, r) {
+ const g = new THREE.Group();
+ const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.84, r * 0.22, 16, 32), new THREE.MeshStandardMaterial({ color: 0x1a1715, roughness: 0.38 }));
+ ring.rotation.x = Math.PI / 2; ring.position.y = r * 0.24; ring.castShadow = true; g.add(ring);
+ const cap = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.68, r * 0.78, r * 0.34, 24), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.18 }));
+ cap.position.y = r * 0.46; cap.castShadow = true; g.add(cap);
+ const topBtn = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.26, r * 0.26, 0.08, 18), new THREE.MeshStandardMaterial({ color: 0x2563eb, emissive: 0x1d4ed8, emissiveIntensity: 0.45 }));
+ topBtn.position.y = r * 0.65; g.add(topBtn);
+ g.position.set(x, y, z); courseGroup.add(g);
+ }
+
+ // GROUNDED CARVED TRAVERTINE TŌRŌ LANTERN WITH UPTURNED PAGODA EAVES & GOLD FINIAL ORB
+ function buildCarvedToroLantern(x, z, lightObj) {
+ const g = new THREE.Group();
+ const contactAO = new THREE.Mesh(
+ new THREE.CircleGeometry(0.68, 20),
+ new THREE.MeshBasicMaterial({ color: 0x16120c, transparent: true, opacity: 0.36 })
+ );
+ contactAO.rotation.x = -Math.PI / 2; contactAO.position.y = 0.015; g.add(contactAO);
+
+ const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.56, 0.28, 6), matLanternStone);
+ plinth.position.y = 0.10; plinth.castShadow = true; plinth.receiveShadow = true; g.add(plinth);
+
+ const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, 0.90, 8), matLanternStone);
+ pillar.position.y = 0.65; pillar.castShadow = true; pillar.receiveShadow = true; g.add(pillar);
+
+ const chudai = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.22, 0.18, 6), matLanternStone);
+ chudai.position.y = 1.15; chudai.castShadow = true; g.add(chudai);
+
+ const paperCore = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.46, 0.44), matLanternPaper);
+ paperCore.position.y = 1.46; g.add(paperCore);
+ for (let c = 0; c < 4; c++) {
+ const a = (c / 4) * Math.PI * 2 + Math.PI / 4;
+ const post = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.50, 0.06), matLanternStone);
+ post.position.set(Math.cos(a) * 0.28, 1.46, Math.sin(a) * 0.28); post.castShadow = true; g.add(post);
+ }
+
+ // Swept upturned pagoda lantern roof!
+ const roofGeo = new THREE.ConeGeometry(0.68, 0.34, 4, 8);
+ roofGeo.rotateY(Math.PI / 4);
+ const rp = roofGeo.attributes.position;
+ for (let i = 0; i < rp.count; i++) {
+ const vx = rp.getX(i), vy = rp.getY(i), vz = rp.getZ(i);
+ const rad = Math.hypot(vx, vz) / 0.68;
+ rp.setXYZ(i, vx * (1 + rad * 0.16), vy + Math.pow(rad, 2.2) * 0.24, vz * (1 + rad * 0.16));
+ }
+ roofGeo.computeVertexNormals();
+ const roof = new THREE.Mesh(roofGeo, matLanternStone);
+ roof.position.y = 1.84; roof.castShadow = true; g.add(roof);
+
+ const finial = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12), matGoldTrim);
+ finial.position.y = 2.06; g.add(finial);
+
+ const haloMat = new THREE.SpriteMaterial({ map: glowSpriteTex, color: 0xffcc70, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending, depthWrite: false });
+ const halo = new THREE.Sprite(haloMat);
+ halo.position.set(0, 1.46, 0); halo.scale.set(2.2, 2.2, 1); g.add(halo);
+ lanternHalos.push(halo);
+
+ g.position.set(x, 0, z);
+ courseGroup.add(g);
+ lightObj.position.set(x, 1.54, z);
+ }
+
+ function buildDragonVolcanoShrine(cx, backWallZ) {
+ const g = new THREE.Group();
+ function makeCraggyRock(radius, sx, sy, sz, seedOff) {
+ const geo = new THREE.IcosahedronGeometry(radius, 3);
+ const pos = geo.attributes.position;
+ for (let i = 0; i < pos.count; i++) {
+ const vx = pos.getX(i), vy = pos.getY(i), vz = pos.getZ(i);
+ const n = 0.78 + 0.38 * ridgedFbm(vx * 0.8 + seedOff, vz * 0.8 + vy * 0.6, 3);
+ pos.setXYZ(i, vx * n, vy * n, vz * n);
+ }
+ geo.computeVertexNormals();
+ const m = new THREE.Mesh(geo, matCliff);
+ m.scale.set(sx, sy, sz); m.castShadow = true; m.receiveShadow = true; return m;
+ }
+
+ const mainMass = makeCraggyRock(2.8, 1.3, 1.35, 0.95, 1.2); mainMass.position.set(0, 2.4, -4.2); g.add(mainMass);
+ const upperPeak = makeCraggyRock(1.7, 0.95, 1.25, 0.85, 4.7); upperPeak.position.set(0.2, 4.3, -4.6); g.add(upperPeak);
+ const leftClaw = makeCraggyRock(1.3, 0.85, 0.95, 1.5, 12.3); leftClaw.position.set(-2.3, 0.95, -1.5); leftClaw.rotation.y = 0.32; g.add(leftClaw);
+ const rightClaw = makeCraggyRock(1.3, 0.85, 0.95, 1.5, 15.8); rightClaw.position.set(2.3, 0.95, -1.5); rightClaw.rotation.y = -0.32; g.add(rightClaw);
+
+ const archRock = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.46, 12, 24, Math.PI), matCliff);
+ archRock.position.set(0, 0.25, -1.0); archRock.castShadow = true; g.add(archRock);
+ const glowCore = new THREE.Mesh(new THREE.CircleGeometry(1.38, 24, 0, Math.PI), matLavaShader);
+ glowCore.position.set(0, 0.25, -1.1); g.add(glowCore);
+
+ g.position.set(cx, 0, backWallZ);
+ courseGroup.add(g);
+ shrineLight.position.set(cx, 1.65, backWallZ + 0.4);
+ }
+
+ function buildHole(idx) {
+ clearGroup(courseGroup);
+ lanternHalos.length = 0;
+ state.holeIdx = idx;
+ const h = HOLES[idx];
+ state.strokes = 0;
+ state.ball.x = h.tee.x; state.ball.z = h.tee.z; state.ball.y = 0.24 + ballRadius;
+ state.ball.lastSafeX = h.tee.x; state.ball.lastSafeZ = h.tee.z;
+ state.ball.vx = 0; state.ball.vy = 0; state.ball.vz = 0; state.ball.portalCD = 0;
+ state.ball.inHole = false; state.ball.sinkT = 0;
+ state.aiming = false;
+ state.wallSegs = []; state.dynWindmills = []; state.dynMovers = []; state.dynPortals = [];
+
+ courseGroup.add(buildFairwayTurfMesh(h.outer, h.island));
+ courseGroup.add(buildCurvedStoneWallMesh(h.outer, 0.92, 0.56, false));
+ for (let i = 0; i < h.outer.length; i++) {
+ const a = h.outer[i], b = h.outer[(i + 1) % h.outer.length];
+ state.wallSegs.push([a.x, a.z, b.x, b.z]);
+ }
+ if (h.island) {
+ courseGroup.add(buildCurvedStoneWallMesh(h.island, 0.92, 0.46, true));
+ for (let i = 0; i < h.island.length; i++) {
+ const a = h.island[i], b = h.island[(i + 1) % h.island.length];
+ state.wallSegs.push([a.x, a.z, b.x, b.z]);
+ }
+ const islRock = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 2), matCliff);
+ islRock.scale.set(0.85, 0.9, 1.8); islRock.position.set(0, 0.65, 0); islRock.castShadow = true;
+ courseGroup.add(islRock);
+ }
+
+ h.slopes.forEach(sl => {
+ const ramp = new THREE.Mesh(
+ new THREE.PlaneGeometry((sl.x2 - sl.x1) * 0.88, (sl.z2 - sl.z1) * 0.92),
+ new THREE.MeshBasicMaterial({ map: chevronTex, transparent: true, opacity: 0.72 })
+ );
+ ramp.rotation.x = -Math.PI / 2; ramp.position.set((sl.x1 + sl.x2) / 2, 0.246, (sl.z1 + sl.z2) / 2);
+ courseGroup.add(ramp);
+ });
+
+ h.gates.forEach(gt => {
+ const halfGap = gt.gapW / 2, pillarW = 0.68;
+ [-1, 1].forEach(side => {
+ const px = gt.x + side * (halfGap + pillarW / 2);
+ const tower = new THREE.Mesh(new THREE.BoxGeometry(pillarW, 1.25, 0.68), matCliff);
+ tower.position.set(px, 0.62, gt.z); tower.castShadow = true; courseGroup.add(tower);
+ const roof = new THREE.Mesh(new THREE.ConeGeometry(0.64, 0.44, 4), matPagodaRoof);
+ roof.position.set(px, 1.44, gt.z); roof.rotation.y = Math.PI / 4; courseGroup.add(roof);
+ const xL = px - pillarW / 2, xR = px + pillarW / 2, zF = gt.z + 0.34, zB = gt.z - 0.34;
+ state.wallSegs.push([xL, zF, xR, zF], [xR, zF, xR, zB], [xR, zB, xL, zB], [xL, zB, xL, zF]);
+ });
+ });
+
+ h.bumpers.forEach(bmp => buildBumperMesh(bmp.x, 0.24, bmp.z, bmp.r));
+ (h.ramps || []).forEach(buildRampMesh);
+ (h.windmills || []).forEach(buildWindmillMesh);
+ (h.movers || []).forEach(buildMoverMesh);
+ (h.boosts || []).forEach(buildBoostMesh);
+ (h.bunkers || []).forEach(buildBunkerMesh);
+ (h.waters || []).forEach(buildWaterHazardMesh);
+ (h.portals || []).forEach(buildPortalMesh);
+
+ const cupHole = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 24), new THREE.MeshBasicMaterial({ color: 0x05070a }));
+ cupHole.position.set(h.cup.x, 0.23, h.cup.z); courseGroup.add(cupHole);
+ const cupRim = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.42, 24), new THREE.MeshStandardMaterial({ color: 0xe6c687, roughness: 0.3 }));
+ cupRim.rotation.x = -Math.PI / 2; cupRim.position.set(h.cup.x, 0.245, h.cup.z); courseGroup.add(cupRim);
+ const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 2.8, 12), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+ pole.position.set(h.cup.x, 1.62, h.cup.z); pole.castShadow = true; courseGroup.add(pole);
+ const flagMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.6, 8, 2), new THREE.MeshStandardMaterial({ color: 0xdc2626, side: THREE.DoubleSide, roughness: 0.45 }));
+ flagMesh.position.set(h.cup.x + 0.5, 2.66, h.cup.z); flagMesh.castShadow = true; courseGroup.add(flagMesh);
+ state.flagMesh = flagMesh;
+
+ const teePad = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.48 }));
+ teePad.position.set(h.tee.x, 0.242, h.tee.z); courseGroup.add(teePad);
+
+ if (h.shrineBackZ !== null) { buildDragonVolcanoShrine(h.cup.x, h.shrineBackZ); shrineLight.visible = true; }
+ else shrineLight.visible = false;
+
+ // Place 6 Carved Travertine Tōrō Lanterns cleanly outside the curved outer wall!
+ const totalPts = h.outer.length;
+ let lIdx = 0;
+ for (let k = 0; k < 6; k++) {
+ const idxP = Math.floor(((k + 0.5) / 6) * totalPts) % totalPts;
+ const p = h.outer[idxP], pN = h.outer[(idxP + 1) % totalPts];
+ const dx = pN.x - p.x, dz = pN.z - p.z, l = Math.hypot(dx, dz) || 1;
+ const lx = p.x + (dz / l) * 1.65, lz = p.z + (-dx / l) * 1.65;
+ if (h.shrineBackZ !== null && Math.abs(lx - h.cup.x) < 4.0 && lz < h.shrineBackZ + 0.8) continue;
+ if (pointInPoly(lx, lz, h.outer) || minDistToPoly(lx, lz, h.outer) < 1.2) continue;
+ buildCarvedToroLantern(lx, lz, lanternLights[lIdx++]);
+ }
+ for (let i = lIdx; i < lanternLights.length; i++) lanternLights[i].intensity = 0;
+
+ // Initial aim toward cup
+ const dx = h.cup.x - h.tee.x, dz = h.cup.z - h.tee.z;
+ state.aimAngle = Math.atan2(dx, dz);
+ state.aimPower = 0.45;
+ syncSlidersFromState();
+
+ state.camYaw = state.aimAngle + Math.PI;
+ state.camPitch = 0.45; state.camDist = 9.8;
+
+ document.getElementById('holeNumBadge').textContent = String(idx + 1).padStart(2, '0');
+ document.getElementById('holeSelect').value = String(idx);
+ document.getElementById('holeSub').textContent = `HOLE ${idx + 1} OF ${HOLES.length} • PAR ${h.par}`;
+ applyAtmosphere();
+ updateHUD();
+ }
+
+ // =========================================================================
+ // 9. ATMOSPHERE (SERENE JADE DAYLIGHT / DAWN / DUSK / NIGHT + CLEAR / RAINY)
+ // =========================================================================
+ const ATMOS = {
+ daylight: {
+ top: 0x2278b8, horizon: 0xb5dff5, fog: 0xc8e4f2, sunColor: 0xfff4d6, sunInt: 1.52,
+ sunPos: [22, 34, 18], hemiSky: 0xdff2ff, hemiGround: 0x5c7044, hemiInt: 0.80,
+ lanternInt: 0.0, haloOp: 0.0, paperEm: 0.12, ballLight: 0.0, stars: 0.0, firefly: 0.0,
+ waterDeep: 0x0b5d66, waterShal: 0x24b8a8, exposure: 1.02
+ },
+ dawn: {
+ top: 0x4b7ab5, horizon: 0xffbe82, fog: 0xf7cfa8, sunColor: 0xffd296, sunInt: 1.65,
+ sunPos: [30, 22, -10], hemiSky: 0xffebd0, hemiGround: 0x8a745c, hemiInt: 1.15,
+ lanternInt: 1.8, haloOp: 0.38, paperEm: 0.85, ballLight: 0.2, stars: 0.08, firefly: 0.25,
+ waterDeep: 0x1d4e6b, waterShal: 0x3b9694, exposure: 1.18
+ },
+ dusk: {
+ top: 0x324285, horizon: 0xf58458, fog: 0xcf826b, sunColor: 0xffa67a, sunInt: 1.45,
+ sunPos: [-30, 18, -12], hemiSky: 0xffc8bc, hemiGround: 0x705b63, hemiInt: 1.02,
+ lanternInt: 3.0, haloOp: 0.68, paperEm: 1.45, ballLight: 0.45, stars: 0.35, firefly: 0.65,
+ waterDeep: 0x1b2b52, waterShal: 0x3e6685, exposure: 1.22
+ },
+ night: {
+ top: 0x0f2047, horizon: 0x2b4e8c, fog: 0x223e70, sunColor: 0xb8e0ff, sunInt: 1.15,
+ sunPos: [-18, 30, 16], hemiSky: 0x73a6f5, hemiGround: 0x425f7d, hemiInt: 1.05,
+ lanternInt: 4.2, haloOp: 0.92, paperEm: 2.2, ballLight: 0.85, stars: 1.0, firefly: 0.95,
+ waterDeep: 0x0b1f3b, waterShal: 0x1d4d75, exposure: 1.32
+ }
+ };
+
+ function applyAtmosphere() {
+ const a = ATMOS[state.time], rainy = state.weather === 'rainy';
+ const topCol = rainy ? new THREE.Color(a.top).lerp(new THREE.Color(0x2c3846), 0.65) : new THREE.Color(a.top);
+ const horCol = rainy ? new THREE.Color(a.horizon).lerp(new THREE.Color(0x526170), 0.68) : new THREE.Color(a.horizon);
+ const fogCol = rainy ? new THREE.Color(a.fog).lerp(new THREE.Color(0x475563), 0.7) : new THREE.Color(a.fog);
+ const fogDensity = rainy ? 0.0125 : 0.0046;
+
+ skyUniforms.topColor.value.copy(topCol);
+ skyUniforms.horizonColor.value.copy(horCol);
+ skyUniforms.sunDir.value.set(...a.sunPos).normalize();
+ skyUniforms.sunColor.value.setHex(a.sunColor);
+ skyUniforms.starAlpha.value = rainy ? 0.0 : a.stars;
+ updateSkyIBL();
+
+ waterUniforms.uDeepColor.value.setHex(a.waterDeep);
+ waterUniforms.uShallowColor.value.setHex(a.waterShal);
+ waterUniforms.uSkyColor.value.copy(horCol);
+ waterUniforms.uSunDir.value.set(...a.sunPos).normalize();
+ waterUniforms.uSunColor.value.setHex(a.sunColor);
+ waterUniforms.uRain.value = rainy ? 1.0 : 0.0;
+
+ scene.fog = new THREE.FogExp2(fogCol, fogDensity);
+ ffMat.opacity = rainy ? 0.0 : a.firefly;
+
+ sunLight.color.setHex(a.sunColor);
+ sunLight.intensity = rainy ? a.sunInt * 0.72 : a.sunInt;
+ sunLight.position.set(...a.sunPos);
+
+ hemiLight.color.setHex(a.hemiSky);
+ hemiLight.groundColor.setHex(a.hemiGround);
+ hemiLight.intensity = rainy ? a.hemiInt * 0.90 : a.hemiInt;
+ ballGlowLight.intensity = a.ballLight || 0.0;
+
+ lanternLights.forEach((pl, idx) => { pl.intensity = idx < lanternHalos.length ? a.lanternInt : 0; });
+ lanternHalos.forEach(sp => { sp.material.opacity = a.haloOp; });
+ matLanternPaper.emissiveIntensity = a.paperEm;
+
+ matGrass.roughness = rainy ? 0.25 : 0.85;
+ matWall.roughness = rainy ? 0.24 : 0.72;
+ matCourtyardSand.roughness = rainy ? 0.36 : 0.90;
+ matCourtyardSand.color.setHex(rainy ? 0xa99e8e : 0xffffff);
+
+ renderer.toneMappingExposure = a.exposure;
+ rainLines.visible = rainy;
+ syncRainAudio();
+ }
+
+ // =========================================================================
+ // 10. DUAL INPUT (SLIDERS + PUTT BUTTON OR DIRECT DRAG-BACK FROM BALL)
+ // =========================================================================
+ const rngAim = document.getElementById('rngAim');
+ const rngPower = document.getElementById('rngPower');
+ const lblAim = document.getElementById('lblAim');
+ const lblPower = document.getElementById('lblPower');
+
+ function syncSlidersFromState() {
+ let deg = Math.round((state.aimAngle * 180) / Math.PI);
+ while (deg > 180) deg -= 360;
+ while (deg < -180) deg += 360;
+ rngAim.value = deg;
+ lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
+ const pPct = Math.round(state.aimPower * 100);
+ rngPower.value = pPct;
+ lblPower.textContent = `${pPct}%`;
+ }
+
+ function executePutt() {
+ if (!ballStopped() || state.aimPower < 0.04) return;
+ initAudio();
+ const spd = state.aimPower * 21.0;
+ state.ball.lastSafeX = state.ball.x; state.ball.lastSafeZ = state.ball.z;
+ state.ball.vx = Math.sin(state.aimAngle) * spd;
+ state.ball.vz = Math.cos(state.aimAngle) * spd;
+ state.strokes++; updateHUD(); sfxPutt(state.aimPower);
+ spawnFX(state.ball.x, 0.3, state.ball.z, 0xf5d89a, 8, 2.5);
+ state.putterSwingT = 0.22;
+ }
+
+ rngAim.addEventListener('input', () => {
+ const deg = parseFloat(rngAim.value);
+ state.aimAngle = (deg * Math.PI) / 180;
+ lblAim.textContent = `${deg > 0 ? '+' : ''}${deg}°`;
+ });
+ rngPower.addEventListener('input', () => {
+ const pct = parseFloat(rngPower.value);
+ state.aimPower = pct / 100;
+ lblPower.textContent = `${pct}%`;
+ });
+ document.getElementById('btnPutt').addEventListener('click', executePutt);
+
+ const raycaster = new THREE.Raycaster();
+ const pointerNDC = new THREE.Vector2();
+ const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.24);
+ let dragMode = null, lastPointer = { x: 0, y: 0 };
+
+ function getGroundHit(clientX, clientY) {
+ pointerNDC.x = (clientX / window.innerWidth) * 2 - 1;
+ pointerNDC.y = -(clientY / window.innerHeight) * 2 + 1;
+ raycaster.setFromCamera(pointerNDC, camera);
+ const hit = new THREE.Vector3();
+ raycaster.ray.intersectPlane(groundPlane, hit);
+ return hit;
+ }
+
+ function ballStopped() { return !state.ball.inHole && state.ball.y <= 0.24 + ballRadius + 0.04 && Math.abs(state.ball.vy) < 0.1 && Math.hypot(state.ball.vx, state.ball.vz) < 0.08; }
+
+ canvas.addEventListener('pointerdown', e => {
+ initAudio(); lastPointer = { x: e.clientX, y: e.clientY };
+ const hit = getGroundHit(e.clientX, e.clientY);
+ if (ballStopped() && hit && Math.hypot(hit.x - state.ball.x, hit.z - state.ball.z) < 2.1) {
+ dragMode = 'aim'; state.aiming = true;
+ canvas.setPointerCapture(e.pointerId); return;
+ }
+ dragMode = 'orbit'; canvas.setPointerCapture(e.pointerId);
+ });
+
+ canvas.addEventListener('pointermove', e => {
+ if (!dragMode) return;
+ if (dragMode === 'orbit') {
+ const dx = e.clientX - lastPointer.x, dy = e.clientY - lastPointer.y;
+ lastPointer = { x: e.clientX, y: e.clientY };
+ state.camYaw -= dx * 0.0065;
+ state.camPitch = Math.max(0.16, Math.min(1.25, state.camPitch + dy * 0.0055));
+ } else if (dragMode === 'aim') {
+ const hit = getGroundHit(e.clientX, e.clientY);
+ if (hit) {
+ const dx = state.ball.x - hit.x, dz = state.ball.z - hit.z;
+ state.aimPower = Math.max(0.05, Math.min(1, Math.hypot(dx, dz) / 4.2));
+ state.aimAngle = Math.atan2(dx, dz);
+ syncSlidersFromState();
+ }
+ }
+ });
+
+ canvas.addEventListener('pointerup', () => {
+ if (dragMode === 'aim' && state.aiming) {
+ state.aiming = false;
+ executePutt();
+ }
+ dragMode = null;
+ });
+
+ canvas.addEventListener('wheel', e => {
+ state.camDist = Math.max(4.8, Math.min(23.0, state.camDist + e.deltaY * 0.008));
+ }, { passive: true });
+
+ // =========================================================================
+ // 11. 16x SUB-STEPPED PHYSICS & LIVE BANK-BOUNCE PREVIEW
+ // =========================================================================
+ function collideWall2D(ball, x1, z1, x2, z2, rest = 0.84, silent = false) {
+ const vx = x2 - x1, vz = z2 - z1, lenSq = vx * vx + vz * vz;
+ if (lenSq === 0) return;
+ const t = Math.max(0, Math.min(1, ((ball.x - x1) * vx + (ball.z - z1) * vz) / lenSq));
+ const cx = x1 + t * vx, cz = z1 + t * vz;
+ const dx = ball.x - cx, dz = ball.z - cz, dist = Math.hypot(dx, dz);
+ if (dist < ballRadius && dist > 0.00001) {
+ const nx = dx / dist, nz = dz / dist;
+ ball.x += nx * (ballRadius - dist); ball.z += nz * (ballRadius - dist);
+ const vn = ball.vx * nx + ball.vz * nz;
+ if (vn < 0) {
+ if (!silent) { sfxBounce(Math.abs(vn), false); if (Math.abs(vn) > 5) spawnFX(cx, 0.38, cz, 0xfde68a, 5, 2.8); }
+ ball.vx -= (1 + rest) * vn * nx; ball.vz -= (1 + rest) * vn * nz;
+ }
+ }
+ }
+
+ function collideCircle2D(ball, cx, cz, cr, rest = 1.1, extraKick = 2.8, silent = false) {
+ const dx = ball.x - cx, dz = ball.z - cz, dist = Math.hypot(dx, dz), minD = ballRadius + cr;
+ if (dist < minD && dist > 0.00001) {
+ const nx = dx / dist, nz = dz / dist;
+ ball.x = cx + nx * minD; ball.z = cz + nz * minD;
+ const vn = ball.vx * nx + ball.vz * nz;
+ if (vn < 0) {
+ ball.vx -= (1 + rest) * vn * nx; ball.vz -= (1 + rest) * vn * nz;
+ if (extraKick > 0) { ball.vx += nx * extraKick; ball.vz += nz * extraKick; }
+ if (!silent) { sfxBounce(Math.max(Math.abs(vn), extraKick * 4), extraKick > 0); spawnFX(cx + nx * cr, 0.42, cz + nz * cr, 0x38bdf8, 12, 4.2); }
+ }
+ }
+ }
+
+ function updateAimAndPutter() {
+ const stopped = ballStopped();
+ aimGroup.visible = stopped && state.guideOn;
+ if (stopped && state.putterSwingT <= 0) {
+ putterGroup.visible = true;
+ const pullBack = 0.36 + (state.aiming ? state.aimPower * 1.1 : state.aimPower * 0.45);
+ putterGroup.position.set(state.ball.x - Math.sin(state.aimAngle) * pullBack, 0.24, state.ball.z - Math.cos(state.aimAngle) * pullBack);
+ putterGroup.rotation.y = state.aimAngle;
+ } else if (state.putterSwingT <= 0) {
+ putterGroup.visible = false;
+ }
+
+ if (!aimGroup.visible) return;
+ const hole = HOLES[state.holeIdx];
+ const col = state.aimPower < 0.45 ? 0x34d399 : (state.aimPower < 0.8 ? 0xf5d89a : 0xef4444);
+ const sim = {
+ x: state.ball.x, z: state.ball.z,
+ vx: Math.sin(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0),
+ vz: Math.cos(state.aimAngle) * Math.max(4.5, state.aimPower * 21.0)
+ };
+ const stepDt = 0.022;
+ for (let i = 0; i < aimDots.length; i++) {
+ for (let s = 0; s < 3; s++) {
+ sim.x += sim.vx * (stepDt / 3); sim.z += sim.vz * (stepDt / 3);
+ for (const seg of state.wallSegs) collideWall2D(sim, seg[0], seg[1], seg[2], seg[3], 0.84, true);
+ for (const bmp of hole.bumpers) collideCircle2D(sim, bmp.x, bmp.z, bmp.r, 1.1, 2.8, true);
+ }
+ aimDots[i].position.set(sim.x, 0.33, sim.z); aimDots[i].material.color.setHex(col);
+ }
+ }
+
+ function stepPhysics(dt) {
+ const hole = HOLES[state.holeIdx], b = state.ball;
+ if (state.bannerT > 0) { state.bannerT -= dt; if (state.bannerT <= 0) document.getElementById('banner').classList.remove('show'); }
+
+ if (state.putterSwingT > 0) {
+ state.putterSwingT -= dt;
+ putterGroup.position.x += Math.sin(state.aimAngle) * dt * 6.5;
+ putterGroup.position.z += Math.cos(state.aimAngle) * dt * 6.5;
+ if (state.putterSwingT <= 0) putterGroup.visible = false;
+ }
+
+ for (let i = fxParticles.length - 1; i >= 0; i--) {
+ const p = fxParticles[i];
+ p.mesh.position.x += p.vx * dt; p.mesh.position.y += p.vy * dt; p.mesh.position.z += p.vz * dt;
+ p.vy -= 12.0 * dt; p.life -= dt;
+ p.mesh.scale.setScalar(Math.max(0.01, p.life));
+ if (p.life <= 0) { scene.remove(p.mesh); fxParticles.splice(i, 1); }
+ }
+
+ if (b.inHole) {
+ b.sinkT += dt; b.y = Math.max(-0.22, 0.24 + ballRadius - b.sinkT * 1.15);
+ state.nextHoleT -= dt;
+ if (state.nextHoleT <= 0) {
+ if (state.holeIdx < HOLES.length - 1) buildHole(state.holeIdx + 1);
+ else showScorecard(true);
+ }
+ return;
+ }
+
+ // Animate rotating windmills & moving stone gates
+ const tSec = performance.now() * 0.001;
+ state.dynWindmills.forEach(wm => {
+ wm.angle += wm.def.speed * dt;
+ wm.rotor.rotation.z = wm.angle;
+ });
+ state.dynMovers.forEach(mv => {
+ const d = mv.def;
+ mv.x = d.cx + Math.sin(tSec * d.speed + d.phase) * d.ampX;
+ mv.z = d.cz + Math.cos(tSec * d.speed + d.phase) * d.ampZ;
+ mv.mesh.position.set(mv.x, 0.24, mv.z);
+ });
+ if (b.portalCD > 0) b.portalCD -= dt;
+
+ const groundY = 0.24 + ballRadius;
+ const sub = 16, sdt = dt / sub;
+ for (let s = 0; s < sub; s++) {
+ const airborne = b.y > groundY + 0.05;
+
+ // Vertical parabolic jump physics
+ if (airborne || b.vy > 0) {
+ b.vy -= 22.0 * sdt;
+ b.y += b.vy * sdt;
+ if (b.y <= groundY) {
+ b.y = groundY;
+ if (Math.abs(b.vy) > 2.2) {
+ sfxBounce(Math.abs(b.vy) * 1.4, false);
+ spawnFX(b.x, 0.28, b.z, 0xe2e8f0, 6, 2.6);
+ b.vy = -b.vy * 0.36;
+ } else {
+ b.vy = 0;
+ }
+ }
+ }
+
+ // Ground-only interactions (slopes, ramps, boosts, bunkers, waters, portals)
+ let inSand = false;
+ if (!airborne) {
+ hole.slopes.forEach(sl => {
+ if (b.x >= sl.x1 && b.x <= sl.x2 && b.z >= sl.z1 && b.z <= sl.z2) { b.vx += sl.fx * sdt; b.vz += sl.fz * sdt; }
+ });
+ (hole.ramps || []).forEach(rp => {
+ if (Math.abs(b.x - rp.x) <= rp.w * 0.5 && Math.abs(b.z - rp.z) <= rp.d * 0.5) {
+ const forwardSpd = b.vx * rp.dirX + b.vz * rp.dirZ;
+ if (forwardSpd > 2.4 && b.vy <= 0.1) {
+ b.vy = rp.vy * Math.min(1.15, Math.max(0.65, forwardSpd / 11.0));
+ b.vx += rp.dirX * rp.boost;
+ b.vz += rp.dirZ * rp.boost;
+ b.y = groundY + 0.08;
+ sfxJump();
+ spawnFX(b.x, 0.35, b.z, 0xf5d89a, 10, 3.8);
+ }
+ }
+ });
+ (hole.boosts || []).forEach(bp => {
+ if (Math.abs(b.x - bp.x) <= bp.w * 0.5 && Math.abs(b.z - bp.z) <= bp.d * 0.5) {
+ b.vx += bp.fx * sdt; b.vz += bp.fz * sdt;
+ if (s === 0 && Math.random() < 0.35) { sfxBoost(); spawnFX(b.x, 0.3, b.z, 0x67e8f9, 3, 2.5); }
+ }
+ });
+ for (const bk of (hole.bunkers || [])) {
+ const dx = (b.x - bk.x) / bk.rx, dz = (b.z - bk.z) / bk.rz;
+ if (dx * dx + dz * dz <= 1.0) { inSand = true; break; }
+ }
+ for (const pt of (hole.portals || [])) {
+ if (b.portalCD <= 0 && Math.hypot(b.x - pt.inX, b.z - pt.inZ) < 0.68) {
+ const spd = Math.max(5.5, Math.hypot(b.vx, b.vz));
+ b.x = pt.outX; b.z = pt.outZ;
+ b.vx = Math.sin(pt.outAngle) * spd;
+ b.vz = Math.cos(pt.outAngle) * spd;
+ b.portalCD = 1.2;
+ sfxPortal();
+ spawnFX(pt.inX, 0.5, pt.inZ, 0x34d399, 14, 4.5);
+ spawnFX(pt.outX, 0.5, pt.outZ, 0xfbbf24, 16, 4.8);
+ }
+ }
+ }
+
+ b.x += b.vx * sdt; b.z += b.vz * sdt;
+ const baseFric = airborne ? 0.9985 : (inSand ? 0.935 : (state.weather === 'rainy' ? 0.991 : 0.987));
+ const fric = Math.pow(baseFric, sdt * 60);
+ b.vx *= fric; b.vz *= fric;
+
+ for (const seg of state.wallSegs) collideWall2D(b, seg[0], seg[1], seg[2], seg[3], 0.84);
+ for (const bmp of hole.bumpers) collideCircle2D(b, bmp.x, bmp.z, bmp.r, 1.1, 2.8);
+
+ // Windmill house + rotating blades collision
+ for (const wm of state.dynWindmills) {
+ collideCircle2D(b, wm.def.x, wm.def.z, 0.85, 0.82, 0);
+ // Check if any of the 4 blades is sweeping down near ground level (y < 0.65)
+ const frontZ = wm.def.z + 0.78;
+ if (Math.abs(b.z - frontZ) < 0.34 && b.y < 0.85) {
+ for (let bi = 0; bi < 4; bi++) {
+ const a = wm.angle + (bi * Math.PI) / 2;
+ // Tip position in XY: tipY = 1.48 + sin(a)*len, tipX = wm.x + cos(a)*len
+ const tipY = 1.48 + Math.sin(a) * wm.def.bladeLen;
+ if (tipY < 0.45) {
+ const bxAtGround = wm.def.x + Math.cos(a) * (1.2);
+ if (Math.abs(b.x - bxAtGround) < 0.55) {
+ b.vz = Math.abs(b.vz) * 0.85 + 3.2;
+ b.z = frontZ + 0.36;
+ sfxBounce(10, true);
+ spawnFX(b.x, 0.4, b.z, 0xfef08a, 8, 3.5);
+ }
+ }
+ }
+ }
+ }
+
+ // Moving stone gates collision
+ for (const mv of state.dynMovers) {
+ const hw = mv.def.w / 2, hd = mv.def.d / 2;
+ const xL = mv.x - hw, xR = mv.x + hw, zF = mv.z + hd, zB = mv.z - hd;
+ collideWall2D(b, xL, zF, xR, zF, 0.85);
+ collideWall2D(b, xR, zF, xR, zB, 0.85);
+ collideWall2D(b, xR, zB, xL, zB, 0.85);
+ collideWall2D(b, xL, zB, xL, zF, 0.85);
+ }
+
+ // Water hazards (ONLY trigger if NOT airborne — so you can jump OVER water!)
+ if (!airborne) {
+ for (const wt of (hole.waters || [])) {
+ if (Math.abs(b.x - wt.x) < wt.w * 0.48 && Math.abs(b.z - wt.z) < wt.d * 0.48) {
+ sfxSplash();
+ spawnFX(b.x, 0.35, b.z, 0x38bdf8, 22, 5.2);
+ state.strokes++; updateHUD();
+ const ban = document.getElementById('banner');
+ document.getElementById('bannerTitle').textContent = 'WATER HAZARD!';
+ document.getElementById('bannerSub').textContent = '+1 Penalty Stroke';
+ ban.classList.add('show'); state.bannerT = 1.3;
+ b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0;
+ return;
+ }
+ }
+ }
+
+ if (!pointInPoly(b.x, b.z, hole.outer) && minDistToPoly(b.x, b.z, hole.outer) > 0.35) {
+ b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0; return;
+ }
+
+ const cDist = Math.hypot(b.x - hole.cup.x, b.z - hole.cup.z);
+ if (!airborne && cDist < 0.37 && Math.hypot(b.vx, b.vz) < 13.5) {
+ b.inHole = true; b.x = hole.cup.x; b.z = hole.cup.z; b.vx = 0; b.vz = 0;
+ state.scores[state.holeIdx] = state.strokes; updateHUD(); sfxCup();
+ spawnFX(hole.cup.x, 0.4, hole.cup.z, 0xf5d89a, 24, 6.2);
+ spawnFX(hole.cup.x, 0.4, hole.cup.z, 0x34d399, 18, 5.4);
+ const diff = state.strokes - hole.par;
+ let title = 'PAR!';
+ if (state.strokes === 1) title = 'HOLE IN ONE!!';
+ else if (diff <= -2) title = 'EAGLE!';
+ else if (diff === -1) title = 'BIRDIE!';
+ else if (diff === 1) title = 'BOGEY';
+ else if (diff >= 2) title = `+${diff}`;
+ const ban = document.getElementById('banner');
+ document.getElementById('bannerTitle').textContent = title;
+ document.getElementById('bannerSub').textContent = `${state.strokes} Stroke${state.strokes === 1 ? '' : 's'} on Par ${hole.par}`;
+ ban.classList.add('show'); state.bannerT = 2.0; state.nextHoleT = 2.1; return;
+ }
+ }
+
+ const spd = Math.hypot(b.vx, b.vz);
+ if (spd < 0.08) { b.vx = 0; b.vz = 0; }
+ else ballMesh.rotateOnWorldAxis(new THREE.Vector3(b.vz, 0, -b.vx).normalize(), (spd * dt) / ballRadius);
+ }
+
+ // =========================================================================
+ // 12. UI WIRING & MAIN 60FPS ANIMATION LOOP
+ // =========================================================================
+ function updateHUD() {
+ document.getElementById('hudStrokes').textContent = state.strokes;
+ let diff = 0, cnt = 0;
+ state.scores.forEach((s, i) => { if (s !== null) { diff += s - HOLES[i].par; cnt++; } });
+ document.getElementById('hudTotal').textContent = cnt === 0 || diff === 0 ? 'E' : (diff > 0 ? `+${diff}` : `${diff}`);
+ }
+
+ function showScorecard(final = false) {
+ function buildNineTable(start, end, label) {
+ let hRow = `<tr><th>${label}</th>`, pRow = '<tr><td><b>Par</b></td>', sRow = '<tr><td><b>You</b></td>';
+ let tPar = 0, tScr = 0, any = false;
+ for (let i = start; i < end; i++) {
+ const h = HOLES[i]; tPar += h.par;
+ hRow += `<th>${i + 1}</th>`; pRow += `<td>${h.par}</td>`;
+ const s = state.scores[i];
+ if (s === null) sRow += '<td>-</td>';
+ else { any = true; tScr += s; sRow += `<td class="${s < h.par ? 'under' : (s === h.par ? 'even' : 'over')}">${s}</td>`; }
+ }
+ hRow += '<th>TOT</th></tr>'; pRow += `<td><b>${tPar}</b></td></tr>`; sRow += `<td><b>${any ? tScr : '-'}</b></td></tr>`;
+ return hRow + pRow + sRow;
+ }
+ document.getElementById('scoreTbl').innerHTML = buildNineTable(0, 9, 'OUT') + buildNineTable(9, 18, 'IN');
+ document.getElementById('modalHead').textContent = final ? '18-Hole Championship Complete!' : 'Zen Dragon Links — 18-Hole Scorecard';
+ let tPar = 0, tScr = 0, played = 0;
+ HOLES.forEach((h, i) => { if (state.scores[i] !== null) { tPar += h.par; tScr += state.scores[i]; played++; } });
+ const d = tScr - tPar;
+ document.getElementById('scoreSummary').textContent = played ? `Played ${played}/18 • Score: ${tScr} (${d === 0 ? 'Even Par' : (d > 0 ? '+' + d : d)})` : 'Play holes to record your 18-hole round';
+ if (final && played === HOLES.length) {
+ const prev = parseInt(localStorage.getItem('minigolf_best_zen-dragon') || '999', 10);
+ if (tScr < prev) localStorage.setItem('minigolf_best_zen-dragon', String(tScr));
+ }
+ document.getElementById('scoreModal').classList.add('open');
+ }
+
+ document.querySelectorAll('#timeBtns .pill').forEach(b => b.addEventListener('click', () => {
+ document.querySelectorAll('#timeBtns .pill').forEach(x => x.classList.remove('active'));
+ b.classList.add('active'); state.time = b.dataset.t; applyAtmosphere();
+ }));
+ document.querySelectorAll('#skyBtns .pill').forEach(b => b.addEventListener('click', () => {
+ document.querySelectorAll('#skyBtns .pill').forEach(x => x.classList.remove('active'));
+ b.classList.add('active'); state.weather = b.dataset.w; applyAtmosphere();
+ }));
+ document.getElementById('btnCam').addEventListener('click', e => {
+ state.camMode = state.camMode === 'follow' ? 'overview' : 'follow';
+ e.target.textContent = state.camMode === 'follow' ? 'Course view' : 'Follow ball';
+ e.target.classList.toggle('on', state.camMode === 'overview');
+ });
+ document.getElementById('btnGuide').addEventListener('click', e => {
+ state.guideOn = !state.guideOn;
+ e.target.textContent = state.guideOn ? 'Guide: ON' : 'Guide: OFF';
+ e.target.classList.toggle('on', state.guideOn);
+ });
+ document.getElementById('btnZoomIn').addEventListener('click', () => { state.camDist = Math.max(4.8, state.camDist - 1.8); });
+ document.getElementById('btnZoomOut').addEventListener('click', () => { state.camDist = Math.min(23.0, state.camDist + 1.8); });
+ document.getElementById('btnRotate').addEventListener('click', () => { state.camYaw += Math.PI / 4; });
+
+ document.getElementById('btnPrevHole').addEventListener('click', () => buildHole((state.holeIdx - 1 + HOLES.length) % HOLES.length));
+ document.getElementById('btnNextHole').addEventListener('click', () => buildHole((state.holeIdx + 1) % HOLES.length));
+ document.getElementById('btnReset').addEventListener('click', () => buildHole(state.holeIdx));
+ document.getElementById('btnScore').addEventListener('click', () => showScorecard(false));
+ document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('scoreModal').classList.remove('open'));
+ document.getElementById('btnNewRound').addEventListener('click', () => {
+ state.scores = Array(HOLES.length).fill(null);
+ document.getElementById('scoreModal').classList.remove('open');
+ buildHole(0);
+ });
+ document.getElementById('btnSound').addEventListener('click', e => {
+ soundOn = !soundOn; e.target.textContent = soundOn ? 'Sound: ON' : 'Sound: OFF';
+ e.target.classList.toggle('on', soundOn); syncRainAudio();
+ });
+
+ window.addEventListener('resize', () => {
+ camera.aspect = window.innerWidth / window.innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(window.innerWidth, window.innerHeight);
+ });
+
+ let lastT = performance.now();
+ function animate(now) {
+ const dt = Math.min(0.05, (now - lastT) / 1000);
+ lastT = now;
+
+ stepPhysics(dt);
+ updateAimAndPutter();
+
+ waterUniforms.uTime.value = now * 0.001;
+ lavaUniforms.uTime.value = now * 0.001;
+ lighthouseBeacon.rotation.y += dt * 0.65;
+ if (lighthouseBeamMat) lighthouseBeamMat.opacity = state.time === 'night' ? 0.24 : (state.time === 'dusk' ? 0.16 : 0.07);
+
+ ballMesh.position.set(state.ball.x, state.ball.y, state.ball.z);
+ ballGlowLight.position.set(state.ball.x, state.ball.y + 2.2, state.ball.z);
+ ballShadowDisc.position.set(state.ball.x, 0.243, state.ball.z);
+ const airH = Math.max(0, state.ball.y - (0.24 + ballRadius));
+ ballShadowDisc.scale.setScalar(Math.max(0.45, 1.0 - airH * 0.18));
+ ballShadowDisc.visible = !state.ball.inHole;
+
+ const stopped = ballStopped();
+ readyRing.visible = stopped;
+ if (stopped) {
+ readyRing.position.set(state.ball.x, 0.247, state.ball.z);
+ readyRing.scale.setScalar(1 + Math.sin(now * 0.0055) * 0.12);
+ }
+
+ if (state.flagMesh) {
+ const fp = state.flagMesh.geometry.attributes.position;
+ for (let i = 0; i < fp.count; i++) {
+ const fx = fp.getX(i);
+ fp.setZ(i, Math.sin(now * 0.007 - fx * 4.5) * 0.06 * (fx + 0.5));
+ }
+ fp.needsUpdate = true;
+ }
+
+ chevronTex.offset.y -= dt * 0.65;
+ if (shrineLight.visible) shrineLight.intensity = 2.8 + Math.sin(now * 0.008) * 0.6;
+
+ const baseLantern = ATMOS[state.time].lanternInt;
+ if (baseLantern > 0.05) {
+ for (let i = 0; i < lanternHalos.length; i++) {
+ const flk = 1.0 + Math.sin(now * 0.011 + i * 2.3) * 0.08;
+ lanternLights[i].intensity = baseLantern * flk;
+ lanternHalos[i].scale.setScalar(2.1 * flk);
+ }
+ }
+
+ koiFish.forEach((k, idx) => {
+ k.ang += k.spd * dt;
+ k.mesh.position.set(Math.cos(k.ang) * k.rad, 0, Math.sin(k.ang) * k.rad);
+ k.mesh.rotation.y = -k.ang + Math.sin(now * 0.008 + idx) * 0.12;
+ });
+
+ const pArr = petalGeo.attributes.position.array;
+ for (let i = 0; i < petalCount; i++) {
+ pArr[i * 3] += Math.sin(now * 0.0012 + i) * 0.45 * dt;
+ pArr[i * 3 + 1] -= 0.58 * dt;
+ if (pArr[i * 3 + 1] < 0.2) pArr[i * 3 + 1] = 11.2;
+ }
+ petalGeo.attributes.position.needsUpdate = true;
+
+ if (ffMat.opacity > 0.05) {
+ const fArr = ffGeo.attributes.position.array;
+ for (let i = 0; i < fireflyCount; i++) {
+ fArr[i * 3] += Math.sin(now * 0.0015 + i * 2.1) * 0.35 * dt;
+ fArr[i * 3 + 1] += Math.cos(now * 0.002 + i) * 0.22 * dt;
+ }
+ ffGeo.attributes.position.needsUpdate = true;
+ }
+
+ if (state.weather === 'rainy') {
+ const pos = rainGeo.attributes.position.array;
+ for (let i = 0; i < rainCount; i++) {
+ pos[i * 6 + 1] -= 26 * dt; pos[i * 6 + 4] -= 26 * dt;
+ if (pos[i * 6 + 1] < 0) { const ny = 24 + Math.random() * 6; pos[i * 6 + 1] = ny; pos[i * 6 + 4] = ny - 0.9; }
+ }
+ rainGeo.attributes.position.needsUpdate = true;
+ }
+
+ if (state.camMode === 'overview') {
+ camera.position.lerp(new THREE.Vector3(0, 22, 24), 0.08);
+ camera.lookAt(0, 1.5, -4);
+ } else {
+ const cx = state.ball.x + Math.sin(state.camYaw) * Math.cos(state.camPitch) * state.camDist;
+ const cy = state.ball.y + Math.sin(state.camPitch) * state.camDist;
+ const cz = state.ball.z + Math.cos(state.camYaw) * Math.cos(state.camPitch) * state.camDist;
+ camera.position.lerp(new THREE.Vector3(cx, cy, cz), 0.12);
+ camera.lookAt(state.ball.x, state.ball.y + 0.45, state.ball.z);
+ }
+
+ sunLight.target.position.set(state.ball.x, 0, state.ball.z);
+ sunLight.target.updateMatrixWorld();
+ renderer.render(scene, camera);
+ requestAnimationFrame(animate);
+ }
+
+ const holeSel = document.getElementById('holeSelect');
+ HOLES.forEach((h, i) => {
+ const opt = document.createElement('option');
+ opt.value = String(i);
+ opt.textContent = `${i + 1}. ${h.name}`;
+ holeSel.appendChild(opt);
+ });
+ holeSel.addEventListener('change', () => buildHole(parseInt(holeSel.value, 10)));
+
+ buildHole(0);
+ setTimeout(() => {
+ const ld = document.getElementById('loader');
+ if (ld) {
+ ld.style.opacity = '0';
+ setTimeout(() => ld.remove(), 420);
+ }
+ }, 250);
+ requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
