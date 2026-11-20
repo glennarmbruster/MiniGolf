@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Zen Dragon Links — The Jade Garden 3D</title>
+<title>Zen Dragon Links — 18-Hole Grand Championship 3D</title>
 <style>
  :root {
  --panel: rgba(16, 30, 29, 0.84);
@@ -206,8 +206,8 @@
  <div class="hole-card">
  <div class="hole-badge" id="holeNumBadge">01</div>
  <div class="hole-meta">
- <div class="hole-name" id="holeName">Dragon's Gate</div>
- <div class="hole-sub" id="holeSub">HOLE 1 OF 6 • PAR 2</div>
+ <select id="holeSelect" class="hole-select" title="Jump to any of the 18 holes"></select>
+ <div class="hole-sub" id="holeSub">HOLE 1 OF 18 • PAR 2</div>
  </div>
  <div class="nav-arrows">
  <button class="mini-btn" id="btnPrevHole" title="Previous Hole">◀</button>
@@ -715,6 +715,41 @@
  g.gain.exponentialRampToValueAtTime(0.001, t + 0.075);
  o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.08);
  }
+ function sfxSplash() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, len = Math.floor(audioCtx.sampleRate * 0.35);
+ const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate), d = buf.getChannelData(0);
+ for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.09));
+ const src = audioCtx.createBufferSource(); src.buffer = buf;
+ const flt = audioCtx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 620;
+ const g = audioCtx.createGain(); g.gain.setValueAtTime(0.32, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+ src.connect(flt); flt.connect(g); g.connect(audioCtx.destination); src.start(t);
+ }
+ function sfxJump() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sine'; o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(520, t + 0.18);
+ g.gain.setValueAtTime(0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.21);
+ }
+ function sfxBoost() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sawtooth'; o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(680, t + 0.16);
+ const flt = audioCtx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1200;
+ g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+ o.connect(flt); flt.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + 0.19);
+ }
+ function sfxPortal() {
+ if (!soundOn) return; initAudio();
+ const t = audioCtx.currentTime;
+ [440, 660, 880, 1320].forEach((f, i) => {
+ const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+ o.type = 'sine'; o.frequency.setValueAtTime(f, t + i * 0.045);
+ g.gain.setValueAtTime(0.15, t + i * 0.045); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.045 + 0.25);
+ o.connect(g); g.connect(audioCtx.destination); o.start(t + i * 0.045); o.stop(t + i * 0.045 + 0.26);
+ });
+ }
  function sfxCup() {
  if (!soundOn) return; initAudio();
  const t = audioCtx.currentTime;
@@ -1100,6 +1135,113 @@
  // Place Hero Jade Pagoda prominently in the mid-ground scenic vista!
  createHeroJadePagoda(3.5, -24.5);
 
+ // =========================================================================
+ // 5B. COASTAL ZEN LIGHTHOUSE WITH ROTATING VOLUMETRIC BEAM + TORII GATES
+ // =========================================================================
+ const lighthouseBeacon = new THREE.Group();
+ let lighthouseBeamMat = null;
+ function createCoastalLighthouse(x, z) {
+ const g = new THREE.Group();
+ // Rocky cliff headland base
+ const headGeo = new THREE.IcosahedronGeometry(3.8, 3);
+ const hp = headGeo.attributes.position;
+ for (let i = 0; i < hp.count; i++) {
+ const vx = hp.getX(i), vy = hp.getY(i), vz = hp.getZ(i);
+ const n = 0.8 + 0.34 * ridgedFbm(vx * 0.45 + 3.1, vz * 0.45 + vy * 0.4, 3);
+ hp.setXYZ(i, vx * n, vy * n, vz * n);
+ }
+ headGeo.computeVertexNormals();
+ const headland = new THREE.Mesh(headGeo, matCliff);
+ headland.scale.set(1.3, 0.85, 1.3); headland.position.y = 1.4;
+ headland.castShadow = true; headland.receiveShadow = true; g.add(headland);
+
+ // Stone octagonal foundation
+ const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 2.05, 1.4, 12), matWall);
+ base.position.y = 3.6; base.castShadow = true; base.receiveShadow = true; g.add(base);
+
+ // Red & White striped tapered lighthouse tower (5 bands)
+ const matLHWhite = new THREE.MeshStandardMaterial({ color: 0xf8f5ee, roughness: 0.55 });
+ const matLHRed   = new THREE.MeshStandardMaterial({ color: 0xc22b2b, roughness: 0.48 });
+ const bands = [
+ { y: 5.2, rT: 1.46, rB: 1.62, h: 1.9, m: matLHWhite },
+ { y: 7.1, rT: 1.30, rB: 1.46, h: 1.9, m: matLHRed   },
+ { y: 9.0, rT: 1.15, rB: 1.30, h: 1.9, m: matLHWhite },
+ { y: 10.9, rT: 1.02, rB: 1.15, h: 1.9, m: matLHRed  },
+ { y: 12.6, rT: 0.92, rB: 1.02, h: 1.5, m: matLHWhite }
+ ];
+ bands.forEach(b => {
+ const seg = new THREE.Mesh(new THREE.CylinderGeometry(b.rT, b.rB, b.h, 20), b.m);
+ seg.position.y = b.y; seg.castShadow = true; seg.receiveShadow = true; g.add(seg);
+ });
+
+ // Wrap-around gallery deck & dark iron railing
+ const gallery = new THREE.Mesh(new THREE.CylinderGeometry(1.38, 1.12, 0.35, 20), matWoodDark);
+ gallery.position.y = 13.45; gallery.castShadow = true; g.add(gallery);
+ const rail = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.045, 8, 24), matWoodDark);
+ rail.rotation.x = Math.PI / 2; rail.position.y = 14.05; g.add(rail);
+
+ // Glass lantern room + glowing Fresnel core
+ const glass = new THREE.Mesh(
+ new THREE.CylinderGeometry(0.86, 0.86, 1.35, 16),
+ new THREE.MeshStandardMaterial({ color: 0xfff8dc, emissive: 0xffd166, emissiveIntensity: 0.85, transparent: true, opacity: 0.72, roughness: 0.1 })
+ );
+ glass.position.y = 14.3; g.add(glass);
+
+ // Pagoda-inspired crimson dome cap + golden finial
+ const dome = new THREE.Mesh(new THREE.ConeGeometry(1.18, 1.05, 16), matLHRed);
+ dome.position.y = 15.48; dome.castShadow = true; g.add(dome);
+ const fin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), matGoldTrim);
+ fin.position.y = 16.08; g.add(fin);
+
+ // Rotating Dual Volumetric Light Cones!
+ lighthouseBeamMat = new THREE.MeshBasicMaterial({
+ color: 0xfff3c4, transparent: true, opacity: 0.16,
+ blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+ });
+ [-1, 1].forEach(dir => {
+ const coneGeo = new THREE.ConeGeometry(3.8, 26, 20, 1, true);
+ coneGeo.translate(0, -13, 0);
+ coneGeo.rotateZ(dir * Math.PI / 2);
+ const beam = new THREE.Mesh(coneGeo, lighthouseBeamMat);
+ beam.rotation.z = dir * 0.14; // slight downward tilt toward course
+ lighthouseBeacon.add(beam);
+ });
+ lighthouseBeacon.position.set(0, 14.35, 0);
+ g.add(lighthouseBeacon);
+
+ g.position.set(x, 0, z);
+ envGroup.add(g);
+ }
+ createCoastalLighthouse(-20.5, -18.5);
+
+ // Curved-Beam Crimson Torii Gates framing the scenic horizon
+ function createToriiGate(x, z, scale = 1, rotY = 0) {
+ const g = new THREE.Group();
+ [-1.8, 1.8].forEach(px => {
+ const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.48, 0.52, 12), matCliff);
+ ped.position.set(px, 0.25, 0); ped.castShadow = true; g.add(ped);
+ const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 5.1, 14), matPagodaRed);
+ pil.position.set(px, 2.7, 0); pil.castShadow = true; g.add(pil);
+ });
+ const kasagi = new THREE.CatmullRomCurve3([
+ new THREE.Vector3(-2.9, 5.4, 0), new THREE.Vector3(-1.3, 5.08, 0),
+ new THREE.Vector3(0, 5.04, 0), new THREE.Vector3(1.3, 5.08, 0), new THREE.Vector3(2.9, 5.4, 0)
+ ]);
+ const topB = new THREE.Mesh(new THREE.TubeGeometry(kasagi, 20, 0.22, 8, false), matPagodaRed);
+ topB.castShadow = true; g.add(topB);
+ const capB = new THREE.Mesh(new THREE.TubeGeometry(kasagi, 20, 0.13, 8, false), matWoodDark);
+ capB.position.y = 0.20; g.add(capB);
+ const subB = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.25, 0.32), matPagodaRed);
+ subB.position.set(0, 4.1, 0); g.add(subB);
+ const strut = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.85, 0.26), matPagodaRed);
+ strut.position.set(0, 4.58, 0); g.add(strut);
+ g.position.set(x, 0, z); g.scale.setScalar(scale); g.rotation.y = rotY;
+ envGroup.add(g);
+ }
+ createToriiGate(-13.5, -28.0, 1.35, 0.24);
+ createToriiGate(16.5, -26.0, 1.35, -0.22);
+
+
  // Sculpted Dramatic Ochre Hero Cliff Crags flanking the courtyard (like the reference!)
  function createHeroCliffCrag(x, z, sx, sy, sz, rotY = 0, seedOff = 1.0) {
  const geo = new THREE.IcosahedronGeometry(2.6, 3);
@@ -1426,6 +1568,7 @@
  // 7. 6 SCULPTED CHAMPIONSHIP HOLES (Featuring "Ribbon of Stone" Hairpin!)
  // =========================================================================
  const HOLES = [
+ // ==================== FRONT 9: THE JADE GARDEN ====================
  {
  name: "Dragon's Gate", par: 2, tee: { x: 0, z: 10.2 }, cup: { x: 0, z: -10.2 },
  outer: ensureOutwardWinding(createRoundedPolygon([
@@ -1437,21 +1580,53 @@
  { x: 0, z: 3.3, r: 0.52 }, { x: -1.65, z: -0.4, r: 0.52 },
  { x: 1.65, z: -0.4, r: 0.52 }, { x: 0, z: -4.1, r: 0.52 }
  ],
- gates: [], slopes: [], shrineBackZ: -13.2
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: -13.2
  },
  {
  name: "Ribbon of Stone", par: 3, tee: { x: -5.4, z: 8.6 }, cup: { x: 3.2, z: 7.2 },
  outer: ensureOutwardWinding(createCurvedCorridor([
  [-5.4, 8.8], [-5.2, 1.0], [0.5, -6.5], [6.8, -4.5], [5.8, 3.2], [3.2, 7.5]
  ], 2.45, 56)),
- island: null, bumpers: [{ x: 6.2, z: -1.2, r: 0.5 }], gates: [], slopes: [], shrineBackZ: null
+ island: null, bumpers: [{ x: 6.2, z: -1.2, r: 0.5 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: null
+ },
+ {
+ name: "Old Windmill Pass", par: 3, tee: { x: 0, z: 11.2 }, cup: { x: 0, z: -10.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.4, z: 13.5, r: 2.4 }, { x: 3.4, z: 13.5, r: 2.4 },
+ { x: 3.4, z: -13.4, r: 2.8 }, { x: -3.4, z: -13.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [], ramps: [],
+ windmills: [{ x: 0, z: 0.0, speed: 1.45, bladeLen: 2.15 }],
+ movers: [], boosts: [],
+ bunkers: [{ x: -2.0, z: -5.5, rx: 0.95, rz: 1.35 }, { x: 2.0, z: -5.5, rx: 0.95, rz: 1.35 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Leap of the Koi", par: 3, tee: { x: 0, z: 11.5 }, cup: { x: 0, z: -10.5 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.2, z: 13.8, r: 2.2 }, { x: 3.2, z: 13.8, r: 2.2 },
+ { x: 3.2, z: -13.2, r: 2.8 }, { x: -3.2, z: -13.2, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [{ x: -1.6, z: -7.2, r: 0.48 }, { x: 1.6, z: -7.2, r: 0.48 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 3.2, w: 3.0, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.5 }],
+ windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [{ x: 0, z: -1.2, w: 5.8, d: 4.2 }],
+ portals: [], shrineBackZ: -13.4
  },
  {
  name: "Crescent Lotus Bank", par: 3, tee: { x: -5.2, z: 9.8 }, cup: { x: 5.2, z: -9.8 },
  outer: ensureOutwardWinding(createCurvedCorridor([
  [-5.2, 10.2], [-6.8, 2.0], [-2.5, -6.2], [5.2, -10.0]
  ], 2.65, 48)),
- island: null, bumpers: [{ x: -4.6, z: 0.2, r: 0.54 }, { x: 0.5, z: -6.8, r: 0.54 }], gates: [], slopes: [], shrineBackZ: null
+ island: null, bumpers: [{ x: -4.6, z: 0.2, r: 0.54 }, { x: 0.5, z: -6.8, r: 0.54 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: -4.2, z: 5.2, rx: 0.85, rz: 1.15 }],
+ waters: [], portals: [], shrineBackZ: null
  },
  {
  name: "Twin Lantern Oval", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -11.4 },
@@ -1464,24 +1639,188 @@
  { x: 1.15, z: -3.2, r: 1.05 }, { x: -1.15, z: -3.2, r: 1.05 }
  ], 10), false),
  bumpers: [{ x: -2.75, z: 5.8, r: 0.48 }, { x: 2.75, z: 5.8, r: 0.48 }, { x: 0, z: -6.8, r: 0.56 }],
- gates: [], slopes: [], shrineBackZ: -14.5
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [], waters: [], portals: [],
+ shrineBackZ: -14.5
  },
  {
- name: "Mount Fuji Terrace", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -10.8 },
+ name: "Sliding Shoji Gates", par: 3, tee: { x: 0, z: 11.4 }, cup: { x: 0, z: -10.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.5, z: 13.8, r: 2.4 }, { x: 3.5, z: 13.8, r: 2.4 },
+ { x: 3.5, z: -13.4, r: 2.8 }, { x: -3.5, z: -13.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [
+ { cx: 0, cz: 3.2, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.6, phase: 0 },
+ { cx: 0, cz: -3.8, w: 2.1, d: 0.65, ampX: 1.9, ampZ: 0, speed: 1.9, phase: 2.4 }
+ ],
+ boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Mount Fuji Boost", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -10.8 },
  outer: ensureOutwardWinding(createRoundedPolygon([
  { x: -3.5, z: 14.6, r: 2.5 }, { x: 3.5, z: 14.6, r: 2.5 },
  { x: 3.5, z: -13.6, r: 3.1 }, { x: -3.5, z: -13.6, r: 3.1 }
  ], 10)),
- island: null, slopes: [{ x1: -3.2, z1: -3.8, x2: 3.2, z2: 4.0, fx: 0, fz: 5.4 }],
- bumpers: [{ x: -1.65, z: -7.0, r: 0.52 }, { x: 1.65, z: -7.0, r: 0.52 }], gates: [], shrineBackZ: -13.8
+ island: null,
+ slopes: [{ x1: -3.2, z1: -4.2, x2: 3.2, z2: 3.8, fx: 0, fz: 5.8 }],
+ bumpers: [{ x: -1.65, z: -7.0, r: 0.52 }, { x: 1.65, z: -7.0, r: 0.52 }],
+ gates: [], ramps: [], windmills: [], movers: [],
+ boosts: [{ x: 0, z: 6.4, w: 2.2, d: 2.8, fx: 0, fz: -24.0 }],
+ bunkers: [], waters: [], portals: [], shrineBackZ: -13.8
  },
  {
- name: "Dragon's Sanctuary", par: 4, tee: { x: -4.2, z: 12.4 }, cup: { x: 0.0, z: -11.5 },
+ name: "Pagoda Portal Shortcut", par: 3, tee: { x: -4.2, z: 11.4 }, cup: { x: 4.2, z: -10.5 },
  outer: ensureOutwardWinding(createCurvedCorridor([
- [-4.2, 12.8], [-4.2, 5.0], [2.4, 0.5], [0.2, -5.5], [0.0, -11.8]
- ], 2.75, 54)),
- island: null, bumpers: [{ x: -1.25, z: -4.0, r: 0.52 }, { x: 1.45, z: -4.2, r: 0.52 }],
- gates: [{ x: 0.0, z: -7.8, gapW: 2.15 }], slopes: [], shrineBackZ: -14.6
+ [-4.2, 11.8], [-4.5, 4.0], [0.0, 0.0], [4.5, -4.0], [4.2, -10.8]
+ ], 2.65, 50)),
+ island: null, bumpers: [{ x: 0, z: 0, r: 0.62 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: 2.2, z: -2.2, rx: 0.9, rz: 0.9 }],
+ waters: [],
+ portals: [{ inX: -4.4, inZ: 5.2, outX: 4.2, outZ: -6.4, outAngle: Math.PI }],
+ shrineBackZ: null
+ },
+ // ==================== BACK 9: LIGHTHOUSE COAST & DRAGON'S PEAK ====================
+ {
+ name: "Lighthouse Bluff Jump", par: 3, tee: { x: -4.6, z: 11.0 }, cup: { x: 4.6, z: -10.2 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -6.8, z: 13.5, r: 2.6 }, { x: 6.8, z: 13.5, r: 2.6 },
+ { x: 6.8, z: -13.0, r: 3.0 }, { x: -6.8, z: -13.0, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -2.4, z: -6.8, r: 0.58 }, { x: 2.4, z: 5.5, r: 0.58 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 2.5, w: 3.6, d: 2.2, dirX: 0.45, dirZ: -0.89, vy: 8.2, boost: 4.2 }],
+ windmills: [], movers: [], boosts: [],
+ bunkers: [{ x: 0.5, z: -1.6, rx: 3.6, rz: 2.1 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Twin Windmill Alley", par: 4, tee: { x: 0, z: 12.6 }, cup: { x: 0, z: -12.0 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.6, z: 14.8, r: 2.4 }, { x: 3.6, z: 14.8, r: 2.4 },
+ { x: 3.6, z: -14.4, r: 2.8 }, { x: -3.6, z: -14.4, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [{ x: 0, z: 0.0, r: 0.55 }],
+ gates: [], slopes: [], ramps: [],
+ windmills: [
+ { x: 0, z: 4.8, speed: 1.5, bladeLen: 2.1 },
+ { x: 0, z: -4.8, speed: -1.75, bladeLen: 2.1 }
+ ],
+ movers: [], boosts: [], bunkers: [], waters: [], portals: [], shrineBackZ: -14.6
+ },
+ {
+ name: "Turbo Switchback", par: 4, tee: { x: -5.4, z: 9.2 }, cup: { x: 3.4, z: 7.4 },
+ outer: ensureOutwardWinding(createCurvedCorridor([
+ [-5.4, 9.5], [-5.2, 0.5], [0.5, -7.5], [6.8, -4.8], [5.8, 3.0], [3.4, 7.8]
+ ], 2.55, 56)),
+ island: null, bumpers: [{ x: 0.5, z: -7.2, r: 0.52 }],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [],
+ boosts: [
+ { x: -5.2, z: 3.2, w: 2.0, d: 2.8, fx: 0, fz: -22.0 },
+ { x: 6.2, z: -1.2, w: 2.0, d: 2.8, fx: -4.0, fz: 22.0 }
+ ],
+ bunkers: [], waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Emperor's Pinball Arena", par: 3, tee: { x: 0, z: 11.8 }, cup: { x: 0, z: -11.2 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -5.4, z: 14.2, r: 4.2 }, { x: 5.4, z: 14.2, r: 4.2 },
+ { x: 5.4, z: -13.8, r: 4.2 }, { x: -5.4, z: -13.8, r: 4.2 }
+ ], 12)),
+ island: null,
+ bumpers: [
+ { x: -2.2, z: 5.0, r: 0.62 }, { x: 2.2, z: 5.0, r: 0.62 },
+ { x: 0, z: 1.0, r: 0.72 },
+ { x: -2.6, z: -3.2, r: 0.62 }, { x: 2.6, z: -3.2, r: 0.62 },
+ { x: 0, z: -6.5, r: 0.55 }
+ ],
+ gates: [], slopes: [], ramps: [], windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [{ x: -4.1, z: 0.5, w: 1.7, d: 3.6 }, { x: 4.1, z: 0.5, w: 1.7, d: 3.6 }],
+ portals: [], shrineBackZ: null
+ },
+ {
+ name: "Double Canyon Jump", par: 4, tee: { x: 0, z: 13.0 }, cup: { x: 0, z: -12.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.4, z: 15.0, r: 2.2 }, { x: 3.4, z: 15.0, r: 2.2 },
+ { x: 3.4, z: -14.8, r: 2.8 }, { x: -3.4, z: -14.8, r: 2.8 }
+ ], 10)),
+ island: null, bumpers: [],
+ gates: [], slopes: [],
+ ramps: [
+ { x: 0, z: 7.4, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 },
+ { x: 0, z: -1.8, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.6, boost: 4.8 }
+ ],
+ windmills: [], movers: [], boosts: [], bunkers: [],
+ waters: [
+ { x: 0, z: 3.4, w: 6.2, d: 3.6 },
+ { x: 0, z: -5.8, w: 6.2, d: 3.6 }
+ ],
+ portals: [], shrineBackZ: -15.0
+ },
+ {
+ name: "Shifting Zen Labyrinth", par: 4, tee: { x: 0, z: 12.6 }, cup: { x: 0, z: -11.8 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -4.0, z: 14.8, r: 2.8 }, { x: 4.0, z: 14.8, r: 2.8 },
+ { x: 4.0, z: -14.4, r: 3.0 }, { x: -4.0, z: -14.4, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -2.2, z: 0.0, r: 0.48 }, { x: 2.2, z: 0.0, r: 0.48 }],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [
+ { cx: 0, cz: 5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.5, phase: 0 },
+ { cx: 0, cz: 0.0, w: 2.2, d: 0.65, ampX: 1.8, ampZ: 0, speed: 2.0, phase: 2.0 },
+ { cx: 0, cz: -5.8, w: 2.4, d: 0.65, ampX: 2.2, ampZ: 0, speed: 1.7, phase: 4.0 }
+ ],
+ boosts: [],
+ bunkers: [{ x: -2.5, z: -8.8, rx: 0.9, rz: 1.2 }, { x: 2.5, z: -8.8, rx: 0.9, rz: 1.2 }],
+ waters: [], portals: [], shrineBackZ: null
+ },
+ {
+ name: "Portal of the Waves", par: 3, tee: { x: 0, z: 12.2 }, cup: { x: 0, z: -11.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -4.6, z: 14.5, r: 3.4 }, { x: 4.6, z: 14.5, r: 3.4 },
+ { x: 4.6, z: -14.2, r: 3.4 }, { x: -4.6, z: -14.2, r: 3.4 }
+ ], 12)),
+ island: ensureOutwardWinding(createRoundedPolygon([
+ { x: -1.15, z: 3.2, r: 1.05 }, { x: 1.15, z: 3.2, r: 1.05 },
+ { x: 1.15, z: -3.2, r: 1.05 }, { x: -1.15, z: -3.2, r: 1.05 }
+ ], 10), false),
+ bumpers: [{ x: 2.8, z: 0.0, r: 0.55 }],
+ gates: [], slopes: [], ramps: [], windmills: [],
+ movers: [{ cx: -2.8, cz: 4.5, w: 1.4, d: 0.6, ampX: 0.9, ampZ: 0, speed: 1.8, phase: 0 }],
+ boosts: [], bunkers: [], waters: [],
+ portals: [{ inX: -2.8, inZ: 0.0, outX: 0.0, outZ: -7.8, outAngle: Math.PI }],
+ shrineBackZ: -14.5
+ },
+ {
+ name: "Volcano Ridge Assault", par: 4, tee: { x: 0, z: 13.0 }, cup: { x: 0, z: -12.0 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.6, z: 15.0, r: 2.4 }, { x: 3.6, z: 15.0, r: 2.4 },
+ { x: 3.6, z: -14.6, r: 3.0 }, { x: -3.6, z: -14.6, r: 3.0 }
+ ], 10)),
+ island: null, bumpers: [{ x: -1.8, z: -8.2, r: 0.5 }, { x: 1.8, z: -8.2, r: 0.5 }],
+ gates: [],
+ slopes: [{ x1: -3.3, z1: -4.5, x2: 3.3, z2: 4.0, fx: 0, fz: 6.2 }],
+ ramps: [],
+ windmills: [{ x: 0, z: -5.2, speed: 1.65, bladeLen: 2.1 }],
+ movers: [],
+ boosts: [{ x: 0, z: 6.8, w: 2.2, d: 2.8, fx: 0, fz: -25.0 }],
+ bunkers: [], waters: [], portals: [], shrineBackZ: -14.8
+ },
+ {
+ name: "Grand Dragon Finale", par: 4, tee: { x: 0, z: 13.2 }, cup: { x: 0, z: -12.4 },
+ outer: ensureOutwardWinding(createRoundedPolygon([
+ { x: -3.8, z: 15.2, r: 2.6 }, { x: 3.8, z: 15.2, r: 2.6 },
+ { x: 3.8, z: -14.8, r: 3.2 }, { x: -3.8, z: -14.8, r: 3.2 }
+ ], 10)),
+ island: null,
+ bumpers: [{ x: -1.65, z: -8.4, r: 0.52 }, { x: 1.65, z: -8.4, r: 0.52 }],
+ gates: [], slopes: [],
+ ramps: [{ x: 0, z: 7.2, w: 3.2, d: 2.2, dirX: 0, dirZ: -1, vy: 8.8, boost: 5.0 }],
+ windmills: [{ x: 0, z: -3.2, speed: 1.65, bladeLen: 2.2 }],
+ movers: [], boosts: [], bunkers: [],
+ waters: [{ x: 0, z: 3.0, w: 6.8, d: 3.8 }],
+ portals: [], shrineBackZ: -15.0
  }
  ];
 
@@ -1566,9 +1905,9 @@
  holeIdx: 0, strokes: 0, scores: Array(HOLES.length).fill(null),
  time: 'daylight', weather: 'clear', camMode: 'follow', guideOn: true,
  camYaw: 0, camPitch: 0.44, camDist: 9.6,
- ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vz: 0, inHole: false, sinkT: 0 },
+ ball: { x: 0, y: 0.24 + ballRadius, z: 10.2, vx: 0, vy: 0, vz: 0, lastSafeX: 0, lastSafeZ: 10.2, portalCD: 0, inHole: false, sinkT: 0 },
  aiming: false, aimPower: 0.45, aimAngle: Math.PI,
- putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null
+ putterSwingT: 0, bannerT: 0, nextHoleT: 0, wallSegs: [], flagMesh: null, dynWindmills: [], dynMovers: [], dynPortals: []
  };
 
  function clearGroup(grp) { while (grp.children.length > 0) grp.remove(grp.children[0]); }
@@ -1590,6 +1929,137 @@
  if (d < minD) minD = d;
  }
  return minD;
+ }
+
+ 
+ function buildRampMesh(rp) {
+ const g = new THREE.Group();
+ const ang = Math.atan2(rp.dirX, rp.dirZ);
+ // Angled 3D wooden launch ramp wedge!
+ const shape = new THREE.Shape();
+ shape.moveTo(-rp.d / 2, 0);
+ shape.lineTo(rp.d / 2, 0);
+ shape.lineTo(rp.d / 2, 0.52);
+ shape.closePath();
+ const geo = new THREE.ExtrudeGeometry(shape, { depth: rp.w, bevelEnabled: false });
+ geo.translate(0, 0, -rp.w / 2);
+ geo.rotateY(-Math.PI / 2);
+ const matRamp = new THREE.MeshStandardMaterial({ color: 0x9c6638, map: barkTex, roughness: 0.65 });
+ const wedge = new THREE.Mesh(geo, matRamp);
+ wedge.castShadow = true; wedge.receiveShadow = true; g.add(wedge);
+
+ // Bright gold launch chevrons painted on top slope
+ const chev = new THREE.Mesh(
+ new THREE.PlaneGeometry(rp.w * 0.85, rp.d * 0.9),
+ new THREE.MeshBasicMaterial({ map: chevronTex, transparent: true, opacity: 0.88 })
+ );
+ chev.rotation.x = -Math.PI / 2 + 0.23;
+ chev.position.set(0, 0.30, 0);
+ g.add(chev);
+
+ g.position.set(rp.x, 0.24, rp.z);
+ g.rotation.y = ang;
+ courseGroup.add(g);
+ }
+
+ function buildWindmillMesh(wm) {
+ const g = new THREE.Group();
+ // Traditional Japanese stone & timber mill house straddling the center
+ const house = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.82, 2.35, 8), matWall);
+ house.position.y = 1.18; house.castShadow = true; house.receiveShadow = true; g.add(house);
+ const roof = new THREE.Mesh(new THREE.ConeGeometry(1.18, 0.95, 8), matPagodaRoof);
+ roof.position.y = 2.75; roof.castShadow = true; g.add(roof);
+ const finial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), matGoldTrim);
+ finial.position.y = 3.28; g.add(finial);
+
+ // Rotating 4-blade timber & crimson sail hub (mounted on front face)
+ const rotor = new THREE.Group();
+ rotor.position.set(0, 1.48, 0.78);
+ const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.26, 12), matGoldTrim);
+ hub.rotation.x = Math.PI / 2; rotor.add(hub);
+ const matSail = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+ for (let b = 0; b < 4; b++) {
+ const armG = new THREE.Group();
+ armG.rotation.z = (b * Math.PI) / 2;
+ const spar = new THREE.Mesh(new THREE.BoxGeometry(0.11, wm.bladeLen, 0.08), matWoodDark);
+ spar.position.y = wm.bladeLen / 2; spar.castShadow = true; armG.add(spar);
+ const sail = new THREE.Mesh(new THREE.BoxGeometry(0.42, wm.bladeLen * 0.72, 0.04), matSail);
+ sail.position.set(0.16, wm.bladeLen * 0.58, 0.02); sail.castShadow = true; armG.add(sail);
+ const trim = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.10, 0.06), matPagodaRed);
+ trim.position.set(0.16, wm.bladeLen * 0.92, 0.02); armG.add(trim);
+ rotor.add(armG);
+ }
+ g.add(rotor);
+ g.position.set(wm.x, 0.24, wm.z);
+ courseGroup.add(g);
+ state.dynWindmills.push({ def: wm, rotor, angle: 0 });
+ }
+
+ function buildMoverMesh(mv) {
+ const g = new THREE.Group();
+ const block = new THREE.Mesh(new THREE.BoxGeometry(mv.w, 0.92, mv.d), matWall);
+ block.position.y = 0.46; block.castShadow = true; block.receiveShadow = true; g.add(block);
+ const cap = new THREE.Mesh(new THREE.BoxGeometry(mv.w + 0.08, 0.14, mv.d + 0.08), matPagodaRoof);
+ cap.position.y = 0.96; cap.castShadow = true; g.add(cap);
+ g.position.set(mv.cx, 0.24, mv.cz);
+ courseGroup.add(g);
+ state.dynMovers.push({ def: mv, mesh: g, x: mv.cx, z: mv.cz });
+ }
+
+ function buildBoostMesh(bp) {
+ const g = new THREE.Group();
+ const pad = new THREE.Mesh(
+ new THREE.PlaneGeometry(bp.w, bp.d),
+ new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.42 })
+ );
+ pad.rotation.x = -Math.PI / 2; g.add(pad);
+ const chev = new THREE.Mesh(
+ new THREE.PlaneGeometry(bp.w * 0.85, bp.d * 0.9),
+ new THREE.MeshBasicMaterial({ map: chevronTex, color: 0x67e8f9, transparent: true, opacity: 0.92 })
+ );
+ chev.rotation.x = -Math.PI / 2; chev.position.y = 0.01;
+ chev.rotation.z = Math.atan2(bp.fx, -bp.fz);
+ g.add(chev);
+ g.position.set(bp.x, 0.252, bp.z);
+ courseGroup.add(g);
+ }
+
+ function buildBunkerMesh(bk) {
+ const mesh = new THREE.Mesh(
+ new THREE.CircleGeometry(1.0, 28),
+ new THREE.MeshStandardMaterial({ color: 0xe6c27a, roughness: 0.95 })
+ );
+ mesh.rotation.x = -Math.PI / 2;
+ mesh.scale.set(bk.rx, bk.rz, 1);
+ mesh.position.set(bk.x, 0.248, bk.z);
+ mesh.receiveShadow = true;
+ courseGroup.add(mesh);
+ }
+
+ function buildWaterHazardMesh(wt) {
+ const mesh = new THREE.Mesh(new THREE.PlaneGeometry(wt.w, wt.d, 16, 12), matWaterShader);
+ mesh.rotation.x = -Math.PI / 2;
+ mesh.position.set(wt.x, 0.249, wt.z);
+ courseGroup.add(mesh);
+ }
+
+ function buildPortalMesh(pt) {
+ function makeArch(x, z, colHex) {
+ const g = new THREE.Group();
+ const arch = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.14, 12, 24, Math.PI), matGoldTrim);
+ arch.position.y = 0.05; arch.castShadow = true; g.add(arch);
+ const swirl = new THREE.Mesh(
+ new THREE.CircleGeometry(0.62, 20, 0, Math.PI),
+ new THREE.MeshBasicMaterial({ color: colHex, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
+ );
+ swirl.position.y = 0.05; g.add(swirl);
+ g.position.set(x, 0.24, z);
+ courseGroup.add(g);
+ return swirl;
+ }
+ const sIn = makeArch(pt.inX, pt.inZ, 0x34d399);
+ const sOut = makeArch(pt.outX, pt.outZ, 0xfbbf24);
+ state.dynPortals.push({ def: pt, sIn, sOut });
  }
 
  function buildBumperMesh(x, y, z, r) {
@@ -1692,9 +2162,11 @@
  const h = HOLES[idx];
  state.strokes = 0;
  state.ball.x = h.tee.x; state.ball.z = h.tee.z; state.ball.y = 0.24 + ballRadius;
- state.ball.vx = 0; state.ball.vz = 0; state.ball.inHole = false; state.ball.sinkT = 0;
+ state.ball.lastSafeX = h.tee.x; state.ball.lastSafeZ = h.tee.z;
+ state.ball.vx = 0; state.ball.vy = 0; state.ball.vz = 0; state.ball.portalCD = 0;
+ state.ball.inHole = false; state.ball.sinkT = 0;
  state.aiming = false;
- state.wallSegs = [];
+ state.wallSegs = []; state.dynWindmills = []; state.dynMovers = []; state.dynPortals = [];
 
  courseGroup.add(buildFairwayTurfMesh(h.outer, h.island));
  courseGroup.add(buildCurvedStoneWallMesh(h.outer, 0.92, 0.56, false));
@@ -1736,6 +2208,13 @@
  });
 
  h.bumpers.forEach(bmp => buildBumperMesh(bmp.x, 0.24, bmp.z, bmp.r));
+ (h.ramps || []).forEach(buildRampMesh);
+ (h.windmills || []).forEach(buildWindmillMesh);
+ (h.movers || []).forEach(buildMoverMesh);
+ (h.boosts || []).forEach(buildBoostMesh);
+ (h.bunkers || []).forEach(buildBunkerMesh);
+ (h.waters || []).forEach(buildWaterHazardMesh);
+ (h.portals || []).forEach(buildPortalMesh);
 
  const cupHole = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 24), new THREE.MeshBasicMaterial({ color: 0x05070a }));
  cupHole.position.set(h.cup.x, 0.23, h.cup.z); courseGroup.add(cupHole);
@@ -1777,7 +2256,7 @@
  state.camPitch = 0.45; state.camDist = 9.8;
 
  document.getElementById('holeNumBadge').textContent = String(idx + 1).padStart(2, '0');
- document.getElementById('holeName').textContent = h.name;
+ document.getElementById('holeSelect').value = String(idx);
  document.getElementById('holeSub').textContent = `HOLE ${idx + 1} OF ${HOLES.length} • PAR ${h.par}`;
  applyAtmosphere();
  updateHUD();
@@ -1883,6 +2362,7 @@
  if (!ballStopped() || state.aimPower < 0.04) return;
  initAudio();
  const spd = state.aimPower * 21.0;
+ state.ball.lastSafeX = state.ball.x; state.ball.lastSafeZ = state.ball.z;
  state.ball.vx = Math.sin(state.aimAngle) * spd;
  state.ball.vz = Math.cos(state.aimAngle) * spd;
  state.strokes++; updateHUD(); sfxPutt(state.aimPower);
@@ -1916,7 +2396,7 @@
  return hit;
  }
 
- function ballStopped() { return !state.ball.inHole && Math.hypot(state.ball.vx, state.ball.vz) < 0.08; }
+ function ballStopped() { return !state.ball.inHole && state.ball.y <= 0.24 + ballRadius + 0.04 && Math.abs(state.ball.vy) < 0.1 && Math.hypot(state.ball.vx, state.ball.vz) < 0.08; }
 
  canvas.addEventListener('pointerdown', e => {
  initAudio(); lastPointer = { x: e.clientX, y: e.clientY };
@@ -2052,24 +2532,148 @@
  return;
  }
 
+ // Animate rotating windmills & moving stone gates
+ const tSec = performance.now() * 0.001;
+ state.dynWindmills.forEach(wm => {
+ wm.angle += wm.def.speed * dt;
+ wm.rotor.rotation.z = wm.angle;
+ });
+ state.dynMovers.forEach(mv => {
+ const d = mv.def;
+ mv.x = d.cx + Math.sin(tSec * d.speed + d.phase) * d.ampX;
+ mv.z = d.cz + Math.cos(tSec * d.speed + d.phase) * d.ampZ;
+ mv.mesh.position.set(mv.x, 0.24, mv.z);
+ });
+ if (b.portalCD > 0) b.portalCD -= dt;
+
+ const groundY = 0.24 + ballRadius;
  const sub = 16, sdt = dt / sub;
  for (let s = 0; s < sub; s++) {
+ const airborne = b.y > groundY + 0.05;
+
+ // Vertical parabolic jump physics
+ if (airborne || b.vy > 0) {
+ b.vy -= 22.0 * sdt;
+ b.y += b.vy * sdt;
+ if (b.y <= groundY) {
+ b.y = groundY;
+ if (Math.abs(b.vy) > 2.2) {
+ sfxBounce(Math.abs(b.vy) * 1.4, false);
+ spawnFX(b.x, 0.28, b.z, 0xe2e8f0, 6, 2.6);
+ b.vy = -b.vy * 0.36;
+ } else {
+ b.vy = 0;
+ }
+ }
+ }
+
+ // Ground-only interactions (slopes, ramps, boosts, bunkers, waters, portals)
+ let inSand = false;
+ if (!airborne) {
  hole.slopes.forEach(sl => {
  if (b.x >= sl.x1 && b.x <= sl.x2 && b.z >= sl.z1 && b.z <= sl.z2) { b.vx += sl.fx * sdt; b.vz += sl.fz * sdt; }
  });
+ (hole.ramps || []).forEach(rp => {
+ if (Math.abs(b.x - rp.x) <= rp.w * 0.5 && Math.abs(b.z - rp.z) <= rp.d * 0.5) {
+ const forwardSpd = b.vx * rp.dirX + b.vz * rp.dirZ;
+ if (forwardSpd > 2.4 && b.vy <= 0.1) {
+ b.vy = rp.vy * Math.min(1.15, Math.max(0.65, forwardSpd / 11.0));
+ b.vx += rp.dirX * rp.boost;
+ b.vz += rp.dirZ * rp.boost;
+ b.y = groundY + 0.08;
+ sfxJump();
+ spawnFX(b.x, 0.35, b.z, 0xf5d89a, 10, 3.8);
+ }
+ }
+ });
+ (hole.boosts || []).forEach(bp => {
+ if (Math.abs(b.x - bp.x) <= bp.w * 0.5 && Math.abs(b.z - bp.z) <= bp.d * 0.5) {
+ b.vx += bp.fx * sdt; b.vz += bp.fz * sdt;
+ if (s === 0 && Math.random() < 0.35) { sfxBoost(); spawnFX(b.x, 0.3, b.z, 0x67e8f9, 3, 2.5); }
+ }
+ });
+ for (const bk of (hole.bunkers || [])) {
+ const dx = (b.x - bk.x) / bk.rx, dz = (b.z - bk.z) / bk.rz;
+ if (dx * dx + dz * dz <= 1.0) { inSand = true; break; }
+ }
+ for (const pt of (hole.portals || [])) {
+ if (b.portalCD <= 0 && Math.hypot(b.x - pt.inX, b.z - pt.inZ) < 0.68) {
+ const spd = Math.max(5.5, Math.hypot(b.vx, b.vz));
+ b.x = pt.outX; b.z = pt.outZ;
+ b.vx = Math.sin(pt.outAngle) * spd;
+ b.vz = Math.cos(pt.outAngle) * spd;
+ b.portalCD = 1.2;
+ sfxPortal();
+ spawnFX(pt.inX, 0.5, pt.inZ, 0x34d399, 14, 4.5);
+ spawnFX(pt.outX, 0.5, pt.outZ, 0xfbbf24, 16, 4.8);
+ }
+ }
+ }
+
  b.x += b.vx * sdt; b.z += b.vz * sdt;
- const fric = Math.pow(state.weather === 'rainy' ? 0.991 : 0.987, sdt * 60);
+ const baseFric = airborne ? 0.9985 : (inSand ? 0.935 : (state.weather === 'rainy' ? 0.991 : 0.987));
+ const fric = Math.pow(baseFric, sdt * 60);
  b.vx *= fric; b.vz *= fric;
 
  for (const seg of state.wallSegs) collideWall2D(b, seg[0], seg[1], seg[2], seg[3], 0.84);
  for (const bmp of hole.bumpers) collideCircle2D(b, bmp.x, bmp.z, bmp.r, 1.1, 2.8);
 
+ // Windmill house + rotating blades collision
+ for (const wm of state.dynWindmills) {
+ collideCircle2D(b, wm.def.x, wm.def.z, 0.85, 0.82, 0);
+ // Check if any of the 4 blades is sweeping down near ground level (y < 0.65)
+ const frontZ = wm.def.z + 0.78;
+ if (Math.abs(b.z - frontZ) < 0.34 && b.y < 0.85) {
+ for (let bi = 0; bi < 4; bi++) {
+ const a = wm.angle + (bi * Math.PI) / 2;
+ // Tip position in XY: tipY = 1.48 + sin(a)*len, tipX = wm.x + cos(a)*len
+ const tipY = 1.48 + Math.sin(a) * wm.def.bladeLen;
+ if (tipY < 0.45) {
+ const bxAtGround = wm.def.x + Math.cos(a) * (1.2);
+ if (Math.abs(b.x - bxAtGround) < 0.55) {
+ b.vz = Math.abs(b.vz) * 0.85 + 3.2;
+ b.z = frontZ + 0.36;
+ sfxBounce(10, true);
+ spawnFX(b.x, 0.4, b.z, 0xfef08a, 8, 3.5);
+ }
+ }
+ }
+ }
+ }
+
+ // Moving stone gates collision
+ for (const mv of state.dynMovers) {
+ const hw = mv.def.w / 2, hd = mv.def.d / 2;
+ const xL = mv.x - hw, xR = mv.x + hw, zF = mv.z + hd, zB = mv.z - hd;
+ collideWall2D(b, xL, zF, xR, zF, 0.85);
+ collideWall2D(b, xR, zF, xR, zB, 0.85);
+ collideWall2D(b, xR, zB, xL, zB, 0.85);
+ collideWall2D(b, xL, zB, xL, zF, 0.85);
+ }
+
+ // Water hazards (ONLY trigger if NOT airborne — so you can jump OVER water!)
+ if (!airborne) {
+ for (const wt of (hole.waters || [])) {
+ if (Math.abs(b.x - wt.x) < wt.w * 0.48 && Math.abs(b.z - wt.z) < wt.d * 0.48) {
+ sfxSplash();
+ spawnFX(b.x, 0.35, b.z, 0x38bdf8, 22, 5.2);
+ state.strokes++; updateHUD();
+ const ban = document.getElementById('banner');
+ document.getElementById('bannerTitle').textContent = 'WATER HAZARD!';
+ document.getElementById('bannerSub').textContent = '+1 Penalty Stroke';
+ ban.classList.add('show'); state.bannerT = 1.3;
+ b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0;
+ return;
+ }
+ }
+ }
+
  if (!pointInPoly(b.x, b.z, hole.outer) && minDistToPoly(b.x, b.z, hole.outer) > 0.35) {
- b.x = hole.tee.x; b.z = hole.tee.z; b.vx = 0; b.vz = 0; return;
+ b.x = b.lastSafeX; b.z = b.lastSafeZ; b.y = groundY; b.vx = 0; b.vy = 0; b.vz = 0; return;
  }
 
  const cDist = Math.hypot(b.x - hole.cup.x, b.z - hole.cup.z);
- if (cDist < 0.37 && Math.hypot(b.vx, b.vz) < 13.5) {
+ if (!airborne && cDist < 0.37 && Math.hypot(b.vx, b.vz) < 13.5) {
  b.inHole = true; b.x = hole.cup.x; b.z = hole.cup.z; b.vx = 0; b.vz = 0;
  state.scores[state.holeIdx] = state.strokes; updateHUD(); sfxCup();
  spawnFX(hole.cup.x, 0.4, hole.cup.z, 0xf5d89a, 24, 6.2);
@@ -2104,13 +2708,26 @@
  }
 
  function showScorecard(final = false) {
- let hRow = '<tr><th>Hole</th>', pRow = '<tr><td><b>Par</b></td>', sRow = '<tr><td><b>You</b></td>';
+ function buildNineTable(start, end, label) {
+ let hRow = `<tr><th>${label}</th>`, pRow = '<tr><td><b>Par</b></td>', sRow = '<tr><td><b>You</b></td>';
  let tPar = 0, tScr = 0, any = false;
- HOLES.forEach((h, i) => {
- tPar += h.par; hRow += `<th>${i + 1}</th>`; pRow += `<td>${h.par}</td>`;
+ for (let i = start; i < end; i++) {
+ const h = HOLES[i]; tPar += h.par;
+ hRow += `<th>${i + 1}</th>`; pRow += `<td>${h.par}</td>`;
  const s = state.scores[i];
  if (s === null) sRow += '<td>-</td>';
  else { any = true; tScr += s; sRow += `<td class="${s < h.par ? 'under' : (s === h.par ? 'even' : 'over')}">${s}</td>`; }
+ }
+ hRow += '<th>TOT</th></tr>'; pRow += `<td><b>${tPar}</b></td></tr>`; sRow += `<td><b>${any ? tScr : '-'}</b></td></tr>`;
+ return hRow + pRow + sRow;
+ }
+ document.getElementById('scoreTbl').innerHTML = buildNineTable(0, 9, 'OUT') + buildNineTable(9, 18, 'IN');
+ document.getElementById('modalHead').textContent = final ? '18-Hole Championship Complete!' : 'Zen Dragon Links — 18-Hole Scorecard';
+ let tPar = 0, tScr = 0, played = 0;
+ HOLES.forEach((h, i) => { if (state.scores[i] !== null) { tPar += h.par; tScr += state.scores[i]; played++; } });
+ const d = tScr - tPar;
+ document.getElementById('scoreSummary').textContent = played ? `Played ${played}/18 • Score: ${tScr} (${d === 0 ? 'Even Par' : (d > 0 ? '+' + d : d)})` : 'Play holes to record your 18-hole round';
+ document.getElementById('scoreModal').classList.add('open');
  });
  hRow += '<th>TOT</th></tr>'; pRow += `<td><b>${tPar}</b></td></tr>`; sRow += `<td><b>${any ? tScr : '-'}</b></td></tr>`;
  document.getElementById('scoreTbl').innerHTML = hRow + pRow + sRow;
@@ -2148,7 +2765,16 @@
  document.getElementById('btnScore').addEventListener('click', () => showScorecard(false));
  document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('scoreModal').classList.remove('open'));
  document.getElementById('btnNewRound').addEventListener('click', () => {
- state.scores = Array(HOLES.length).fill(null); document.getElementById('scoreModal').classList.remove('open'); buildHole(0);
+ state.scores = Array(HOLES.length).fill(null); document.getElementById('scoreModal').classList.remove('open'); const holeSel = document.getElementById('holeSelect');
+ HOLES.forEach((h, i) => {
+ const opt = document.createElement('option');
+ opt.value = String(i);
+ opt.textContent = `${i + 1}. ${h.name}`;
+ holeSel.appendChild(opt);
+ });
+ holeSel.addEventListener('change', () => buildHole(parseInt(holeSel.value, 10)));
+
+ buildHole(0);
  });
  document.getElementById('btnSound').addEventListener('click', e => {
  soundOn = !soundOn; e.target.textContent = soundOn ? 'Sound: ON' : 'Sound: OFF';
@@ -2171,10 +2797,14 @@
 
  waterUniforms.uTime.value = now * 0.001;
  lavaUniforms.uTime.value = now * 0.001;
+ lighthouseBeacon.rotation.y += dt * 0.65;
+ if (lighthouseBeamMat) lighthouseBeamMat.opacity = state.time === 'night' ? 0.24 : (state.time === 'dusk' ? 0.16 : 0.07);
 
  ballMesh.position.set(state.ball.x, state.ball.y, state.ball.z);
  ballGlowLight.position.set(state.ball.x, state.ball.y + 2.2, state.ball.z);
  ballShadowDisc.position.set(state.ball.x, 0.243, state.ball.z);
+ const airH = Math.max(0, state.ball.y - (0.24 + ballRadius));
+ ballShadowDisc.scale.setScalar(Math.max(0.45, 1.0 - airH * 0.18));
  ballShadowDisc.visible = !state.ball.inHole;
 
  const stopped = ballStopped();
