@@ -58,6 +58,12 @@
  .hole-name { font-size: 13.5px; font-weight: 700; color: #fff; }
  .hole-sub { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: 1px; }
  .nav-arrows { display: flex; gap: 4px; margin-left: 4px; }
+ .hole-select {
+ background: rgba(255,255,255,0.08); border: 1px solid rgba(235,215,175,0.22);
+ color: #fff; border-radius: 8px; padding: 4px 8px; font-size: 12px; font-weight: 700;
+ cursor: pointer; outline: none; max-width: 175px;
+ }
+ .hole-select option { background: #101f1f; color: #f6f2e9; }
  .mini-btn {
  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
  color: var(--text); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 800;
@@ -166,7 +172,7 @@
  .modal-bg.open { display: flex; }
  .modal {
  background: #101f1f; border: 1px solid var(--border); border-radius: 20px;
- max-width: 680px; width: 100%; padding: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.78);
+ max-width: 780px; width: 100%; padding: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.78);
  }
  table.sc { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0 20px; }
  table.sc th, table.sc td { padding: 8px 5px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -1161,12 +1167,12 @@
 
  // Red & White striped tapered lighthouse tower (5 bands)
  const matLHWhite = new THREE.MeshStandardMaterial({ color: 0xf8f5ee, roughness: 0.55 });
- const matLHRed   = new THREE.MeshStandardMaterial({ color: 0xc22b2b, roughness: 0.48 });
+ const matLHRed = new THREE.MeshStandardMaterial({ color: 0xc22b2b, roughness: 0.48 });
  const bands = [
  { y: 5.2, rT: 1.46, rB: 1.62, h: 1.9, m: matLHWhite },
- { y: 7.1, rT: 1.30, rB: 1.46, h: 1.9, m: matLHRed   },
+ { y: 7.1, rT: 1.30, rB: 1.46, h: 1.9, m: matLHRed },
  { y: 9.0, rT: 1.15, rB: 1.30, h: 1.9, m: matLHWhite },
- { y: 10.9, rT: 1.02, rB: 1.15, h: 1.9, m: matLHRed  },
+ { y: 10.9, rT: 1.02, rB: 1.15, h: 1.9, m: matLHRed },
  { y: 12.6, rT: 0.92, rB: 1.02, h: 1.5, m: matLHWhite }
  ];
  bands.forEach(b => {
@@ -1932,7 +1938,7 @@
  }
 
  
- function buildRampMesh(rp) {
+function buildRampMesh(rp) {
  const g = new THREE.Group();
  const ang = Math.atan2(rp.dirX, rp.dirZ);
  // Angled 3D wooden launch ramp wedge!
@@ -2728,13 +2734,6 @@
  const d = tScr - tPar;
  document.getElementById('scoreSummary').textContent = played ? `Played ${played}/18 • Score: ${tScr} (${d === 0 ? 'Even Par' : (d > 0 ? '+' + d : d)})` : 'Play holes to record your 18-hole round';
  document.getElementById('scoreModal').classList.add('open');
- });
- hRow += '<th>TOT</th></tr>'; pRow += `<td><b>${tPar}</b></td></tr>`; sRow += `<td><b>${any ? tScr : '-'}</b></td></tr>`;
- document.getElementById('scoreTbl').innerHTML = hRow + pRow + sRow;
- document.getElementById('modalHead').textContent = final ? 'Jade Garden Championship Complete!' : 'Zen Dragon Links — Scorecard';
- const d = tScr - tPar;
- document.getElementById('scoreSummary').textContent = any ? `Total: ${tScr} (${d === 0 ? 'Even Par' : (d > 0 ? '+' + d : d)})` : 'Play holes to record scores';
- document.getElementById('scoreModal').classList.add('open');
  }
 
  document.querySelectorAll('#timeBtns .pill').forEach(b => b.addEventListener('click', () => {
@@ -2765,15 +2764,8 @@
  document.getElementById('btnScore').addEventListener('click', () => showScorecard(false));
  document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('scoreModal').classList.remove('open'));
  document.getElementById('btnNewRound').addEventListener('click', () => {
- state.scores = Array(HOLES.length).fill(null); document.getElementById('scoreModal').classList.remove('open'); const holeSel = document.getElementById('holeSelect');
- HOLES.forEach((h, i) => {
- const opt = document.createElement('option');
- opt.value = String(i);
- opt.textContent = `${i + 1}. ${h.name}`;
- holeSel.appendChild(opt);
- });
- holeSel.addEventListener('change', () => buildHole(parseInt(holeSel.value, 10)));
-
+ state.scores = Array(HOLES.length).fill(null);
+ document.getElementById('scoreModal').classList.remove('open');
  buildHole(0);
  });
  document.getElementById('btnSound').addEventListener('click', e => {
@@ -2884,11 +2876,22 @@
  requestAnimationFrame(animate);
  }
 
+ const holeSel = document.getElementById('holeSelect');
+ HOLES.forEach((h, i) => {
+ const opt = document.createElement('option');
+ opt.value = String(i);
+ opt.textContent = `${i + 1}. ${h.name}`;
+ holeSel.appendChild(opt);
+ });
+ holeSel.addEventListener('change', () => buildHole(parseInt(holeSel.value, 10)));
+
  buildHole(0);
  setTimeout(() => {
  const ld = document.getElementById('loader');
+ if (ld) {
  ld.style.opacity = '0';
  setTimeout(() => ld.remove(), 420);
+ }
  }, 250);
  requestAnimationFrame(animate);
 })();
