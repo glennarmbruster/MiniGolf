@@ -372,16 +372,16 @@
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
 
-    ctx.fillStyle = '#0e5a5c'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#1da892'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
 
     // Subtle sci-fi mowing bands
     for (let x = 0; x < size; x += 64) {
-      ctx.fillStyle = (x / 64) % 2 === 0 ? 'rgba(94, 234, 212, 0.05)' : 'rgba(4, 24, 34, 0.08)';
+      ctx.fillStyle = (x / 64) % 2 === 0 ? 'rgba(153, 246, 228, 0.10)' : 'rgba(10, 62, 66, 0.12)';
       ctx.fillRect(x, 0, 64, size);
     }
     // Crisp glowing hex-grid tech pattern
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.16)'; ctx.lineWidth = 1.4;
+    ctx.strokeStyle = 'rgba(125, 211, 252, 0.30)'; ctx.lineWidth = 1.6;
     hctx.strokeStyle = '#a0a0a0'; hctx.lineWidth = 1.6;
     const r = 32, dx = r * 1.5, dy = r * Math.sqrt(3);
     for (let row = -1; row < size / dy + 2; row++) {
@@ -401,7 +401,7 @@
     // Micro-synthetic turf speckles
     for (let i = 0; i < 16000; i++) {
       const x = Math.random() * size, y = Math.random() * size, t = Math.random();
-      ctx.fillStyle = t > 0.65 ? 'rgba(45, 212, 191, 0.24)' : 'rgba(6, 40, 46, 0.28)';
+      ctx.fillStyle = t > 0.65 ? 'rgba(94, 234, 212, 0.32)' : 'rgba(13, 92, 88, 0.28)';
       ctx.fillRect(x, y, 2, 2);
       const bv = Math.floor(85 + t * 140);
       hctx.fillStyle = `rgb(${bv},${bv},${bv})`; hctx.fillRect(x, y, 2, 2);
@@ -420,13 +420,13 @@
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
 
-    ctx.fillStyle = '#334155'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#8fa3b8'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#808080'; hctx.fillRect(0, 0, size, size);
 
     // Brushed alloy horizontal grain
     for (let i = 0; i < 900; i++) {
       const y = Math.random() * size;
-      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(226,232,240,0.06)' : 'rgba(15,23,42,0.12)';
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(241,245,249,0.14)' : 'rgba(51,65,85,0.14)';
       ctx.fillRect(0, y, size, 1.5);
     }
     // Panel seam lines & rivets
@@ -442,7 +442,7 @@
     ledGrad.addColorStop(0.5, '#7dd3fc');
     ledGrad.addColorStop(1.0, '#0284c7');
     ctx.fillStyle = ledGrad;
-    ctx.fillRect(0, size * 0.53, size, size * 0.14);
+    ctx.fillRect(0, size * 0.51, size, size * 0.18);
 
     const map = new THREE.CanvasTexture(c), normalMap = heightCanvasToNormalTexture(hC, 2.0);
     map.encoding = THREE.sRGBEncoding;
@@ -457,10 +457,10 @@
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
 
-    ctx.fillStyle = '#141e33'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#2d4163'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
 
-    ctx.strokeStyle = '#090e1a'; ctx.lineWidth = 4;
+    ctx.strokeStyle = '#182640'; ctx.lineWidth = 4;
     hctx.strokeStyle = '#222222'; hctx.lineWidth = 5;
     for (let i = 0; i <= size; i += 64) {
       ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke();
@@ -468,7 +468,7 @@
       hctx.beginPath(); hctx.moveTo(i, 0); hctx.lineTo(i, size); hctx.stroke();
       hctx.beginPath(); hctx.moveTo(0, i); hctx.lineTo(size, i); hctx.stroke();
     }
-    ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+    ctx.fillStyle = 'rgba(125, 211, 252, 0.32)';
     for (let y = 32; y < size; y += 128) {
       for (let x = 32; x < size; x += 128) {
         ctx.fillRect(x - 10, y - 3, 20, 6);
@@ -525,7 +525,7 @@
     const ctx = c.getContext('2d');
     const hC = document.createElement('canvas'); hC.width = hC.height = size;
     const hctx = hC.getContext('2d');
-    ctx.fillStyle = '#475569'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#7c8da6'; ctx.fillRect(0, 0, size, size);
     hctx.fillStyle = '#757575'; hctx.fillRect(0, 0, size, size);
     for (let i = 0; i < 160; i++) {
       const x = Math.random() * size, y = Math.random() * size, r = 5 + Math.random() * 22;
@@ -692,8 +692,8 @@
       float noise(vec3 p){
         vec3 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
         return mix(
-          mix(mix(hash(i), hash(i+vec3(1,0,0)), f.x), mix(hash(i+vec3(0,1,0)), hash(i+vec3(1,1,0)), f.x), f.y),
-          mix(mix(hash(i+vec3(0,0,1)), hash(i+vec3(1,0,1)), f.x), mix(hash(i+vec3(0,1,1)), hash(i+vec3(1,1,1)), f.x), f.y), f.z
+          mix(mix(hash(i), hash(i+vec3(1.0,0.0,0.0)), f.x), mix(hash(i+vec3(0.0,1.0,0.0)), hash(i+vec3(1.0,1.0,0.0)), f.x), f.y),
+          mix(mix(hash(i+vec3(0.0,0.0,1.0)), hash(i+vec3(1.0,0.0,1.0)), f.x), mix(hash(i+vec3(0.0,1.0,1.0)), hash(i+vec3(1.0,1.0,1.0)), f.x), f.y), f.z
         );
       }
       void main() {
@@ -702,8 +702,8 @@
         vec3 col = mix(uColorA, uColorB, grad);
         float n1 = noise(d * 3.2) * 0.6 + noise(d * 7.4) * 0.4;
         float n2 = noise(d * 4.5 + vec3(2.3, -1.7, 1.1));
-        col += uNebula1 * smoothstep(0.42, 0.88, n1) * 0.52;
-        col += uNebula2 * smoothstep(0.48, 0.90, n2) * 0.42;
+        col += uNebula1 * smoothstep(0.32, 0.84, n1) * 0.72;
+        col += uNebula2 * smoothstep(0.38, 0.86, n2) * 0.58;
         float starCell = hash(floor(d * 210.0));
         col += vec3(0.95, 0.98, 1.0) * smoothstep(0.994, 0.999, starCell) * 1.4;
         float sunAmt = max(dot(d, normalize(uSunDir)), 0.0);
@@ -723,8 +723,13 @@
     scene.environment = envRT.texture;
   }
 
-  const hemiLight = new THREE.HemisphereLight(0xbbeeff, 0x312e81, 0.95);
+  const ambLight = new THREE.AmbientLight(0xdbeafe, 0.65);
+  scene.add(ambLight);
+  const hemiLight = new THREE.HemisphereLight(0xdff4ff, 0x4c46a8, 1.25);
   scene.add(hemiLight);
+  const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.72);
+  rimLight.position.set(-26, 20, -24);
+  scene.add(rimLight);
 
   const sunLight = new THREE.DirectionalLight(0xfff4d6, 1.55);
   sunLight.position.set(22, 34, 18);
@@ -757,16 +762,19 @@
   const chevronTex = createChevronTexture();
 
   const matGrass = new THREE.MeshStandardMaterial({
-    map: turfPBR.map, normalMap: turfPBR.normalMap, normalScale: new THREE.Vector2(0.8, 0.8),
-    roughness: 0.78, metalness: 0.08, envMapIntensity: 0.35
+    map: turfPBR.map, normalMap: turfPBR.normalMap, normalScale: new THREE.Vector2(0.75, 0.75),
+    emissive: 0x0b4f4d, emissiveIntensity: 0.32,
+    roughness: 0.78, metalness: 0.04, envMapIntensity: 0.35
   });
   const matWall = new THREE.MeshStandardMaterial({
-    map: railPBR.map, normalMap: railPBR.normalMap, normalScale: new THREE.Vector2(1.1, 1.1),
-    roughness: 0.35, metalness: 0.65, envMapIntensity: 1.05
+    map: railPBR.map, normalMap: railPBR.normalMap, normalScale: new THREE.Vector2(1.0, 1.0),
+    emissive: 0x0c2d48, emissiveIntensity: 0.25,
+    roughness: 0.42, metalness: 0.26, envMapIntensity: 0.75
   });
   const matDeck = new THREE.MeshStandardMaterial({
-    map: deckPBR.map, normalMap: deckPBR.normalMap, normalScale: new THREE.Vector2(1.2, 1.2),
-    roughness: 0.55, metalness: 0.45, envMapIntensity: 0.65
+    map: deckPBR.map, normalMap: deckPBR.normalMap, normalScale: new THREE.Vector2(1.1, 1.1),
+    emissive: 0x0f1c36, emissiveIntensity: 0.35,
+    roughness: 0.62, metalness: 0.18, envMapIntensity: 0.45
   });
   const matAsteroid = new THREE.MeshStandardMaterial({
     map: astPBR.map, normalMap: astPBR.normalMap, normalScale: new THREE.Vector2(1.5, 1.5),
@@ -774,8 +782,8 @@
   });
   const matCyanGlow = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 1.4, roughness: 0.2 });
   const matVioletGlow = new THREE.MeshStandardMaterial({ color: 0xc084fc, emissive: 0x9333ea, emissiveIntensity: 1.4, roughness: 0.2 });
-  const matGoldAlloy = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.22, envMapIntensity: 1.3 });
-  const matDarkAlloy = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.75, roughness: 0.35 });
+  const matGoldAlloy = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0x713f12, emissiveIntensity: 0.35, metalness: 0.45, roughness: 0.25, envMapIntensity: 1.0 });
+  const matDarkAlloy = new THREE.MeshStandardMaterial({ color: 0x64748b, emissive: 0x162238, emissiveIntensity: 0.25, metalness: 0.32, roughness: 0.38 });
 
   // Animated Swirling Black Hole / Plasma Void Shader for Chasm Hazards
   const voidUniforms = { uTime: { value: 0 } };
@@ -812,7 +820,7 @@
   const planetGroup = new THREE.Group();
   const planetMesh = new THREE.Mesh(
     new THREE.SphereGeometry(34, 48, 36),
-    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), roughness: 0.72, metalness: 0.05 })
+    new THREE.MeshStandardMaterial({ map: createGasGiantTexture(), emissive: 0x1d4ed8, emissiveIntensity: 0.32, roughness: 0.70, metalness: 0.04 })
   );
   planetGroup.add(planetMesh);
   const ringGeo = new THREE.RingGeometry(43, 68, 72);
@@ -1575,24 +1583,28 @@
   // =========================================================================
   const ATMOS = {
     nebula: {
-      cA: 0x050a1e, cB: 0x1e1b4b, n1: 0x0ea5e9, n2: 0xa855f7,
-      sunCol: 0xfff4d6, sunInt: 1.55, hemiSky: 0xbbeeff, hemiGnd: 0x312e81, hemiInt: 1.0,
-      pylonCol: 0x38bdf8, pylonInt: 2.0, exposure: 1.12
+      cA: 0x0d1b3d, cB: 0x2e2a6e, n1: 0x38bdf8, n2: 0xc084fc,
+      sunCol: 0xfff8e6, sunInt: 1.75, hemiSky: 0xdff4ff, hemiGnd: 0x4f46a5, hemiInt: 1.30,
+      ambCol: 0xcce8ff, ambInt: 0.65,
+      pylonCol: 0x38bdf8, pylonInt: 2.4, exposure: 1.18
     },
     solar: {
-      cA: 0x1a0b0e, cB: 0x451a14, n1: 0xf97316, n2: 0xfacc15,
-      sunCol: 0xffd599, sunInt: 1.72, hemiSky: 0xffedd5, hemiGnd: 0x4c1d3d, hemiInt: 1.05,
-      pylonCol: 0xfbbf24, pylonInt: 2.2, exposure: 1.15
+      cA: 0x291318, cB: 0x6b281c, n1: 0xfb923c, n2: 0xfde047,
+      sunCol: 0xffe4b5, sunInt: 1.88, hemiSky: 0xffedd5, hemiGnd: 0x7a3448, hemiInt: 1.32,
+      ambCol: 0xfde6c4, ambInt: 0.68,
+      pylonCol: 0xfbbf24, pylonInt: 2.6, exposure: 1.20
     },
     eclipse: {
-      cA: 0x040614, cB: 0x161136, n1: 0x6366f1, n2: 0xec4899,
-      sunCol: 0xc4b5fd, sunInt: 1.15, hemiSky: 0x818cf8, hemiGnd: 0x1e1b4b, hemiInt: 0.95,
-      pylonCol: 0xe879f9, pylonInt: 3.2, exposure: 1.22
+      cA: 0x101336, cB: 0x302163, n1: 0x818cf8, n2: 0xf472b6,
+      sunCol: 0xe0d4ff, sunInt: 1.48, hemiSky: 0xc4b5fd, hemiGnd: 0x3b2d7a, hemiInt: 1.22,
+      ambCol: 0xd8ccff, ambInt: 0.62,
+      pylonCol: 0xe879f9, pylonInt: 3.4, exposure: 1.24
     },
     void: {
-      cA: 0x02040a, cB: 0x0a192f, n1: 0x06b6d4, n2: 0x10b981,
-      sunCol: 0x99f6e4, sunInt: 1.25, hemiSky: 0x67e8f9, hemiGnd: 0x0f172a, hemiInt: 0.95,
-      pylonCol: 0x2dd4bf, pylonInt: 3.4, exposure: 1.24
+      cA: 0x081529, cB: 0x133352, n1: 0x22d3ee, n2: 0x34d399,
+      sunCol: 0xccfbf1, sunInt: 1.55, hemiSky: 0xa5f3fc, hemiGnd: 0x1f4b5c, hemiInt: 1.24,
+      ambCol: 0xbef5f0, ambInt: 0.62,
+      pylonCol: 0x2dd4bf, pylonInt: 3.5, exposure: 1.25
     }
   };
 
@@ -1607,6 +1619,7 @@
 
     sunLight.color.setHex(a.sunCol); sunLight.intensity = a.sunInt;
     hemiLight.color.setHex(a.hemiSky); hemiLight.groundColor.setHex(a.hemiGnd); hemiLight.intensity = a.hemiInt;
+    ambLight.color.setHex(a.ambCol); ambLight.intensity = a.ambInt;
     pylonLights.forEach((pl, idx) => { pl.color.setHex(a.pylonCol); pl.intensity = idx < pylonHalos.length ? a.pylonInt : 0; });
     pylonHalos.forEach(sp => sp.material.color.setHex(a.pylonCol));
     renderer.toneMappingExposure = a.exposure;
